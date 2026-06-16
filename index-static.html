@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ DESIGN CRITIQUE DUNGEON</title>
+    <meta name="description" content="AI-powered UX critique platform with retro RPG aesthetics">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/terminal.css">
+    <link rel="stylesheet" href="css/animations.css">
+    
+    <!-- CORS Proxy for GitHub Pages -->
+    <script>
+        // Use a CORS proxy for API calls when deployed
+        window.CORS_PROXY = 'https://corsproxy.io/?';
+    </script>
+</head>
+<body>
+    <!-- Same content as index.html -->
+    <div class="terminal-container">
+        
+        <!-- Header -->
+        <header class="terminal-header">
+            <div class="ascii-logo">
+                <pre>
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                                                                           ║
+║   ██████╗ ███████╗███████╗██╗ ██████╗ ███╗   ██╗                        ║
+║   ██╔══██╗██╔════╝██╔════╝██║██╔════╝ ████╗  ██║                        ║
+║   ██║  ██║█████╗  ███████╗██║██║  ███╗██╔██╗ ██║                        ║
+║   ██║  ██║██╔══╝  ╚════██║██║██║   ██║██║╚██╗██║                        ║
+║   ██████╔╝███████╗███████║██║╚██████╔╝██║ ╚████║                        ║
+║   ╚═════╝ ╚══════╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝                        ║
+║                                                                           ║
+║    ██████╗██████╗ ██╗████████╗██╗ ██████╗ ██╗   ██╗███████╗            ║
+║   ██╔════╝██╔══██╗██║╚══██╔══╝██║██╔═══██╗██║   ██║██╔════╝            ║
+║   ██║     ██████╔╝██║   ██║   ██║██║   ██║██║   ██║█████╗              ║
+║   ██║     ██╔══██╗██║   ██║   ██║██║▄▄ ██║██║   ██║██╔══╝              ║
+║   ╚██████╗██║  ██║██║   ██║   ██║╚██████╔╝╚██████╔╝███████╗            ║
+║    ╚═════╝╚═╝  ╚═╝╚═╝   ╚═╝   ╚═╝ ╚══▀▀═╝  ╚═════╝ ╚══════╝            ║
+║                                                                           ║
+║   ██████╗ ██╗   ██╗███╗   ██╗ ██████╗ ███████╗ ██████╗ ███╗   ██╗     ║
+║   ██╔══██╗██║   ██║████╗  ██║██╔════╝ ██╔════╝██╔═══██╗████╗  ██║     ║
+║   ██║  ██║██║   ██║██╔██╗ ██║██║  ███╗█████╗  ██║   ██║██╔██╗ ██║     ║
+║   ██║  ██║██║   ██║██║╚██╗██║██║   ██║██╔══╝  ██║   ██║██║╚██╗██║     ║
+║   ██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝███████╗╚██████╔╝██║ ╚████║     ║
+║   ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝     ║
+║                                                                           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+                </pre>
+            </div>
+            <div class="tagline">
+                <span class="blink">▶</span> AI-Powered UX Analysis Through the Eyes of a Dungeon Master
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="terminal-main">
+            
+            <!-- Player Stats Panel -->
+            <aside class="stats-panel" id="statsPanel">
+                <div class="panel-header">
+                    <span class="icon">⚔️</span> ADVENTURER STATUS
+                </div>
+                <div class="panel-content">
+                    <div class="stat-row">
+                        <span class="stat-label">Level:</span>
+                        <span class="stat-value" id="playerLevel">1</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Title:</span>
+                        <span class="stat-value" id="playerTitle">Novice Apprentice</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">XP:</span>
+                        <span class="stat-value">
+                            <span id="currentXP">0</span> / <span id="nextLevelXP">100</span>
+                        </span>
+                    </div>
+                    <div class="xp-bar">
+                        <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Dungeons Cleared:</span>
+                        <span class="stat-value" id="dungeonsCleared">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Total Score:</span>
+                        <span class="stat-value" id="totalScore">0</span>
+                    </div>
+                </div>
+                
+                <!-- Badges Section -->
+                <div class="panel-header">
+                    <span class="icon">🏆</span> IBM IDL ACHIEVEMENTS
+                </div>
+                <div class="panel-content badges-container" id="badgesContainer">
+                    <div class="badge locked">
+                        <span class="badge-icon">🛡️</span>
+                        <span class="badge-name">First Quest</span>
+                    </div>
+                    <div class="badge locked">
+                        <span class="badge-icon">⚛️</span>
+                        <span class="badge-name">Carbon Initiate</span>
+                    </div>
+                    <div class="badge locked">
+                        <span class="badge-icon">♿</span>
+                        <span class="badge-name">Accessibility Champion</span>
+                    </div>
+                    <div class="badge locked">
+                        <span class="badge-icon">📐</span>
+                        <span class="badge-name">8px Grid Master</span>
+                    </div>
+                    <div class="badge locked">
+                        <span class="badge-icon">📝</span>
+                        <span class="badge-name">IBM Plex Guardian</span>
+                    </div>
+                    <div class="badge locked">
+                        <span class="badge-icon">🎨</span>
+                        <span class="badge-name">Color Token Sage</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Upload & Analysis Area -->
+            <section class="content-area">
+                
+                <!-- Welcome Message -->
+                <div class="welcome-message" id="welcomeMessage">
+                    <div class="ascii-divider">
+═══════════════════════════════════════════════════════════════════════════
+                    </div>
+                    <div class="message-content">
+                        <p class="dm-text">
+                            <span class="dm-label">[DUNGEON MASTER]:</span>
+                            Greetings, brave designer. You stand at the entrance of the
+                            <span class="highlight">Design Critique Dungeon</span>, where interfaces
+                            are judged by the sacred standards of <span class="highlight">IBM Design Language</span>
+                            and the <span class="highlight">Carbon Design System</span>.
+                        </p>
+                        <p class="dm-text">
+                            Within these digital halls, your interfaces will be tested against
+                            IBM's three pillars: <span class="highlight">Productive Design</span> (efficiency and clarity),
+                            <span class="highlight">Expressive Design</span> (humanity and delight), and
+                            <span class="highlight">Universal Design</span> (inclusive and accessible).
+                        </p>
+                        <p class="dm-text">
+                            Your designs will be evaluated for Carbon compliance: the sacred
+                            <span class="highlight">8px grid</span>, <span class="highlight">IBM Plex typography</span>,
+                            <span class="highlight">color tokens</span>, proper <span class="highlight">spacing scales</span>,
+                            and <span class="highlight">WCAG 2.1 AA accessibility</span>.
+                        </p>
+                        <p class="dm-text">
+                            Upload a screenshot of your UI, and I shall guide you through its
+                            strengths and weaknesses against IBM's design standards. Face the critique.
+                            Earn experience. Master Carbon. Level up your craft.
+                        </p>
+                        <p class="dm-text warning">
+                            ⚠️ <em>Warning: IBM IDL-based constructive feedback ahead. Carbon compliance armor recommended.</em>
+                        </p>
+                    </div>
+                    <div class="ascii-divider">
+═══════════════════════════════════════════════════════════════════════════
+                    </div>
+                </div>
+
+                <!-- Upload Zone -->
+                <div class="upload-zone" id="uploadZone">
+                    <div class="upload-content">
+                        <div class="upload-icon">📸</div>
+                        <h2>Drop Your Interface Screenshot</h2>
+                        <p>or click to browse</p>
+                        <p class="upload-hint">Supports: PNG, JPG, WebP • Max 10MB</p>
+                    </div>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
+
+                <!-- Image Preview -->
+                <div class="image-preview hidden" id="imagePreview">
+                    <div class="preview-header">
+                        <span class="icon">🖼️</span> INTERFACE LOADED
+                        <button class="btn-remove" id="btnRemove">✕ Remove</button>
+                    </div>
+                    <div class="preview-container">
+                        <img id="previewImage" src="" alt="Uploaded interface">
+                    </div>
+                    <button class="btn-primary btn-analyze" id="btnAnalyze">
+                        <span class="btn-icon">⚔️</span>
+                        ENTER THE DUNGEON
+                        <span class="btn-icon">🗡️</span>
+                    </button>
+                </div>
+
+                <!-- Loading State -->
+                <div class="loading-state hidden" id="loadingState">
+                    <div class="ascii-divider">
+═══════════════════════════════════════════════════════════════════════════
+                    </div>
+                    <div class="loading-content">
+                        <div class="spinner">
+                            <pre class="ascii-spinner">
+    ⚔️
+   /|\
+   / \
+                            </pre>
+                        </div>
+                        <p class="loading-text" id="loadingText">
+                            The Dungeon Master examines your interface...
+                        </p>
+                        <div class="loading-steps" id="loadingSteps">
+                            <div class="step">▶ Analyzing visual hierarchy...</div>
+                            <div class="step">▶ Testing accessibility...</div>
+                            <div class="step">▶ Evaluating typography...</div>
+                            <div class="step">▶ Checking spacing consistency...</div>
+                            <div class="step">▶ Assessing cognitive load...</div>
+                        </div>
+                    </div>
+                    <div class="ascii-divider">
+═══════════════════════════════════════════════════════════════════════════
+                    </div>
+                </div>
+
+                <!-- Results Area -->
+                <div class="results-area hidden" id="resultsArea">
+                    <!-- Results will be dynamically inserted here -->
+                </div>
+
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="terminal-footer">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <span class="blink">●</span> SYSTEM ONLINE
+                </div>
+                <div class="footer-center">
+                    Powered by AI Vision Models • Built with ⚔️ for better UX
+                </div>
+                <div class="footer-right">
+                    <a href="https://github.com/yourusername/design-critique-dungeon" target="_blank">
+                        GitHub
+                    </a>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Configuration Modal -->
+    <div class="modal hidden" id="configModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Configuration</h2>
+                <button class="btn-close" id="btnCloseModal">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="providerSelect">AI Provider:</label>
+                    <select id="providerSelect" class="input-field">
+                        <option value="azure">Azure OpenAI (Recommended for Enterprise/Copilot)</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="openai">OpenAI (Direct)</option>
+                    </select>
+                    <p class="help-text">
+                        Choose your AI provider. All credentials are stored locally.
+                    </p>
+                </div>
+                
+                <!-- Azure OpenAI Configuration -->
+                <div id="azureConfig" class="provider-config">
+                    <div class="form-group">
+                        <label for="azureEndpoint">Azure Endpoint:</label>
+                        <input
+                            type="text"
+                            id="azureEndpoint"
+                            placeholder="https://your-resource.openai.azure.com"
+                            class="input-field"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="azureApiKey">Azure API Key:</label>
+                        <input
+                            type="password"
+                            id="azureApiKey"
+                            placeholder="Your Azure API key"
+                            class="input-field"
+                        >
+                    </div>
+                    <div class="form-group">
+                        <label for="azureDeployment">Deployment Name:</label>
+                        <input
+                            type="text"
+                            id="azureDeployment"
+                            placeholder="gpt-4o"
+                            class="input-field"
+                        >
+                    </div>
+                    <p class="help-text">
+                        Find these in your Azure OpenAI resource.
+                        <a href="https://portal.azure.com" target="_blank">Azure Portal</a>
+                    </p>
+                </div>
+                
+                <!-- Anthropic Configuration -->
+                <div id="anthropicConfig" class="provider-config hidden">
+                    <div class="form-group">
+                        <label for="anthropicApiKey">Anthropic API Key:</label>
+                        <input
+                            type="password"
+                            id="anthropicApiKey"
+                            placeholder="sk-ant-..."
+                            class="input-field"
+                        >
+                    </div>
+                    <p class="help-text">
+                        Get your API key from Anthropic.
+                        <a href="https://console.anthropic.com" target="_blank">Anthropic Console</a>
+                    </p>
+                </div>
+                
+                <!-- OpenAI Configuration -->
+                <div id="openaiConfig" class="provider-config hidden">
+                    <div class="form-group">
+                        <label for="openaiApiKey">OpenAI API Key:</label>
+                        <input
+                            type="password"
+                            id="openaiApiKey"
+                            placeholder="sk-..."
+                            class="input-field"
+                        >
+                    </div>
+                    <p class="help-text">
+                        Get your API key from OpenAI.
+                        <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI Platform</a>
+                    </p>
+                </div>
+                
+                <button class="btn-primary" id="btnSaveConfig">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Button -->
+    <button class="btn-settings" id="btnSettings" title="Configure API Key">
+        ⚙️
+    </button>
+
+    <!-- Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/gamification.js"></script>
+    <script src="js/dungeon-master.js"></script>
+    <script src="js/ai-analyzer-direct.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

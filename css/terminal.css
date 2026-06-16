@@ -1,0 +1,451 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN CRITIQUE DUNGEON - Terminal Aesthetics
+   Enhanced retro terminal styling and effects
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   CRT Screen Effect
+   ───────────────────────────────────────────────────────────────────────── */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%,
+        rgba(0, 0, 0, 0.25) 50%
+    );
+    background-size: 100% 4px;
+    z-index: 9999;
+    pointer-events: none;
+    animation: scanlines 8s linear infinite;
+}
+
+@keyframes scanlines {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Modal Styles
+   ───────────────────────────────────────────────────────────────────────── */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--terminal-bg-light);
+    border: 2px solid var(--terminal-green);
+    max-width: 500px;
+    width: 90%;
+    box-shadow: var(--glow-green), var(--shadow-deep);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.modal-header h2 {
+    color: var(--terminal-green);
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.btn-close {
+    background: transparent;
+    border: none;
+    color: var(--terminal-red);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.btn-close:hover {
+    color: var(--text-primary);
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: var(--spacing-lg);
+}
+
+.form-group {
+    margin-bottom: var(--spacing-lg);
+}
+
+.form-group label {
+    display: block;
+    color: var(--text-secondary);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.9rem;
+}
+
+.input-field {
+    width: 100%;
+    background: var(--terminal-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    padding: var(--spacing-md);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.input-field:focus {
+    outline: none;
+    border-color: var(--terminal-green);
+    box-shadow: var(--glow-green);
+}
+
+.help-text {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    margin-top: var(--spacing-sm);
+}
+
+.help-text a {
+    color: var(--terminal-green);
+    text-decoration: none;
+}
+
+.help-text a:hover {
+    text-decoration: underline;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Results Display Styles
+   ───────────────────────────────────────────────────────────────────────── */
+.critique-header {
+    background: var(--terminal-bg);
+    border: 2px solid var(--terminal-green);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-xl);
+    box-shadow: var(--glow-green);
+}
+
+.critique-title {
+    color: var(--terminal-amber);
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.critique-scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-lg);
+}
+
+.score-card {
+    background: var(--terminal-bg-light);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
+.score-label {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: var(--spacing-sm);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.score-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--terminal-green);
+    font-family: var(--font-display);
+}
+
+.score-value.excellent { color: var(--terminal-green); }
+.score-value.good { color: var(--terminal-blue); }
+.score-value.fair { color: var(--terminal-amber); }
+.score-value.poor { color: var(--terminal-red); }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Critique Sections
+   ───────────────────────────────────────────────────────────────────────── */
+.critique-section {
+    background: var(--terminal-bg);
+    border: 1px solid var(--border-color);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.section-icon {
+    font-size: 1.5rem;
+}
+
+.section-title {
+    color: var(--terminal-green);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.section-content {
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Finding Items
+   ───────────────────────────────────────────────────────────────────────── */
+.finding {
+    background: var(--terminal-bg-light);
+    border-left: 3px solid var(--border-color);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+.finding.positive {
+    border-left-color: var(--terminal-green);
+}
+
+.finding.warning {
+    border-left-color: var(--terminal-amber);
+}
+
+.finding.critical {
+    border-left-color: var(--terminal-red);
+}
+
+.finding-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.finding-icon {
+    font-size: 1.2rem;
+}
+
+.finding-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.finding-description {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   XP Reward Display
+   ───────────────────────────────────────────────────────────────────────── */
+.xp-reward {
+    background: var(--terminal-bg);
+    border: 2px solid var(--terminal-green);
+    padding: var(--spacing-lg);
+    margin-top: var(--spacing-xl);
+    text-align: center;
+    box-shadow: var(--glow-green);
+    animation: rewardPulse 2s ease-in-out;
+}
+
+@keyframes rewardPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+.xp-reward-title {
+    color: var(--terminal-amber);
+    font-size: 1.2rem;
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+}
+
+.xp-amount {
+    font-size: 3rem;
+    color: var(--terminal-green);
+    font-weight: 700;
+    font-family: var(--font-display);
+    text-shadow: var(--glow-green);
+}
+
+.xp-message {
+    color: var(--text-secondary);
+    margin-top: var(--spacing-md);
+    font-style: italic;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Level Up Notification
+   ───────────────────────────────────────────────────────────────────────── */
+.level-up-notification {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--terminal-bg-light);
+    border: 3px solid var(--terminal-green);
+    padding: var(--spacing-xl);
+    z-index: 10001;
+    text-align: center;
+    box-shadow: var(--glow-green), var(--shadow-deep);
+    animation: levelUpAppear 0.5s ease-out;
+}
+
+@keyframes levelUpAppear {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.level-up-title {
+    font-size: 2rem;
+    color: var(--terminal-green);
+    margin-bottom: var(--spacing-md);
+    text-transform: uppercase;
+    font-weight: 700;
+    text-shadow: var(--glow-green);
+}
+
+.level-up-details {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.new-level {
+    font-size: 3rem;
+    color: var(--terminal-amber);
+    font-weight: 700;
+    font-family: var(--font-display);
+}
+
+.new-title {
+    color: var(--terminal-green);
+    font-weight: 600;
+    font-size: 1.2rem;
+    margin-top: var(--spacing-md);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Action Buttons
+   ───────────────────────────────────────────────────────────────────────── */
+.action-buttons {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+    flex-wrap: wrap;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--terminal-green);
+    border: 1px solid var(--terminal-green);
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-secondary:hover {
+    background: var(--terminal-green);
+    color: var(--terminal-bg);
+    box-shadow: var(--glow-green);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Scrollbar Styling
+   ───────────────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--terminal-bg);
+    border: 1px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--terminal-green-dim);
+    border: 1px solid var(--border-color);
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--terminal-green);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Selection Styling
+   ───────────────────────────────────────────────────────────────────────── */
+::selection {
+    background: var(--terminal-green);
+    color: var(--terminal-bg);
+}
+
+::-moz-selection {
+    background: var(--terminal-green);
+    color: var(--terminal-bg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Print Styles
+   ───────────────────────────────────────────────────────────────────────── */
+@media print {
+    body::before {
+        display: none;
+    }
+    
+    .terminal-header,
+    .stats-panel,
+    .btn-settings,
+    .terminal-footer {
+        display: none;
+    }
+    
+    .terminal-main {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Made with Bob */

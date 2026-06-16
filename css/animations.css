@@ -1,0 +1,388 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESIGN CRITIQUE DUNGEON - Animations
+   Smooth transitions and engaging effects
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Fade Animations
+   ───────────────────────────────────────────────────────────────────────── */
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+.fade-out {
+    animation: fadeOut 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Slide Animations
+   ───────────────────────────────────────────────────────────────────────── */
+.slide-in-up {
+    animation: slideInUp 0.5s ease-out;
+}
+
+.slide-in-down {
+    animation: slideInDown 0.5s ease-out;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+}
+
+.slide-in-right {
+    animation: slideInRight 0.5s ease-out;
+}
+
+@keyframes slideInUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInDown {
+    from {
+        transform: translateY(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(30px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Glow Pulse Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.glow-pulse {
+    animation: glowPulse 2s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(0, 255, 65, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.6);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Typing Effect
+   ───────────────────────────────────────────────────────────────────────── */
+.typing-effect {
+    overflow: hidden;
+    border-right: 2px solid var(--terminal-green);
+    white-space: nowrap;
+    animation: typing 3s steps(40, end), blink-caret 0.75s step-end infinite;
+}
+
+@keyframes typing {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+@keyframes blink-caret {
+    from, to {
+        border-color: transparent;
+    }
+    50% {
+        border-color: var(--terminal-green);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Shake Animation (for errors)
+   ───────────────────────────────────────────────────────────────────────── */
+.shake {
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    10%, 30%, 50%, 70%, 90% {
+        transform: translateX(-5px);
+    }
+    20%, 40%, 60%, 80% {
+        transform: translateX(5px);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Bounce Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.bounce {
+    animation: bounce 1s ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20px);
+    }
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Scale Pop Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.scale-pop {
+    animation: scalePop 0.3s ease-out;
+}
+
+@keyframes scalePop {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.05);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Rotate Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.rotate-360 {
+    animation: rotate360 1s linear;
+}
+
+@keyframes rotate360 {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Flicker Animation (terminal effect)
+   ───────────────────────────────────────────────────────────────────────── */
+.flicker {
+    animation: flicker 0.15s infinite;
+}
+
+@keyframes flicker {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.8;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Progress Bar Fill Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.progress-fill {
+    animation: progressFill 1s ease-out forwards;
+}
+
+@keyframes progressFill {
+    from {
+        width: 0%;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Stagger Children Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.stagger-children > * {
+    opacity: 0;
+    animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.stagger-children > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-children > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-children > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-children > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-children > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-children > *:nth-child(6) { animation-delay: 0.6s; }
+.stagger-children > *:nth-child(7) { animation-delay: 0.7s; }
+.stagger-children > *:nth-child(8) { animation-delay: 0.8s; }
+.stagger-children > *:nth-child(9) { animation-delay: 0.9s; }
+.stagger-children > *:nth-child(10) { animation-delay: 1s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Hover Effects
+   ───────────────────────────────────────────────────────────────────────── */
+.hover-lift {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 255, 65, 0.3);
+}
+
+.hover-glow {
+    transition: box-shadow 0.3s ease;
+}
+
+.hover-glow:hover {
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Badge Unlock Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.badge-unlock {
+    animation: badgeUnlock 0.8s ease-out;
+}
+
+@keyframes badgeUnlock {
+    0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.2) rotate(10deg);
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   XP Counter Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.xp-counter-animate {
+    animation: xpCount 1s ease-out;
+}
+
+@keyframes xpCount {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+        color: var(--terminal-amber);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Notification Slide In
+   ───────────────────────────────────────────────────────────────────────── */
+.notification-enter {
+    animation: notificationEnter 0.5s ease-out;
+}
+
+@keyframes notificationEnter {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Loading Dots Animation
+   ───────────────────────────────────────────────────────────────────────── */
+.loading-dots::after {
+    content: '';
+    animation: loadingDots 1.5s infinite;
+}
+
+@keyframes loadingDots {
+    0%, 20% {
+        content: '.';
+    }
+    40% {
+        content: '..';
+    }
+    60%, 100% {
+        content: '...';
+    }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Reduced Motion Support
+   ───────────────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Made with Bob */
