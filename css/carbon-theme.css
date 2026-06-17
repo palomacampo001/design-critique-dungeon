@@ -137,7 +137,7 @@ body.carbon-theme .ascii-logo {
 }
 
 body.carbon-theme .terminal-header::before {
-    content: '💎 Carbon Quest';
+    content: 'Carbon Quest';
     display: block;
     font-size: 3.5rem;
     font-weight: 300;
@@ -145,6 +145,7 @@ body.carbon-theme .terminal-header::before {
     color: var(--carbon-text-01) !important;
     margin-bottom: var(--spacing-05);
     letter-spacing: -0.02em;
+    text-align: left;
 }
 
 /* Force all headings to be dark and visible */
@@ -165,6 +166,7 @@ body.carbon-theme .tagline {
     color: var(--carbon-text-02);
     font-weight: 400;
     max-width: 640px;
+    text-align: left;
 }
 
 body.carbon-theme .tagline::before {
@@ -400,10 +402,14 @@ body.carbon-theme .upload-zone {
     border: 2px dashed var(--carbon-ui-04);
     border-radius: 0;
     padding: var(--spacing-10);
-    text-align: center;
+    text-align: left !important;
     cursor: pointer;
     transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
     margin-bottom: var(--spacing-07);
+}
+
+body.carbon-theme .upload-zone * {
+    text-align: left !important;
 }
 
 body.carbon-theme .upload-zone:hover {
@@ -545,8 +551,12 @@ body.carbon-theme .btn-analyze:hover {
 
 /* Loading State */
 body.carbon-theme .loading-state {
-    text-align: center;
+    text-align: left !important;
     padding: var(--spacing-09);
+}
+
+body.carbon-theme .loading-state * {
+    text-align: left !important;
 }
 
 body.carbon-theme .loading-text {
@@ -590,7 +600,7 @@ body.carbon-theme .critique-title {
     font-weight: 300;
     color: var(--carbon-text-01) !important;
     margin-bottom: var(--spacing-06);
-    text-align: left;
+    text-align: left !important;
     letter-spacing: -0.02em;
 }
 
@@ -606,11 +616,12 @@ body.carbon-theme .score-card {
     background: var(--carbon-ui-background) !important;
     border: 1px solid var(--carbon-ui-03);
     padding: var(--spacing-06);
-    text-align: center;
+    text-align: left !important;
 }
 
 body.carbon-theme .score-card * {
     background: transparent !important;
+    text-align: left !important;
 }
 
 body.carbon-theme .score-label {
@@ -818,7 +829,7 @@ body.carbon-theme .xp-reward {
     border: 2px solid var(--ibm-blue-60) !important;
     padding: var(--spacing-07) !important;
     margin-top: var(--spacing-07) !important;
-    text-align: center;
+    text-align: left !important;
     box-shadow: 0 4px 12px rgba(15, 98, 254, 0.15) !important;
 }
 
