@@ -162,8 +162,15 @@ body.carbon-theme .panel-header {
 body.carbon-theme .panel-header .icon {
     width: 20px;
     height: 20px;
+    color: var(--carbon-interactive-01);
     fill: var(--carbon-interactive-01);
     flex-shrink: 0;
+    display: block;
+}
+
+body.carbon-theme .panel-header svg.icon {
+    width: 20px;
+    height: 20px;
 }
 
 /* Hide emoji in panel header when SVG is present */
@@ -252,16 +259,26 @@ body.carbon-theme .badge-icon {
     width: 48px;
     height: 48px;
     margin: 0 auto var(--spacing-03);
+    color: var(--carbon-text-03);
     fill: var(--carbon-text-03);
-    transition: fill 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
 }
 
 body.carbon-theme .badge:not(.locked) .badge-icon {
+    color: var(--carbon-interactive-01);
     fill: var(--carbon-interactive-01);
 }
 
 body.carbon-theme .badge:not(.locked):hover .badge-icon {
+    color: var(--carbon-hover-primary);
     fill: var(--carbon-hover-primary);
+}
+
+/* Ensure SVG elements inherit color */
+body.carbon-theme .badge-icon svg {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 /* Hide emoji content in Carbon theme */
