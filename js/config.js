@@ -72,9 +72,9 @@ const CONFIG = {
         },
         GRID_MASTER: {
             id: 'grid_master',
-            name: '8px Grid Master',
+            name: 'The Sacred Grid',
             icon: '📐',
-            description: 'Perfect adherence to Carbon\'s 8px grid system',
+            description: 'Perfect adherence to Carbon\'s grid system',
             condition: (stats) => stats.perfectGridCount >= 1
         },
         IBM_PLEX_GUARDIAN: {
