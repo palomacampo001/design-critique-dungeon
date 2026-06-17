@@ -778,16 +778,21 @@ body.carbon-theme .blink {
     animation: none;
 }
 
-/* Modal */
+/* Modal - Light overlay for Carbon theme */
+body.carbon-theme .modal {
+    background: rgba(255, 255, 255, 0.8) !important;
+    backdrop-filter: blur(8px);
+}
+
 body.carbon-theme .modal-content {
-    background: var(--carbon-ui-background);
-    border: 1px solid var(--carbon-ui-03);
+    background: var(--carbon-ui-background) !important;
+    border: 1px solid var(--carbon-ui-03) !important;
     border-radius: 0;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 body.carbon-theme .modal-header {
-    background: var(--carbon-ui-01);
+    background: var(--carbon-ui-background) !important;
     border-bottom: 1px solid var(--carbon-ui-03);
     padding: var(--spacing-05);
 }
@@ -795,7 +800,33 @@ body.carbon-theme .modal-header {
 body.carbon-theme .modal-header h2 {
     font-size: 1.25rem;
     font-weight: 400;
-    color: var(--carbon-text-01);
+    color: var(--carbon-text-01) !important;
+}
+
+body.carbon-theme .modal-body {
+    background: var(--carbon-ui-background) !important;
+    color: var(--carbon-text-01) !important;
+}
+
+/* Level-up and XP notifications */
+body.carbon-theme .level-up-notification,
+body.carbon-theme .xp-notification,
+body.carbon-theme .achievement-popup {
+    background: var(--carbon-ui-background) !important;
+    border: 2px solid var(--ibm-blue-60) !important;
+    color: var(--carbon-text-01) !important;
+    box-shadow: 0 4px 12px rgba(15, 98, 254, 0.2);
+}
+
+body.carbon-theme .level-up-notification *,
+body.carbon-theme .xp-notification *,
+body.carbon-theme .achievement-popup * {
+    color: var(--carbon-text-01) !important;
+    background: transparent !important;
+}
+
+body.carbon-theme .level-up-title {
+    color: var(--ibm-blue-60) !important;
 }
 
 body.carbon-theme .input-field {
