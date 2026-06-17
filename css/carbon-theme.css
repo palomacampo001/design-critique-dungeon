@@ -325,11 +325,11 @@ body.carbon-theme .badge:not(.locked) .badge-name {
     font-weight: 600;
 }
 
-/* Content Area */
+/* Content Area - Clean White */
 body.carbon-theme .content-area {
-    background: var(--carbon-ui-02);
-    border: 1px solid var(--carbon-ui-03);
-    padding: var(--spacing-07);
+    background: var(--carbon-ui-background);
+    border: none;
+    padding: 0;
 }
 
 /* Welcome Message */
@@ -364,38 +364,46 @@ body.carbon-theme .warning {
     margin-top: var(--spacing-05);
 }
 
-/* Upload Zone */
+/* Upload Zone - Clean Carbon Style */
 body.carbon-theme .upload-zone {
-    background: var(--carbon-ui-01);
+    background: var(--carbon-ui-background);
     border: 2px dashed var(--carbon-ui-04);
     border-radius: 0;
-    padding: var(--spacing-09);
+    padding: var(--spacing-10);
     text-align: center;
     cursor: pointer;
-    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+    margin-bottom: var(--spacing-07);
 }
 
 body.carbon-theme .upload-zone:hover {
-    background: var(--carbon-ui-02);
-    border-color: var(--carbon-interactive-01);
+    background: var(--carbon-ui-01);
+    border-color: var(--ibm-blue-60);
 }
 
 body.carbon-theme .upload-icon {
     font-size: 4rem;
-    margin-bottom: var(--spacing-05);
-    color: var(--carbon-text-03);
+    margin-bottom: var(--spacing-06);
+    color: var(--ibm-blue-60);
 }
 
 body.carbon-theme .upload-zone h2 {
-    font-size: 1.75rem;
-    font-weight: 400;
+    font-size: 2rem;
+    font-weight: 300;
     color: var(--carbon-text-01);
+    margin-bottom: var(--spacing-04);
+    letter-spacing: -0.01em;
+}
+
+body.carbon-theme .upload-zone p {
+    font-size: 1rem;
+    color: var(--carbon-text-02);
     margin-bottom: var(--spacing-03);
 }
 
 body.carbon-theme .upload-hint {
     font-size: 0.875rem;
-    color: var(--carbon-text-02);
+    color: var(--carbon-text-03);
 }
 
 /* Buttons */
@@ -440,33 +448,69 @@ body.carbon-theme .btn-icon {
     display: none;
 }
 
-/* Image Preview */
+/* Image Preview - Clean Carbon Style */
 body.carbon-theme .image-preview {
-    background: var(--carbon-ui-01);
+    background: var(--carbon-ui-background);
     border: 1px solid var(--carbon-ui-03);
-    padding: var(--spacing-05);
+    padding: var(--spacing-07);
+    margin-bottom: var(--spacing-07);
 }
 
 body.carbon-theme .preview-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: var(--spacing-05);
+    margin-bottom: var(--spacing-06);
     padding-bottom: var(--spacing-05);
     border-bottom: 1px solid var(--carbon-ui-03);
+}
+
+body.carbon-theme .preview-header .icon {
+    color: var(--carbon-text-01);
+}
+
+body.carbon-theme .preview-container {
+    background: var(--carbon-ui-01);
+    padding: var(--spacing-05);
+    border: 1px solid var(--carbon-ui-03);
+}
+
+body.carbon-theme .preview-container img {
+    display: block;
+    max-width: 100%;
+    height: auto;
 }
 
 body.carbon-theme .btn-remove {
     background: transparent;
     color: var(--carbon-text-01);
-    border: none;
-    padding: var(--spacing-03);
+    border: 1px solid var(--carbon-ui-04);
+    padding: var(--spacing-03) var(--spacing-05);
     cursor: pointer;
-    font-size: 1rem;
+    font-size: 0.875rem;
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
 }
 
 body.carbon-theme .btn-remove:hover {
     background: var(--carbon-ui-03);
+    border-color: var(--carbon-text-01);
+}
+
+body.carbon-theme .btn-analyze {
+    background: var(--ibm-blue-60);
+    color: var(--carbon-text-04);
+    border: none;
+    padding: var(--spacing-05) var(--spacing-07);
+    font-size: 1rem;
+    font-weight: 400;
+    cursor: pointer;
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+    margin-top: var(--spacing-06);
+    width: 100%;
+}
+
+body.carbon-theme .btn-analyze:hover {
+    background: var(--ibm-blue-80);
 }
 
 /* Loading State */
