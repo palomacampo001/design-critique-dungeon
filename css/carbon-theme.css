@@ -933,4 +933,149 @@ body.carbon-theme .theme-switcher:hover {
     transform: none;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE MOBILE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet and below (768px) */
+@media (max-width: 768px) {
+    body.carbon-theme {
+        font-size: 0.875rem;
+    }
+    
+    /* Header */
+    body.carbon-theme .terminal-header::before {
+        font-size: 2rem !important;
+        line-height: 1.2;
+    }
+    
+    body.carbon-theme .tagline {
+        font-size: 1rem;
+    }
+    
+    /* Main Layout - Stack vertically */
+    body.carbon-theme .terminal-main {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-05);
+    }
+    
+    /* Stats Panel - Full width on mobile */
+    body.carbon-theme .stats-panel {
+        order: -1;
+    }
+    
+    /* Badges - Single column */
+    body.carbon-theme .badges-container {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-04);
+    }
+    
+    body.carbon-theme .badge {
+        min-height: 100px;
+        padding: var(--spacing-05);
+    }
+    
+    body.carbon-theme .badge-icon,
+    body.carbon-theme svg.badge-icon {
+        width: 48px !important;
+        height: 48px !important;
+    }
+    
+    /* Container padding */
+    body.carbon-theme .terminal-container {
+        padding: var(--spacing-05);
+    }
+    
+    body.carbon-theme .terminal-header {
+        padding: var(--spacing-05) 0;
+        margin-bottom: var(--spacing-05);
+    }
+    
+    /* Upload zone */
+    body.carbon-theme .upload-zone {
+        padding: var(--spacing-07);
+    }
+    
+    body.carbon-theme .upload-zone h2 {
+        font-size: 1.5rem;
+    }
+    
+    /* Critique header */
+    body.carbon-theme .critique-title {
+        font-size: 1.75rem !important;
+    }
+    
+    /* Score cards - Stack vertically */
+    body.carbon-theme .critique-scores {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-04);
+    }
+    
+    body.carbon-theme .score-value {
+        font-size: 2rem !important;
+    }
+    
+    /* Findings */
+    body.carbon-theme .finding {
+        padding: var(--spacing-05) !important;
+    }
+    
+    body.carbon-theme .finding-title {
+        font-size: 1rem !important;
+    }
+    
+    /* Theme switcher */
+    .theme-switcher {
+        top: 10px;
+        right: 10px;
+        padding: var(--spacing-03) var(--spacing-04);
+        font-size: 0.75rem;
+    }
+    
+    body.carbon-theme .theme-switcher {
+        padding: var(--spacing-03) var(--spacing-04);
+        font-size: 0.75rem;
+    }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+    body.carbon-theme .terminal-header::before {
+        font-size: 1.5rem !important;
+    }
+    
+    body.carbon-theme .tagline {
+        font-size: 0.875rem;
+    }
+    
+    body.carbon-theme .terminal-container {
+        padding: var(--spacing-04);
+    }
+    
+    body.carbon-theme .critique-title {
+        font-size: 1.5rem !important;
+    }
+    
+    body.carbon-theme .score-value {
+        font-size: 1.75rem !important;
+    }
+    
+    body.carbon-theme .upload-zone h2 {
+        font-size: 1.25rem;
+    }
+    
+    body.carbon-theme .xp-amount {
+        font-size: 2rem !important;
+    }
+    
+    /* Reduce spacing on small screens */
+    body.carbon-theme .panel-content {
+        padding: var(--spacing-04);
+    }
+    
+    body.carbon-theme .critique-header {
+        padding: var(--spacing-05) !important;
+    }
+}
+
 /* Made with Bob */
