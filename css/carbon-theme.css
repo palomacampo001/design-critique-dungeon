@@ -808,7 +808,44 @@ body.carbon-theme .modal-body {
     color: var(--carbon-text-01) !important;
 }
 
-/* Level-up and XP notifications */
+/* XP Reward Display - Carbon Style */
+body.carbon-theme .xp-reward {
+    background: var(--carbon-ui-background) !important;
+    border: 2px solid var(--ibm-blue-60) !important;
+    padding: var(--spacing-07) !important;
+    margin-top: var(--spacing-07) !important;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(15, 98, 254, 0.15) !important;
+}
+
+body.carbon-theme .xp-reward-title {
+    color: var(--carbon-text-01) !important;
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    margin-bottom: var(--spacing-05) !important;
+    text-transform: uppercase;
+    letter-spacing: 0.16px;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+body.carbon-theme .xp-amount {
+    font-size: 3rem !important;
+    color: var(--ibm-blue-60) !important;
+    font-weight: 300 !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    text-shadow: none !important;
+    line-height: 1.2;
+}
+
+body.carbon-theme .xp-message {
+    color: var(--carbon-text-02) !important;
+    margin-top: var(--spacing-05) !important;
+    font-style: normal !important;
+    font-size: 1rem !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+/* Level-up and other notifications */
 body.carbon-theme .level-up-notification,
 body.carbon-theme .xp-notification,
 body.carbon-theme .achievement-popup {
@@ -827,6 +864,7 @@ body.carbon-theme .achievement-popup * {
 
 body.carbon-theme .level-up-title {
     color: var(--ibm-blue-60) !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
 }
 
 body.carbon-theme .input-field {
