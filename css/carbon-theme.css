@@ -137,7 +137,7 @@ body.carbon-theme .ascii-logo {
 }
 
 body.carbon-theme .terminal-header::before {
-    content: 'Design Critique Platform';
+    content: '💎 Carbon Quest';
     display: block;
     font-size: 3.5rem;
     font-weight: 300;
@@ -167,7 +167,11 @@ body.carbon-theme .tagline {
     max-width: 640px;
 }
 
-body.carbon-theme .tagline .blink {
+body.carbon-theme .tagline::before {
+    content: 'Defeat design flaws. Collect XP. Ship better work.';
+}
+
+body.carbon-theme .tagline > * {
     display: none;
 }
 
