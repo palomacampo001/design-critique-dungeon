@@ -7,6 +7,7 @@
    
    Using IBM Plex font family, Carbon Design System tokens, and IBM Pictograms
    Reference: https://carbondesignsystem.com/
+   IBM Color Palette: https://www.ibm.com/design/language/color
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Carbon Theme Active */
@@ -16,7 +17,7 @@ body.carbon-theme {
     --carbon-ui-01: #f4f4f4;
     --carbon-ui-02: #ffffff;
     --carbon-ui-03: #e0e0e0;
-    --carbon-ui-04: #8d8d8d;
+    --carbon-ui-04: #a8a8a8;
     --carbon-ui-05: #161616;
     
     --carbon-text-01: #161616;
@@ -25,10 +26,27 @@ body.carbon-theme {
     --carbon-text-04: #ffffff;
     --carbon-text-05: #6f6f6f;
     
+    /* IBM Blue Palette */
+    --ibm-blue-100: #001141;  /* Blue 100 - Darkest */
+    --ibm-blue-80: #002d9c;   /* Blue 80 - Dark */
+    --ibm-blue-60: #0f62fe;   /* Blue 60 - Primary IBM Blue */
+    
+    /* IBM Accent Colors */
+    --ibm-red-40: #ff8389;
+    --ibm-purple-40: #be95ff;
+    --ibm-cyan-40: #33b1ff;
+    --ibm-cyan-20: #bae6ff;
+    --ibm-teal-40: #08bdba;
+    --ibm-green-40: #42be65;
+    --ibm-yellow-20: #fddec9;
+    --ibm-gray-40: #a8a8a8;
+    --ibm-gray-20: #e0e0e0;
+    
+    /* Carbon Interactive Colors */
     --carbon-link-01: #0f62fe;
     --carbon-link-02: #0043ce;
     
-    --carbon-interactive-01: #0f62fe;
+    --carbon-interactive-01: #0f62fe;  /* Primary IBM Blue */
     --carbon-interactive-02: #393939;
     --carbon-interactive-03: #0f62fe;
     --carbon-interactive-04: #0f62fe;
@@ -40,17 +58,18 @@ body.carbon-theme {
     --carbon-hover-light-ui: #e5e5e5;
     --carbon-hover-selected-ui: #cacaca;
     
-    --carbon-active-primary: #002d9c;
+    --carbon-active-primary: #002d9c;  /* Blue 80 */
     --carbon-active-secondary: #6f6f6f;
     --carbon-active-ui: #c6c6c6;
     
     --carbon-focus: #0f62fe;
     --carbon-inverse-focus-ui: #ffffff;
     
-    --carbon-support-01: #da1e28;
-    --carbon-support-02: #24a148;
-    --carbon-support-03: #f1c21b;
-    --carbon-support-04: #0043ce;
+    /* Support Colors */
+    --carbon-support-01: #da1e28;  /* Error/Red */
+    --carbon-support-02: #42be65;  /* Success/Green 40 */
+    --carbon-support-03: #f1c21b;  /* Warning/Yellow */
+    --carbon-support-04: #0043ce;  /* Info/Blue */
     
     /* Carbon Spacing Scale (8px base) */
     --spacing-01: 0.125rem;   /* 2px */
@@ -253,39 +272,45 @@ body.carbon-theme .badge:not(.locked):hover {
     background: var(--carbon-hover-ui);
 }
 
-/* IBM Pictogram SVG Styling */
-body.carbon-theme .badge-icon {
-    display: block;
-    width: 48px;
-    height: 48px;
-    margin: 0 auto var(--spacing-03);
-    color: var(--carbon-text-03);
-    fill: var(--carbon-text-03);
-    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+/* IBM Pictogram SVG Styling - Override main.css */
+body.carbon-theme .badge-icon,
+body.carbon-theme .badge-icon.badge-icon {
+    display: block !important;
+    width: 48px !important;
+    height: 48px !important;
+    margin: 0 auto var(--spacing-03) !important;
+    font-size: 0 !important;  /* Override main.css font-size */
+    color: var(--carbon-text-03) !important;
+    fill: var(--carbon-text-03) !important;
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9) !important;
 }
 
-body.carbon-theme .badge:not(.locked) .badge-icon {
-    color: var(--carbon-interactive-01);
-    fill: var(--carbon-interactive-01);
+body.carbon-theme .badge:not(.locked) .badge-icon,
+body.carbon-theme .badge:not(.locked) .badge-icon.badge-icon {
+    color: var(--carbon-interactive-01) !important;
+    fill: var(--carbon-interactive-01) !important;
 }
 
-body.carbon-theme .badge:not(.locked):hover .badge-icon {
-    color: var(--carbon-hover-primary);
-    fill: var(--carbon-hover-primary);
+body.carbon-theme .badge:not(.locked):hover .badge-icon,
+body.carbon-theme .badge:not(.locked):hover .badge-icon.badge-icon {
+    color: var(--carbon-hover-primary) !important;
+    fill: var(--carbon-hover-primary) !important;
 }
 
-/* Ensure SVG elements inherit color */
-body.carbon-theme .badge-icon svg {
-    width: 100%;
-    height: 100%;
-    display: block;
+/* Ensure SVG elements are visible and sized correctly */
+body.carbon-theme .badge-icon svg,
+body.carbon-theme svg.badge-icon {
+    width: 48px !important;
+    height: 48px !important;
+    display: block !important;
+    margin: 0 auto var(--spacing-03) !important;
 }
 
 /* Hide emoji content in Carbon theme */
 body.carbon-theme .badge-icon:not(svg) {
-    font-size: 0;
-    line-height: 0;
-    color: transparent;
+    font-size: 0 !important;
+    line-height: 0 !important;
+    color: transparent !important;
 }
 
 body.carbon-theme .badge-name {
@@ -566,15 +591,18 @@ body.carbon-theme .finding {
 }
 
 body.carbon-theme .finding.positive {
-    border-left-color: var(--carbon-success);
+    border-left-color: var(--ibm-green-40);  /* IBM Green 40 */
+    background: linear-gradient(90deg, rgba(66, 190, 101, 0.05) 0%, var(--carbon-ui-01) 100%);
 }
 
 body.carbon-theme .finding.warning {
-    border-left-color: var(--carbon-warning);
+    border-left-color: var(--carbon-warning);  /* Yellow */
+    background: linear-gradient(90deg, rgba(241, 194, 27, 0.05) 0%, var(--carbon-ui-01) 100%);
 }
 
 body.carbon-theme .finding.critical {
-    border-left-color: var(--carbon-danger);
+    border-left-color: var(--ibm-red-40);  /* IBM Red 40 */
+    background: linear-gradient(90deg, rgba(255, 131, 137, 0.05) 0%, var(--carbon-ui-01) 100%);
 }
 
 body.carbon-theme .finding-header {
