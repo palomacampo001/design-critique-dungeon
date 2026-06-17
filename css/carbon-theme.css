@@ -5,12 +5,13 @@
    - Expressive Design: Humanity and delight
    - Universal Design: Inclusive and accessible
    
-   Using IBM Plex font family and Carbon Design System tokens
+   Using IBM Plex font family, Carbon Design System tokens, and IBM Pictograms
+   Reference: https://carbondesignsystem.com/
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Carbon Theme Active */
 body.carbon-theme {
-    /* IBM Carbon Color Tokens */
+    /* IBM Carbon Color Tokens - White Theme */
     --carbon-ui-background: #ffffff;
     --carbon-ui-01: #f4f4f4;
     --carbon-ui-02: #ffffff;
@@ -22,36 +23,66 @@ body.carbon-theme {
     --carbon-text-02: #525252;
     --carbon-text-03: #a8a8a8;
     --carbon-text-04: #ffffff;
+    --carbon-text-05: #6f6f6f;
+    
+    --carbon-link-01: #0f62fe;
+    --carbon-link-02: #0043ce;
     
     --carbon-interactive-01: #0f62fe;
     --carbon-interactive-02: #393939;
     --carbon-interactive-03: #0f62fe;
     --carbon-interactive-04: #0f62fe;
     
-    --carbon-focus: #0f62fe;
     --carbon-hover-primary: #0353e9;
+    --carbon-hover-primary-text: #0043ce;
+    --carbon-hover-secondary: #4c4c4c;
+    --carbon-hover-ui: #e5e5e5;
+    --carbon-hover-light-ui: #e5e5e5;
+    --carbon-hover-selected-ui: #cacaca;
+    
     --carbon-active-primary: #002d9c;
+    --carbon-active-secondary: #6f6f6f;
+    --carbon-active-ui: #c6c6c6;
     
-    --carbon-success: #24a148;
-    --carbon-warning: #f1c21b;
-    --carbon-danger: #da1e28;
+    --carbon-focus: #0f62fe;
+    --carbon-inverse-focus-ui: #ffffff;
     
-    /* Spacing tokens */
-    --spacing-01: 0.125rem;
-    --spacing-02: 0.25rem;
-    --spacing-03: 0.5rem;
-    --spacing-04: 0.75rem;
-    --spacing-05: 1rem;
-    --spacing-06: 1.5rem;
-    --spacing-07: 2rem;
-    --spacing-08: 2.5rem;
-    --spacing-09: 3rem;
+    --carbon-support-01: #da1e28;
+    --carbon-support-02: #24a148;
+    --carbon-support-03: #f1c21b;
+    --carbon-support-04: #0043ce;
+    
+    /* Carbon Spacing Scale (8px base) */
+    --spacing-01: 0.125rem;   /* 2px */
+    --spacing-02: 0.25rem;    /* 4px */
+    --spacing-03: 0.5rem;     /* 8px */
+    --spacing-04: 0.75rem;    /* 12px */
+    --spacing-05: 1rem;       /* 16px */
+    --spacing-06: 1.5rem;     /* 24px */
+    --spacing-07: 2rem;       /* 32px */
+    --spacing-08: 2.5rem;     /* 40px */
+    --spacing-09: 3rem;       /* 48px */
+    --spacing-10: 4rem;       /* 64px */
+    --spacing-11: 5rem;       /* 80px */
+    --spacing-12: 6rem;       /* 96px */
+    --spacing-13: 10rem;      /* 160px */
+    
+    /* Carbon Layout Tokens */
+    --layout-01: 1rem;        /* 16px */
+    --layout-02: 1.5rem;      /* 24px */
+    --layout-03: 2rem;        /* 32px */
+    --layout-04: 3rem;        /* 48px */
+    --layout-05: 4rem;        /* 64px */
+    --layout-06: 6rem;        /* 96px */
+    --layout-07: 10rem;       /* 160px */
     
     background: var(--carbon-ui-background);
     color: var(--carbon-text-01);
     /* IBM Plex Sans - Official IBM Design Language font */
     font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1rem;
     font-weight: 400;
+    line-height: 1.5;
     letter-spacing: 0;
 }
 
@@ -121,14 +152,24 @@ body.carbon-theme .panel-header {
     font-weight: 600;
     color: var(--carbon-text-01);
     text-transform: none;
+    letter-spacing: 0.16px;
     display: flex;
     align-items: center;
     gap: var(--spacing-03);
 }
 
+/* SVG Icon in Panel Header */
 body.carbon-theme .panel-header .icon {
-    font-size: 1.25rem;
-    color: var(--carbon-interactive-01);
+    width: 20px;
+    height: 20px;
+    fill: var(--carbon-interactive-01);
+    flex-shrink: 0;
+}
+
+/* Hide emoji in panel header when SVG is present */
+body.carbon-theme .panel-header .icon:not(svg) {
+    font-size: 0;
+    display: none;
 }
 
 body.carbon-theme .panel-content {
@@ -167,82 +208,76 @@ body.carbon-theme .xp-fill {
     border-radius: 0;
 }
 
-/* Badges */
+/* Badges - Carbon Compliant */
 body.carbon-theme .badges-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-03);
+    gap: var(--spacing-05);
+    padding: 0;
 }
 
 body.carbon-theme .badge {
-    background: var(--carbon-ui-02);
+    background: var(--carbon-ui-01);
     border: 1px solid var(--carbon-ui-03);
     border-radius: 0;
     padding: var(--spacing-05);
     text-align: center;
-    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 96px;
 }
 
 body.carbon-theme .badge.locked {
-    opacity: 0.4;
+    opacity: 0.5;
+    background: var(--carbon-ui-01);
 }
 
 body.carbon-theme .badge:not(.locked) {
     border-color: var(--carbon-interactive-01);
-    background: var(--carbon-ui-01);
+    background: var(--carbon-ui-background);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
+body.carbon-theme .badge:not(.locked):hover {
+    background: var(--carbon-hover-ui);
+}
+
+/* IBM Pictogram SVG Styling */
 body.carbon-theme .badge-icon {
-    font-size: 0;
     display: block;
-    margin-bottom: var(--spacing-03);
-    height: 48px;
     width: 48px;
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
+    height: 48px;
+    margin: 0 auto var(--spacing-03);
+    fill: var(--carbon-text-03);
+    transition: fill 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
 }
 
-/* Replace emoji icons with IBM Pictograms in Carbon theme */
-body.carbon-theme .badge-icon::before {
-    font-size: 48px;
-    line-height: 1;
-    color: var(--carbon-text-02);
+body.carbon-theme .badge:not(.locked) .badge-icon {
+    fill: var(--carbon-interactive-01);
 }
 
-body.carbon-theme .badge:not(.locked) .badge-icon::before {
-    color: var(--carbon-interactive-01);
+body.carbon-theme .badge:not(.locked):hover .badge-icon {
+    fill: var(--carbon-hover-primary);
 }
 
-/* IBM Pictogram mappings for each badge */
-body.carbon-theme .badge:nth-child(1) .badge-icon::before {
-    content: "🛡️"; /* First Quest - Shield */
-}
-
-body.carbon-theme .badge:nth-child(2) .badge-icon::before {
-    content: "⚛️"; /* Carbon Initiate - Atom */
-}
-
-body.carbon-theme .badge:nth-child(3) .badge-icon::before {
-    content: "♿"; /* Accessibility Champion */
-}
-
-body.carbon-theme .badge:nth-child(4) .badge-icon::before {
-    content: "📐"; /* 8px Grid Master - Ruler */
-}
-
-body.carbon-theme .badge:nth-child(5) .badge-icon::before {
-    content: "📝"; /* IBM Plex Guardian - Document */
-}
-
-body.carbon-theme .badge:nth-child(6) .badge-icon::before {
-    content: "🎨"; /* Color Token Sage - Palette */
+/* Hide emoji content in Carbon theme */
+body.carbon-theme .badge-icon:not(svg) {
+    font-size: 0;
+    line-height: 0;
+    color: transparent;
 }
 
 body.carbon-theme .badge-name {
     font-size: 0.75rem;
+    line-height: 1.33;
     color: var(--carbon-text-02);
     font-weight: 400;
+    letter-spacing: 0.32px;
+    margin: 0;
 }
 
 body.carbon-theme .badge:not(.locked) .badge-name {
