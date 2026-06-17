@@ -364,8 +364,14 @@ body.carbon-theme .ascii-divider {
 body.carbon-theme .dm-text {
     font-size: 1rem;
     line-height: 1.5;
-    color: var(--carbon-text-01);
+    color: var(--carbon-text-01) !important;
     margin-bottom: var(--spacing-05);
+    background: transparent !important;
+}
+
+body.carbon-theme .dm-text * {
+    color: var(--carbon-text-01) !important;
+    background: transparent !important;
 }
 
 body.carbon-theme .dm-label {
@@ -565,15 +571,20 @@ body.carbon-theme .results-area {
 }
 
 body.carbon-theme .critique-header {
+    background: var(--carbon-ui-background) !important;
     margin-bottom: var(--spacing-09);
-    padding-bottom: var(--spacing-07);
+    padding: var(--spacing-07) !important;
     border-bottom: 1px solid var(--carbon-ui-03);
+}
+
+body.carbon-theme .critique-header * {
+    background: transparent !important;
 }
 
 body.carbon-theme .critique-title {
     font-size: 2.625rem;
     font-weight: 300;
-    color: var(--carbon-text-01);
+    color: var(--carbon-text-01) !important;
     margin-bottom: var(--spacing-06);
     text-align: left;
     letter-spacing: -0.02em;
@@ -584,6 +595,7 @@ body.carbon-theme .critique-scores {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-05);
     margin-top: var(--spacing-05);
+    background: var(--carbon-ui-background) !important;
 }
 
 body.carbon-theme .score-card {
@@ -591,6 +603,10 @@ body.carbon-theme .score-card {
     border: 1px solid var(--carbon-ui-03);
     padding: var(--spacing-06);
     text-align: center;
+}
+
+body.carbon-theme .score-card * {
+    background: transparent !important;
 }
 
 body.carbon-theme .score-label {
