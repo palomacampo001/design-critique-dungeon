@@ -121,6 +121,14 @@ body.carbon-theme .panel-header {
     font-weight: 600;
     color: var(--carbon-text-01);
     text-transform: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-03);
+}
+
+body.carbon-theme .panel-header .icon {
+    font-size: 1.25rem;
+    color: var(--carbon-interactive-01);
 }
 
 body.carbon-theme .panel-content {
@@ -170,23 +178,76 @@ body.carbon-theme .badge {
     background: var(--carbon-ui-02);
     border: 1px solid var(--carbon-ui-03);
     border-radius: 0;
-    padding: var(--spacing-03);
+    padding: var(--spacing-05);
     text-align: center;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
 }
 
 body.carbon-theme .badge.locked {
-    opacity: 0.5;
+    opacity: 0.4;
+}
+
+body.carbon-theme .badge:not(.locked) {
+    border-color: var(--carbon-interactive-01);
+    background: var(--carbon-ui-01);
 }
 
 body.carbon-theme .badge-icon {
-    font-size: 1.5rem;
+    font-size: 0;
     display: block;
-    margin-bottom: var(--spacing-02);
+    margin-bottom: var(--spacing-03);
+    height: 48px;
+    width: 48px;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+}
+
+/* Replace emoji icons with IBM Pictograms in Carbon theme */
+body.carbon-theme .badge-icon::before {
+    font-size: 48px;
+    line-height: 1;
+    color: var(--carbon-text-02);
+}
+
+body.carbon-theme .badge:not(.locked) .badge-icon::before {
+    color: var(--carbon-interactive-01);
+}
+
+/* IBM Pictogram mappings for each badge */
+body.carbon-theme .badge:nth-child(1) .badge-icon::before {
+    content: "🛡️"; /* First Quest - Shield */
+}
+
+body.carbon-theme .badge:nth-child(2) .badge-icon::before {
+    content: "⚛️"; /* Carbon Initiate - Atom */
+}
+
+body.carbon-theme .badge:nth-child(3) .badge-icon::before {
+    content: "♿"; /* Accessibility Champion */
+}
+
+body.carbon-theme .badge:nth-child(4) .badge-icon::before {
+    content: "📐"; /* 8px Grid Master - Ruler */
+}
+
+body.carbon-theme .badge:nth-child(5) .badge-icon::before {
+    content: "📝"; /* IBM Plex Guardian - Document */
+}
+
+body.carbon-theme .badge:nth-child(6) .badge-icon::before {
+    content: "🎨"; /* Color Token Sage - Palette */
 }
 
 body.carbon-theme .badge-name {
     font-size: 0.75rem;
     color: var(--carbon-text-02);
+    font-weight: 400;
+}
+
+body.carbon-theme .badge:not(.locked) .badge-name {
+    color: var(--carbon-text-01);
+    font-weight: 600;
 }
 
 /* Content Area */
@@ -245,8 +306,9 @@ body.carbon-theme .upload-zone:hover {
 }
 
 body.carbon-theme .upload-icon {
-    font-size: 3rem;
+    font-size: 4rem;
     margin-bottom: var(--spacing-05);
+    color: var(--carbon-text-03);
 }
 
 body.carbon-theme .upload-zone h2 {
@@ -431,6 +493,11 @@ body.carbon-theme .section-header {
     margin-bottom: var(--spacing-05);
     padding-bottom: var(--spacing-04);
     border-bottom: 1px solid var(--carbon-ui-03);
+
+body.carbon-theme .section-header .icon {
+    font-size: 1.5rem;
+    color: var(--carbon-interactive-01);
+}
 }
 
 body.carbon-theme .section-title {
