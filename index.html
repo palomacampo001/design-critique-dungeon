@@ -9,12 +9,17 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- IBM Carbon Icons & Pictograms -->
+    <link rel="stylesheet" href="https://unpkg.com/@carbon/icons@11.32.1/css/icons.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/@carbon/pictograms@12.28.0/css/pictograms.min.css">
     
     <!-- Styles -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/terminal.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/carbon-theme.css">
 </head>
 <body>
     <!-- Terminal Container -->
@@ -343,6 +348,11 @@
         </div>
     </div>
 
+    <!-- Theme Switcher Button -->
+    <button class="theme-switcher" id="themeSwitcher" title="Switch Theme">
+        🎨 Switch Theme
+    </button>
+
     <!-- Settings Button -->
     <button class="btn-settings" id="btnSettings" title="Configure API Key">
         ⚙️
@@ -350,6 +360,7 @@
 
     <!-- Scripts -->
     <script src="js/config.js"></script>
+    <script src="js/theme-switcher.js"></script>
     <script src="js/gamification.js"></script>
     <script src="js/dungeon-master.js"></script>
     <!-- DEMO MODE: No API key required! -->

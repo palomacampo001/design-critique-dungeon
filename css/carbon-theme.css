@@ -1,0 +1,568 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   IBM CARBON DESIGN SYSTEM THEME
+   Based on IBM Design Language (IDL) principles:
+   - Productive Design: Efficiency and clarity
+   - Expressive Design: Humanity and delight
+   - Universal Design: Inclusive and accessible
+   
+   Using IBM Plex font family and Carbon Design System tokens
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Carbon Theme Active */
+body.carbon-theme {
+    /* IBM Carbon Color Tokens */
+    --carbon-ui-background: #ffffff;
+    --carbon-ui-01: #f4f4f4;
+    --carbon-ui-02: #ffffff;
+    --carbon-ui-03: #e0e0e0;
+    --carbon-ui-04: #8d8d8d;
+    --carbon-ui-05: #161616;
+    
+    --carbon-text-01: #161616;
+    --carbon-text-02: #525252;
+    --carbon-text-03: #a8a8a8;
+    --carbon-text-04: #ffffff;
+    
+    --carbon-interactive-01: #0f62fe;
+    --carbon-interactive-02: #393939;
+    --carbon-interactive-03: #0f62fe;
+    --carbon-interactive-04: #0f62fe;
+    
+    --carbon-focus: #0f62fe;
+    --carbon-hover-primary: #0353e9;
+    --carbon-active-primary: #002d9c;
+    
+    --carbon-success: #24a148;
+    --carbon-warning: #f1c21b;
+    --carbon-danger: #da1e28;
+    
+    /* Spacing tokens */
+    --spacing-01: 0.125rem;
+    --spacing-02: 0.25rem;
+    --spacing-03: 0.5rem;
+    --spacing-04: 0.75rem;
+    --spacing-05: 1rem;
+    --spacing-06: 1.5rem;
+    --spacing-07: 2rem;
+    --spacing-08: 2.5rem;
+    --spacing-09: 3rem;
+    
+    background: var(--carbon-ui-background);
+    color: var(--carbon-text-01);
+    /* IBM Plex Sans - Official IBM Design Language font */
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0;
+}
+
+/* Container */
+body.carbon-theme .terminal-container {
+    background: var(--carbon-ui-background);
+    border: none;
+    box-shadow: none;
+    max-width: 1584px;
+    margin: 0 auto;
+    padding: var(--spacing-07);
+}
+
+/* Header */
+body.carbon-theme .terminal-header {
+    background: var(--carbon-ui-02);
+    border: none;
+    border-bottom: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-07) var(--spacing-05);
+    margin-bottom: var(--spacing-07);
+}
+
+body.carbon-theme .ascii-logo {
+    display: none;
+}
+
+body.carbon-theme .terminal-header::before {
+    content: 'Design Critique Platform';
+    display: block;
+    font-size: 2.625rem;
+    font-weight: 300;
+    line-height: 1.25;
+    color: var(--carbon-text-01);
+    margin-bottom: var(--spacing-03);
+}
+
+body.carbon-theme .tagline {
+    font-size: 1rem;
+    color: var(--carbon-text-02);
+    font-weight: 400;
+}
+
+body.carbon-theme .tagline .blink {
+    display: none;
+}
+
+/* Main Layout */
+body.carbon-theme .terminal-main {
+    display: grid;
+    grid-template-columns: 256px 1fr;
+    gap: var(--spacing-07);
+}
+
+/* Stats Panel */
+body.carbon-theme .stats-panel {
+    background: var(--carbon-ui-01);
+    border: 1px solid var(--carbon-ui-03);
+    border-radius: 0;
+    padding: 0;
+}
+
+body.carbon-theme .panel-header {
+    background: var(--carbon-ui-02);
+    border-bottom: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-05);
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--carbon-text-01);
+    text-transform: none;
+}
+
+body.carbon-theme .panel-content {
+    padding: var(--spacing-05);
+}
+
+body.carbon-theme .stat-row {
+    margin-bottom: var(--spacing-04);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+body.carbon-theme .stat-label {
+    font-size: 0.875rem;
+    color: var(--carbon-text-02);
+    font-weight: 400;
+}
+
+body.carbon-theme .stat-value {
+    font-size: 0.875rem;
+    color: var(--carbon-text-01);
+    font-weight: 600;
+}
+
+/* XP Bar */
+body.carbon-theme .xp-bar {
+    background: var(--carbon-ui-03);
+    height: 8px;
+    border-radius: 0;
+    margin: var(--spacing-04) 0;
+}
+
+body.carbon-theme .xp-fill {
+    background: var(--carbon-interactive-01);
+    border-radius: 0;
+}
+
+/* Badges */
+body.carbon-theme .badges-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-03);
+}
+
+body.carbon-theme .badge {
+    background: var(--carbon-ui-02);
+    border: 1px solid var(--carbon-ui-03);
+    border-radius: 0;
+    padding: var(--spacing-03);
+    text-align: center;
+}
+
+body.carbon-theme .badge.locked {
+    opacity: 0.5;
+}
+
+body.carbon-theme .badge-icon {
+    font-size: 1.5rem;
+    display: block;
+    margin-bottom: var(--spacing-02);
+}
+
+body.carbon-theme .badge-name {
+    font-size: 0.75rem;
+    color: var(--carbon-text-02);
+}
+
+/* Content Area */
+body.carbon-theme .content-area {
+    background: var(--carbon-ui-02);
+    border: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-07);
+}
+
+/* Welcome Message */
+body.carbon-theme .welcome-message {
+    margin-bottom: var(--spacing-07);
+}
+
+body.carbon-theme .ascii-divider {
+    display: none;
+}
+
+body.carbon-theme .dm-text {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--carbon-text-01);
+    margin-bottom: var(--spacing-05);
+}
+
+body.carbon-theme .dm-label {
+    display: none;
+}
+
+body.carbon-theme .highlight {
+    color: var(--carbon-interactive-01);
+    font-weight: 600;
+}
+
+body.carbon-theme .warning {
+    background: var(--carbon-ui-01);
+    border-left: 4px solid var(--carbon-warning);
+    padding: var(--spacing-05);
+    margin-top: var(--spacing-05);
+}
+
+/* Upload Zone */
+body.carbon-theme .upload-zone {
+    background: var(--carbon-ui-01);
+    border: 2px dashed var(--carbon-ui-04);
+    border-radius: 0;
+    padding: var(--spacing-09);
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+body.carbon-theme .upload-zone:hover {
+    background: var(--carbon-ui-02);
+    border-color: var(--carbon-interactive-01);
+}
+
+body.carbon-theme .upload-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-05);
+}
+
+body.carbon-theme .upload-zone h2 {
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: var(--carbon-text-01);
+    margin-bottom: var(--spacing-03);
+}
+
+body.carbon-theme .upload-hint {
+    font-size: 0.875rem;
+    color: var(--carbon-text-02);
+}
+
+/* Buttons */
+body.carbon-theme .btn-primary {
+    background: var(--carbon-interactive-01);
+    color: var(--carbon-text-04);
+    border: none;
+    padding: var(--spacing-04) var(--spacing-06);
+    font-size: 0.875rem;
+    font-weight: 400;
+    border-radius: 0;
+    cursor: pointer;
+    transition: background 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+body.carbon-theme .btn-primary:hover {
+    background: var(--carbon-hover-primary);
+}
+
+body.carbon-theme .btn-primary:active {
+    background: var(--carbon-active-primary);
+}
+
+body.carbon-theme .btn-secondary {
+    background: transparent;
+    color: var(--carbon-interactive-01);
+    border: 1px solid var(--carbon-interactive-01);
+    padding: var(--spacing-04) var(--spacing-06);
+    font-size: 0.875rem;
+    font-weight: 400;
+    border-radius: 0;
+    cursor: pointer;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+body.carbon-theme .btn-secondary:hover {
+    background: var(--carbon-interactive-01);
+    color: var(--carbon-text-04);
+}
+
+body.carbon-theme .btn-icon {
+    display: none;
+}
+
+/* Image Preview */
+body.carbon-theme .image-preview {
+    background: var(--carbon-ui-01);
+    border: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-05);
+}
+
+body.carbon-theme .preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-05);
+    padding-bottom: var(--spacing-05);
+    border-bottom: 1px solid var(--carbon-ui-03);
+}
+
+body.carbon-theme .btn-remove {
+    background: transparent;
+    color: var(--carbon-text-01);
+    border: none;
+    padding: var(--spacing-03);
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+body.carbon-theme .btn-remove:hover {
+    background: var(--carbon-ui-03);
+}
+
+/* Loading State */
+body.carbon-theme .loading-state {
+    text-align: center;
+    padding: var(--spacing-09);
+}
+
+body.carbon-theme .loading-text {
+    font-size: 1.25rem;
+    color: var(--carbon-text-01);
+    margin: var(--spacing-05) 0;
+}
+
+body.carbon-theme .loading-steps {
+    text-align: left;
+    max-width: 400px;
+    margin: var(--spacing-07) auto 0;
+}
+
+body.carbon-theme .step {
+    font-size: 0.875rem;
+    color: var(--carbon-text-02);
+    margin-bottom: var(--spacing-03);
+    padding-left: var(--spacing-05);
+}
+
+/* Results */
+body.carbon-theme .critique-header {
+    margin-bottom: var(--spacing-07);
+}
+
+body.carbon-theme .critique-title {
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--carbon-text-01);
+    margin-bottom: var(--spacing-05);
+    text-align: left;
+}
+
+body.carbon-theme .critique-scores {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-05);
+    margin-top: var(--spacing-05);
+}
+
+body.carbon-theme .score-card {
+    background: var(--carbon-ui-01);
+    border: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-06);
+    text-align: center;
+}
+
+body.carbon-theme .score-label {
+    font-size: 0.875rem;
+    color: var(--carbon-text-02);
+    margin-bottom: var(--spacing-03);
+}
+
+body.carbon-theme .score-value {
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: var(--spacing-03);
+}
+
+body.carbon-theme .score-value.excellent {
+    color: var(--carbon-success);
+}
+
+body.carbon-theme .score-value.good {
+    color: var(--carbon-interactive-01);
+}
+
+body.carbon-theme .score-value.fair {
+    color: var(--carbon-warning);
+}
+
+body.carbon-theme .score-value.poor {
+    color: var(--carbon-danger);
+}
+
+body.carbon-theme .score-rating {
+    font-size: 0.875rem;
+    color: var(--carbon-text-02);
+    font-weight: 600;
+}
+
+/* Findings */
+body.carbon-theme .critique-section {
+    margin-bottom: var(--spacing-07);
+}
+
+body.carbon-theme .section-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-03);
+    margin-bottom: var(--spacing-05);
+    padding-bottom: var(--spacing-04);
+    border-bottom: 1px solid var(--carbon-ui-03);
+}
+
+body.carbon-theme .section-title {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--carbon-text-01);
+}
+
+body.carbon-theme .finding {
+    background: var(--carbon-ui-01);
+    border-left: 4px solid var(--carbon-ui-04);
+    padding: var(--spacing-05);
+    margin-bottom: var(--spacing-04);
+}
+
+body.carbon-theme .finding.positive {
+    border-left-color: var(--carbon-success);
+}
+
+body.carbon-theme .finding.warning {
+    border-left-color: var(--carbon-warning);
+}
+
+body.carbon-theme .finding.critical {
+    border-left-color: var(--carbon-danger);
+}
+
+body.carbon-theme .finding-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-03);
+    margin-bottom: var(--spacing-03);
+}
+
+body.carbon-theme .finding-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--carbon-text-01);
+}
+
+body.carbon-theme .finding-description {
+    font-size: 0.875rem;
+    line-height: 1.5;
+    color: var(--carbon-text-02);
+}
+
+/* Footer */
+body.carbon-theme .terminal-footer {
+    background: var(--carbon-ui-02);
+    border-top: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-05);
+    margin-top: var(--spacing-07);
+}
+
+body.carbon-theme .footer-content {
+    font-size: 0.75rem;
+    color: var(--carbon-text-03);
+}
+
+body.carbon-theme .blink {
+    animation: none;
+}
+
+/* Modal */
+body.carbon-theme .modal-content {
+    background: var(--carbon-ui-background);
+    border: 1px solid var(--carbon-ui-03);
+    border-radius: 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body.carbon-theme .modal-header {
+    background: var(--carbon-ui-01);
+    border-bottom: 1px solid var(--carbon-ui-03);
+    padding: var(--spacing-05);
+}
+
+body.carbon-theme .modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--carbon-text-01);
+}
+
+body.carbon-theme .input-field {
+    background: var(--carbon-ui-01);
+    border: none;
+    border-bottom: 1px solid var(--carbon-ui-04);
+    padding: var(--spacing-04);
+    font-size: 0.875rem;
+    color: var(--carbon-text-01);
+    border-radius: 0;
+}
+
+body.carbon-theme .input-field:focus {
+    outline: 2px solid var(--carbon-focus);
+    outline-offset: -2px;
+}
+
+/* Theme Switcher Button */
+.theme-switcher {
+    position: fixed;
+    top: 20px;
+    right: 80px;
+    z-index: 9999;
+    background: var(--terminal-bg-light);
+    border: 2px solid var(--terminal-green);
+    padding: 12px 20px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: var(--terminal-green);
+    transition: all 0.3s ease;
+}
+
+.theme-switcher:hover {
+    background: var(--terminal-green);
+    color: var(--terminal-bg);
+    transform: translateY(-2px);
+}
+
+body.carbon-theme .theme-switcher {
+    background: var(--carbon-interactive-01);
+    border: none;
+    color: var(--carbon-text-04);
+    border-radius: 0;
+    padding: var(--spacing-04) var(--spacing-05);
+    font-size: 0.875rem;
+}
+
+body.carbon-theme .theme-switcher:hover {
+    background: var(--carbon-hover-primary);
+    transform: none;
+}
+
+/* Made with Bob */

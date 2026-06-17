@@ -30,7 +30,21 @@ class AIAnalyzerDemo {
      * Get mock analysis response
      */
     getMockAnalysis() {
-        const mockResponses = [
+        // Check current theme
+        const isCarbon = document.body.classList.contains('carbon-theme');
+        
+        // Return appropriate responses based on theme
+        const mockResponses = isCarbon ? this.getCarbonResponses() : this.getDungeonResponses();
+        
+        // Return random mock response
+        return mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    }
+    
+    /**
+     * Get Dungeon theme responses (fantasy RPG language)
+     */
+    getDungeonResponses() {
+        return [
             {
                 overallImpression: "Brave designer, you have entered the Design Critique Dungeon with a interface that shows promise! The layout demonstrates understanding of IBM's Productive Design principle with its clean, efficient structure. However, the sacred 8px grid has been violated in several places, and the Color Token Sage detects inconsistent use of Carbon's palette. Your typography shows respect for IBM Plex, but spacing demons lurk in the margins.",
                 designScore: 78,
@@ -184,9 +198,166 @@ class AIAnalyzerDemo {
                 ibmIdlAlignment: "NEEDS_IMPROVEMENT"
             }
         ];
-        
-        // Return random mock response
-        return mockResponses[Math.floor(Math.random() * mockResponses.length)];
+    }
+    
+    /**
+     * Get Carbon theme responses (Creative Director language)
+     */
+    getCarbonResponses() {
+        return [
+            {
+                overallImpression: "This interface demonstrates solid foundational work with clear potential for refinement. The visual hierarchy is well-established, and there's an evident understanding of user-centered design principles. However, we're seeing some inconsistencies in the spacing system and color application that are diluting the overall impact. Let's elevate this to the next level by tightening up those details and ensuring every pixel serves a purpose.",
+                designScore: 78,
+                accessibilityScore: 72,
+                findings: [
+                    {
+                        category: "Typography",
+                        type: "POSITIVE",
+                        title: "Strong Typographic Foundation",
+                        description: "The type hierarchy is working well here. IBM Plex Sans is properly implemented with appropriate weights and scales. The 1.5 line-height for body copy ensures comfortable reading, and the heading structure guides users effectively through the content.",
+                        icon: "📝"
+                    },
+                    {
+                        category: "Spacing & Layout",
+                        type: "CRITICAL",
+                        title: "Spacing System Needs Refinement",
+                        description: "We're seeing arbitrary spacing values that break the 8px grid rhythm. This creates visual noise and undermines the design's credibility. Let's commit to the spacing tokens: 8px, 16px, 24px, 32px, 48px. Consistency here will dramatically improve the polish.",
+                        icon: "📐"
+                    },
+                    {
+                        category: "Color Strategy",
+                        type: "WARNING",
+                        title: "Color Token Opportunity",
+                        description: "Custom colors are introducing unnecessary complexity. By leveraging Carbon's color tokens, we'll ensure accessibility compliance, maintain brand consistency, and simplify future updates. Think of tokens as your design system's vocabulary—use them fluently.",
+                        icon: "🎨"
+                    },
+                    {
+                        category: "Accessibility",
+                        type: "WARNING",
+                        title: "Contrast Ratios Need Attention",
+                        description: "Some interactive elements aren't meeting WCAG 2.1 AA standards. This isn't just about compliance—it's about ensuring everyone can use what we're building. Aim for 4.5:1 minimum for text, 3:1 for UI components. Accessibility is non-negotiable.",
+                        icon: "♿"
+                    },
+                    {
+                        category: "Component Usage",
+                        type: "POSITIVE",
+                        title: "Smart Component Application",
+                        description: "The button hierarchy is well-executed—primary, secondary, and ghost buttons are used appropriately. Component states are clearly defined, and the 2px focus indicators show attention to keyboard navigation. This is the kind of thoughtful implementation that scales.",
+                        icon: "⚛️"
+                    },
+                    {
+                        category: "User Experience",
+                        type: "POSITIVE",
+                        title: "Clear User Journey",
+                        description: "The interface prioritizes efficiency without sacrificing clarity. Information architecture is logical, and users can accomplish their tasks with minimal friction. This productive approach aligns perfectly with enterprise needs.",
+                        icon: "⚡"
+                    }
+                ],
+                xpReward: 125,
+                xpMessage: "Solid work. Address the spacing and color consistency, and this will really shine. You're on the right track.",
+                carbonCompliance: "MEDIUM",
+                ibmIdlAlignment: "GOOD"
+            },
+            {
+                overallImpression: "Impressive work here. This interface shows a mature understanding of design systems and user experience principles. The attention to detail is evident—from the precise spacing to the thoughtful motion design. The Carbon implementation is nearly flawless, and the overall experience feels both professional and delightful. There's just a bit of fine-tuning needed on the accessibility front to make this truly exceptional.",
+                designScore: 88,
+                accessibilityScore: 85,
+                findings: [
+                    {
+                        category: "Spacing & Layout",
+                        type: "POSITIVE",
+                        title: "Exemplary Grid Implementation",
+                        description: "The 8px grid system is executed perfectly. Every element aligns to the rhythm, creating a sense of order and professionalism that users feel even if they can't articulate it. The 16-column grid provides the flexibility needed for responsive layouts. This is textbook execution.",
+                        icon: "📐"
+                    },
+                    {
+                        category: "Motion Design",
+                        type: "POSITIVE",
+                        title: "Purposeful Animation Strategy",
+                        description: "The motion design strikes the perfect balance between productive and expressive. Functional transitions are snappy (70-110ms), while moments of delight use more expressive timing (240-400ms). The easing curves follow Carbon standards, creating a cohesive feel throughout. This elevates the entire experience.",
+                        icon: "✨"
+                    },
+                    {
+                        category: "Accessibility",
+                        type: "WARNING",
+                        title: "Keyboard Navigation Enhancement Opportunity",
+                        description: "While contrast ratios are excellent, keyboard navigation could be more robust. Some interactive elements need more prominent focus indicators. This is about inclusive design—ensuring everyone, regardless of how they interact with the interface, has a first-class experience.",
+                        icon: "♿"
+                    },
+                    {
+                        category: "Color System",
+                        type: "POSITIVE",
+                        title: "Masterful Color Token Usage",
+                        description: "The color implementation is sophisticated and consistent. Proper theme application, correct token usage for backgrounds, text, and interactive elements—it all works together harmoniously. This level of system thinking is what separates good design from great design.",
+                        icon: "🎨"
+                    },
+                    {
+                        category: "Design Philosophy",
+                        type: "POSITIVE",
+                        title: "Balanced Design Approach",
+                        description: "This interface embodies the best of both productive and expressive design. It's efficient without being cold, delightful without being frivolous. The micro-interactions add personality while the overall structure maintains professionalism. This is the sweet spot we're always aiming for.",
+                        icon: "✨"
+                    }
+                ],
+                xpReward: 175,
+                xpMessage: "Excellent execution. Polish the accessibility details and this is portfolio-worthy work. Keep pushing the boundaries.",
+                carbonCompliance: "HIGH",
+                ibmIdlAlignment: "EXCELLENT"
+            },
+            {
+                overallImpression: "Let's be direct: this needs significant work. While there's a basic understanding of layout principles, the execution is undermining the design's effectiveness. We're seeing custom components where Carbon components should be used, inconsistent spacing that creates visual chaos, and accessibility issues that will block users. The good news? These are all fixable problems. Let's roll up our sleeves and elevate this to professional standards.",
+                designScore: 62,
+                accessibilityScore: 58,
+                findings: [
+                    {
+                        category: "Component Strategy",
+                        type: "CRITICAL",
+                        title: "Component Library Misalignment",
+                        description: "Custom-built components are creating maintenance debt and inconsistency. Carbon provides battle-tested components for a reason—they're accessible, responsive, and proven at scale. Let's replace these custom elements with Carbon components. It's not about limiting creativity; it's about building on a solid foundation.",
+                        icon: "⚛️"
+                    },
+                    {
+                        category: "Typography",
+                        type: "CRITICAL",
+                        title: "Font Family Violation",
+                        description: "Non-IBM Plex fonts are being used, which breaks brand consistency and can cause licensing issues. IBM Plex isn't just a font choice—it's part of our design language. Use Plex Sans for UI, Plex Mono for code, and Plex Serif sparingly for editorial content.",
+                        icon: "📝"
+                    },
+                    {
+                        category: "Accessibility",
+                        type: "CRITICAL",
+                        title: "Critical Accessibility Gaps",
+                        description: "Multiple WCAG violations: insufficient contrast (2.8:1 vs required 4.5:1), missing alt text, no keyboard navigation support, poor screen reader compatibility. This isn't optional—accessibility is a fundamental requirement. We need to address these immediately.",
+                        icon: "♿"
+                    },
+                    {
+                        category: "Spacing System",
+                        type: "WARNING",
+                        title: "Inconsistent Spacing Pattern",
+                        description: "Random spacing values (7px, 13px, 19px, 27px) create visual inconsistency. The 8px grid system exists to create rhythm and predictability. Commit to the spacing tokens, and watch how much more polished everything becomes. Small details, big impact.",
+                        icon: "📐"
+                    },
+                    {
+                        category: "Inclusive Design",
+                        type: "WARNING",
+                        title: "Universal Design Considerations Missing",
+                        description: "The design makes assumptions about user abilities and contexts. Touch targets are too small (below 44x44px), there's no internationalization support, and the interface isn't optimized for assistive technologies. Universal design isn't a nice-to-have—it's how we ensure our work reaches everyone.",
+                        icon: "🌍"
+                    },
+                    {
+                        category: "Information Architecture",
+                        type: "POSITIVE",
+                        title: "Solid Information Structure",
+                        description: "Despite other issues, the information hierarchy is clear and logical. Users can understand the page structure and find what they need. This is a strong foundation to build upon. Let's maintain this clarity while we address the other concerns.",
+                        icon: "👁️"
+                    }
+                ],
+                xpReward: 75,
+                xpMessage: "There's work to do, but every expert started somewhere. Study the Carbon documentation, iterate, and come back stronger. You've got this.",
+                carbonCompliance: "LOW",
+                ibmIdlAlignment: "NEEDS_IMPROVEMENT"
+            }
+        ];
     }
     
     /**
