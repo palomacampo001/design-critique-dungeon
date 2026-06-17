@@ -538,17 +538,25 @@ body.carbon-theme .step {
     padding-left: var(--spacing-05);
 }
 
-/* Results */
+/* Results - Clean IBM Style */
+body.carbon-theme .results-area {
+    background: var(--carbon-ui-background);
+    padding: 0;
+}
+
 body.carbon-theme .critique-header {
-    margin-bottom: var(--spacing-07);
+    margin-bottom: var(--spacing-09);
+    padding-bottom: var(--spacing-07);
+    border-bottom: 1px solid var(--carbon-ui-03);
 }
 
 body.carbon-theme .critique-title {
-    font-size: 2rem;
-    font-weight: 400;
+    font-size: 2.625rem;
+    font-weight: 300;
     color: var(--carbon-text-01);
-    margin-bottom: var(--spacing-05);
+    margin-bottom: var(--spacing-06);
     text-align: left;
+    letter-spacing: -0.02em;
 }
 
 body.carbon-theme .critique-scores {
@@ -626,44 +634,61 @@ body.carbon-theme .section-title {
 }
 
 body.carbon-theme .finding {
-    background: var(--carbon-ui-01);
-    border-left: 4px solid var(--carbon-ui-04);
-    padding: var(--spacing-05);
-    margin-bottom: var(--spacing-04);
+    background: var(--carbon-ui-background) !important;
+    border: 1px solid var(--carbon-ui-03) !important;
+    border-left: 4px solid var(--carbon-ui-04) !important;
+    padding: var(--spacing-06) !important;
+    margin-bottom: var(--spacing-05) !important;
+    transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+body.carbon-theme .finding:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
 body.carbon-theme .finding.positive {
-    border-left-color: var(--ibm-green-40);  /* IBM Green 40 */
-    background: linear-gradient(90deg, rgba(66, 190, 101, 0.05) 0%, var(--carbon-ui-01) 100%);
+    border-left-color: var(--ibm-green-40) !important;
+    background: var(--carbon-ui-background) !important;
 }
 
 body.carbon-theme .finding.warning {
-    border-left-color: var(--carbon-warning);  /* Yellow */
-    background: linear-gradient(90deg, rgba(241, 194, 27, 0.05) 0%, var(--carbon-ui-01) 100%);
+    border-left-color: var(--carbon-warning) !important;
+    background: var(--carbon-ui-background) !important;
 }
 
 body.carbon-theme .finding.critical {
-    border-left-color: var(--ibm-red-40);  /* IBM Red 40 */
-    background: linear-gradient(90deg, rgba(255, 131, 137, 0.05) 0%, var(--carbon-ui-01) 100%);
+    border-left-color: var(--ibm-red-40) !important;
+    background: var(--carbon-ui-background) !important;
 }
 
 body.carbon-theme .finding-header {
     display: flex;
     align-items: center;
     gap: var(--spacing-03);
-    margin-bottom: var(--spacing-03);
+    margin-bottom: var(--spacing-04);
 }
 
 body.carbon-theme .finding-title {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--carbon-text-01);
+    font-size: 1.125rem !important;
+    font-weight: 600 !important;
+    color: var(--carbon-text-01) !important;
+    line-height: 1.4;
 }
 
 body.carbon-theme .finding-description {
-    font-size: 0.875rem;
-    line-height: 1.5;
-    color: var(--carbon-text-02);
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+    color: var(--carbon-text-01) !important;
+    font-weight: 400 !important;
+}
+
+body.carbon-theme .finding-description p {
+    color: var(--carbon-text-01) !important;
+    margin-bottom: var(--spacing-04);
+}
+
+body.carbon-theme .finding * {
+    color: var(--carbon-text-01) !important;
 }
 
 /* Footer */
