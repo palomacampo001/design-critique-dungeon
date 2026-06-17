@@ -63,11 +63,29 @@ class DesignCritiqueDungeon {
      * Check API key status on load
      */
     checkApiKeyStatus() {
-        if (!ConfigHelper.hasApiKey()) {
+        // In demo mode, show demo message instead
+        if (typeof aiAnalyzer !== 'undefined' && aiAnalyzer.demoMode) {
+            setTimeout(() => {
+                this.showDemoMessage();
+            }, 1000);
+        } else if (!ConfigHelper.hasApiKey()) {
             setTimeout(() => {
                 this.showApiKeyPrompt();
             }, 1000);
         }
+    }
+    
+    /**
+     * Show demo mode message
+     */
+    showDemoMessage() {
+        alert(
+            '🎮 DEMO MODE ACTIVE!\n\n' +
+            '✨ No API key required!\n\n' +
+            'Upload any design screenshot to see a sample AI critique.\n\n' +
+            'This demo uses pre-written responses to show you how the app works.\n\n' +
+            'Perfect for testing and showing to stakeholders!'
+        );
     }
     
     /**
