@@ -934,147 +934,257 @@ body.carbon-theme .theme-switcher:hover {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   RESPONSIVE MOBILE STYLES
+   RESPONSIVE MOBILE STYLES - Mobile First Approach
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Tablet and below (768px) */
 @media (max-width: 768px) {
+    /* Base font size */
     body.carbon-theme {
         font-size: 0.875rem;
+        overflow-x: hidden;
     }
     
-    /* Header */
+    /* Container - Reduce padding */
+    body.carbon-theme .terminal-container,
+    body.carbon-theme .container {
+        padding: 1rem !important;
+        max-width: 100% !important;
+    }
+    
+    /* Header - Compact */
+    body.carbon-theme .terminal-header {
+        padding: 1rem 0 !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
     body.carbon-theme .terminal-header::before {
-        font-size: 2rem !important;
-        line-height: 1.2;
+        font-size: 1.75rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 0.5rem !important;
     }
     
     body.carbon-theme .tagline {
-        font-size: 1rem;
+        font-size: 0.875rem !important;
+        line-height: 1.4 !important;
     }
     
-    /* Main Layout - Stack vertically */
+    /* Main Layout - Single column */
     body.carbon-theme .terminal-main {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-05);
+        display: block !important;
+        grid-template-columns: none !important;
     }
     
-    /* Stats Panel - Full width on mobile */
+    /* Stats Panel - Collapsible or hidden on mobile */
     body.carbon-theme .stats-panel {
-        order: -1;
+        margin-bottom: 1rem;
     }
     
-    /* Badges - Single column */
+    body.carbon-theme .panel-header {
+        padding: 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    body.carbon-theme .panel-content {
+        padding: 0.75rem !important;
+    }
+    
+    body.carbon-theme .stat-row {
+        margin-bottom: 0.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    /* Badges - 2 columns on tablet */
     body.carbon-theme .badges-container {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-04);
+        grid-template-columns: 1fr 1fr !important;
+        gap: 0.5rem !important;
     }
     
     body.carbon-theme .badge {
-        min-height: 100px;
-        padding: var(--spacing-05);
+        min-height: 80px !important;
+        padding: 0.75rem 0.5rem !important;
     }
     
     body.carbon-theme .badge-icon,
     body.carbon-theme svg.badge-icon {
-        width: 48px !important;
-        height: 48px !important;
+        width: 40px !important;
+        height: 40px !important;
+        margin-bottom: 0.5rem !important;
     }
     
-    /* Container padding */
-    body.carbon-theme .terminal-container {
-        padding: var(--spacing-05);
+    body.carbon-theme .badge-name {
+        font-size: 0.75rem !important;
     }
     
-    body.carbon-theme .terminal-header {
-        padding: var(--spacing-05) 0;
-        margin-bottom: var(--spacing-05);
+    /* Content Area */
+    body.carbon-theme .content-area {
+        padding: 0 !important;
     }
     
-    /* Upload zone */
+    /* Upload Zone - Compact */
     body.carbon-theme .upload-zone {
-        padding: var(--spacing-07);
+        padding: 1.5rem 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    body.carbon-theme .upload-icon {
+        font-size: 2.5rem !important;
+        margin-bottom: 1rem !important;
     }
     
     body.carbon-theme .upload-zone h2 {
-        font-size: 1.5rem;
+        font-size: 1.25rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
-    /* Critique header */
+    body.carbon-theme .upload-zone p {
+        font-size: 0.875rem !important;
+    }
+    
+    /* Image Preview */
+    body.carbon-theme .image-preview {
+        padding: 1rem !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    /* Critique Header */
+    body.carbon-theme .critique-header {
+        padding: 1rem !important;
+        margin-bottom: 1.5rem !important;
+    }
+    
     body.carbon-theme .critique-title {
-        font-size: 1.75rem !important;
+        font-size: 1.5rem !important;
+        margin-bottom: 1rem !important;
     }
     
-    /* Score cards - Stack vertically */
+    /* Score Cards - Single column */
     body.carbon-theme .critique-scores {
-        grid-template-columns: 1fr;
-        gap: var(--spacing-04);
+        grid-template-columns: 1fr !important;
+        gap: 0.75rem !important;
+    }
+    
+    body.carbon-theme .score-card {
+        padding: 1rem !important;
+    }
+    
+    body.carbon-theme .score-label {
+        font-size: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
     body.carbon-theme .score-value {
         font-size: 2rem !important;
+        margin-bottom: 0.25rem !important;
+    }
+    
+    body.carbon-theme .score-rating {
+        font-size: 0.75rem !important;
     }
     
     /* Findings */
     body.carbon-theme .finding {
-        padding: var(--spacing-05) !important;
+        padding: 1rem !important;
+        margin-bottom: 0.75rem !important;
     }
     
     body.carbon-theme .finding-title {
         font-size: 1rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
-    /* Theme switcher */
-    .theme-switcher {
-        top: 10px;
-        right: 10px;
-        padding: var(--spacing-03) var(--spacing-04);
-        font-size: 0.75rem;
+    body.carbon-theme .finding-description {
+        font-size: 0.875rem !important;
     }
     
-    body.carbon-theme .theme-switcher {
-        padding: var(--spacing-03) var(--spacing-04);
-        font-size: 0.75rem;
-    }
-}
-
-/* Mobile (480px and below) */
-@media (max-width: 480px) {
-    body.carbon-theme .terminal-header::before {
-        font-size: 1.5rem !important;
+    /* XP Reward */
+    body.carbon-theme .xp-reward {
+        padding: 1rem !important;
+        margin-top: 1rem !important;
     }
     
-    body.carbon-theme .tagline {
-        font-size: 0.875rem;
-    }
-    
-    body.carbon-theme .terminal-container {
-        padding: var(--spacing-04);
-    }
-    
-    body.carbon-theme .critique-title {
-        font-size: 1.5rem !important;
-    }
-    
-    body.carbon-theme .score-value {
-        font-size: 1.75rem !important;
-    }
-    
-    body.carbon-theme .upload-zone h2 {
-        font-size: 1.25rem;
+    body.carbon-theme .xp-reward-title {
+        font-size: 0.875rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
     body.carbon-theme .xp-amount {
         font-size: 2rem !important;
     }
     
-    /* Reduce spacing on small screens */
-    body.carbon-theme .panel-content {
-        padding: var(--spacing-04);
+    body.carbon-theme .xp-message {
+        font-size: 0.875rem !important;
+        margin-top: 0.5rem !important;
     }
     
-    body.carbon-theme .critique-header {
-        padding: var(--spacing-05) !important;
+    /* Buttons */
+    body.carbon-theme .btn-primary,
+    body.carbon-theme .btn-secondary,
+    body.carbon-theme .btn-analyze {
+        padding: 0.75rem 1rem !important;
+        font-size: 0.875rem !important;
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* Theme Switcher - Smaller */
+    .theme-switcher {
+        top: 0.5rem !important;
+        right: 0.5rem !important;
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+    
+    body.carbon-theme .theme-switcher {
+        padding: 0.5rem 0.75rem !important;
+        font-size: 0.75rem !important;
+    }
+}
+
+/* Mobile (480px and below) */
+@media (max-width: 480px) {
+    /* Even more compact */
+    body.carbon-theme .terminal-container {
+        padding: 0.75rem !important;
+    }
+    
+    body.carbon-theme .terminal-header::before {
+        font-size: 1.5rem !important;
+    }
+    
+    body.carbon-theme .tagline {
+        font-size: 0.75rem !important;
+    }
+    
+    /* Badges - Single column on small mobile */
+    body.carbon-theme .badges-container {
+        grid-template-columns: 1fr !important;
+    }
+    
+    body.carbon-theme .badge {
+        min-height: 70px !important;
+    }
+    
+    /* Smaller text everywhere */
+    body.carbon-theme .critique-title {
+        font-size: 1.25rem !important;
+    }
+    
+    body.carbon-theme .score-value {
+        font-size: 1.75rem !important;
+    }
+    
+    body.carbon-theme .xp-amount {
+        font-size: 1.75rem !important;
+    }
+    
+    body.carbon-theme .upload-zone h2 {
+        font-size: 1.125rem !important;
+    }
+    
+    /* Hide ASCII dividers on mobile */
+    body.carbon-theme .ascii-divider {
+        display: none !important;
     }
 }
 
