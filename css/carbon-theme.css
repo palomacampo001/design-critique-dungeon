@@ -105,9 +105,13 @@ body.carbon-theme {
     letter-spacing: 0;
 }
 
-/* Container - Clean IBM Style */
-body.carbon-theme .terminal-container {
-    background: var(--carbon-ui-background);
+/* Container - Clean IBM Style - Force white background */
+body.carbon-theme .terminal-container,
+body.carbon-theme .container,
+body.carbon-theme #dungeon-master,
+body.carbon-theme #upload-section,
+body.carbon-theme #analysis-section {
+    background: var(--carbon-ui-background) !important;
     border: none;
     box-shadow: none;
     max-width: 1584px;
@@ -115,13 +119,17 @@ body.carbon-theme .terminal-container {
     padding: var(--spacing-09) var(--spacing-07);
 }
 
-/* Header - IBM Clean Style */
+/* Header - IBM Clean Style - Force white background and dark text */
 body.carbon-theme .terminal-header {
-    background: var(--carbon-ui-background);
+    background: var(--carbon-ui-background) !important;
     border: none;
     border-bottom: 1px solid var(--carbon-ui-03);
     padding: var(--spacing-09) 0 var(--spacing-07);
     margin-bottom: var(--spacing-09);
+}
+
+body.carbon-theme .terminal-header * {
+    color: var(--carbon-text-01) !important;
 }
 
 body.carbon-theme .ascii-logo {
@@ -134,9 +142,21 @@ body.carbon-theme .terminal-header::before {
     font-size: 3.5rem;
     font-weight: 300;
     line-height: 1.2;
-    color: var(--carbon-text-01);
+    color: var(--carbon-text-01) !important;
     margin-bottom: var(--spacing-05);
     letter-spacing: -0.02em;
+}
+
+/* Force all headings to be dark and visible */
+body.carbon-theme h1,
+body.carbon-theme h2,
+body.carbon-theme h3,
+body.carbon-theme h4,
+body.carbon-theme h5,
+body.carbon-theme h6 {
+    color: var(--carbon-text-01) !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+    background: transparent !important;
 }
 
 body.carbon-theme .tagline {
@@ -567,7 +587,7 @@ body.carbon-theme .critique-scores {
 }
 
 body.carbon-theme .score-card {
-    background: var(--carbon-ui-01);
+    background: var(--carbon-ui-background) !important;
     border: 1px solid var(--carbon-ui-03);
     padding: var(--spacing-06);
     text-align: center;
@@ -575,8 +595,9 @@ body.carbon-theme .score-card {
 
 body.carbon-theme .score-label {
     font-size: 0.875rem;
-    color: var(--carbon-text-02);
+    color: var(--carbon-text-01) !important;
     margin-bottom: var(--spacing-03);
+    font-weight: 600;
 }
 
 body.carbon-theme .score-value {
@@ -584,6 +605,7 @@ body.carbon-theme .score-value {
     font-weight: 300;
     line-height: 1;
     margin-bottom: var(--spacing-03);
+    color: var(--carbon-text-01) !important;
 }
 
 body.carbon-theme .score-value.excellent {
@@ -604,7 +626,7 @@ body.carbon-theme .score-value.poor {
 
 body.carbon-theme .score-rating {
     font-size: 0.875rem;
-    color: var(--carbon-text-02);
+    color: var(--carbon-text-01) !important;
     font-weight: 600;
 }
 
@@ -629,8 +651,8 @@ body.carbon-theme .section-header .icon {
 
 body.carbon-theme .section-title {
     font-size: 1.25rem;
-    font-weight: 400;
-    color: var(--carbon-text-01);
+    font-weight: 600;
+    color: var(--carbon-text-01) !important;
 }
 
 body.carbon-theme .finding {
@@ -687,7 +709,39 @@ body.carbon-theme .finding-description p {
     margin-bottom: var(--spacing-04);
 }
 
-body.carbon-theme .finding * {
+body.carbon-theme .finding *,
+body.carbon-theme .finding strong,
+body.carbon-theme .finding span,
+body.carbon-theme .finding p,
+body.carbon-theme .finding h4,
+body.carbon-theme .finding h5 {
+    color: var(--carbon-text-01) !important;
+    background: transparent !important;
+}
+
+/* Force all text elements to be dark and readable */
+body.carbon-theme p,
+body.carbon-theme span,
+body.carbon-theme div,
+body.carbon-theme li,
+body.carbon-theme label,
+body.carbon-theme strong {
+    color: var(--carbon-text-01) !important;
+    font-family: 'IBM Plex Sans', sans-serif !important;
+}
+
+/* Results and analysis sections */
+body.carbon-theme #results,
+body.carbon-theme #analysis-results,
+body.carbon-theme .results-area,
+body.carbon-theme .critique-section {
+    background: var(--carbon-ui-background) !important;
+}
+
+body.carbon-theme #results *,
+body.carbon-theme #analysis-results *,
+body.carbon-theme .results-area *,
+body.carbon-theme .critique-section * {
     color: var(--carbon-text-01) !important;
 }
 
