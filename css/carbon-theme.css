@@ -105,23 +105,23 @@ body.carbon-theme {
     letter-spacing: 0;
 }
 
-/* Container */
+/* Container - Clean IBM Style */
 body.carbon-theme .terminal-container {
     background: var(--carbon-ui-background);
     border: none;
     box-shadow: none;
     max-width: 1584px;
     margin: 0 auto;
-    padding: var(--spacing-07);
+    padding: var(--spacing-09) var(--spacing-07);
 }
 
-/* Header */
+/* Header - IBM Clean Style */
 body.carbon-theme .terminal-header {
-    background: var(--carbon-ui-02);
+    background: var(--carbon-ui-background);
     border: none;
     border-bottom: 1px solid var(--carbon-ui-03);
-    padding: var(--spacing-07) var(--spacing-05);
-    margin-bottom: var(--spacing-07);
+    padding: var(--spacing-09) 0 var(--spacing-07);
+    margin-bottom: var(--spacing-09);
 }
 
 body.carbon-theme .ascii-logo {
@@ -131,17 +131,20 @@ body.carbon-theme .ascii-logo {
 body.carbon-theme .terminal-header::before {
     content: 'Design Critique Platform';
     display: block;
-    font-size: 2.625rem;
+    font-size: 3.5rem;
     font-weight: 300;
-    line-height: 1.25;
+    line-height: 1.2;
     color: var(--carbon-text-01);
-    margin-bottom: var(--spacing-03);
+    margin-bottom: var(--spacing-05);
+    letter-spacing: -0.02em;
 }
 
 body.carbon-theme .tagline {
-    font-size: 1rem;
+    font-size: 1.125rem;
+    line-height: 1.5;
     color: var(--carbon-text-02);
     font-weight: 400;
+    max-width: 640px;
 }
 
 body.carbon-theme .tagline .blink {
@@ -177,19 +180,18 @@ body.carbon-theme .panel-header {
     gap: var(--spacing-03);
 }
 
-/* SVG Icon in Panel Header */
-body.carbon-theme .panel-header .icon {
-    width: 20px;
-    height: 20px;
-    color: var(--carbon-interactive-01);
-    fill: var(--carbon-interactive-01);
+/* SVG Icon in Panel Header - Line Art Style */
+body.carbon-theme .panel-header .icon,
+body.carbon-theme .panel-header svg.icon {
+    width: 20px !important;
+    height: 20px !important;
+    stroke: var(--ibm-blue-60) !important;
+    fill: none !important;
+    stroke-width: 1.5 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
     flex-shrink: 0;
     display: block;
-}
-
-body.carbon-theme .panel-header svg.icon {
-    width: 20px;
-    height: 20px;
 }
 
 /* Hide emoji in panel header when SVG is present */
@@ -243,10 +245,10 @@ body.carbon-theme .badges-container {
 }
 
 body.carbon-theme .badge {
-    background: var(--carbon-ui-01);
+    background: var(--carbon-ui-background);
     border: 1px solid var(--carbon-ui-03);
     border-radius: 0;
-    padding: var(--spacing-05);
+    padding: var(--spacing-07) var(--spacing-05);
     text-align: center;
     transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9);
     cursor: default;
@@ -254,56 +256,52 @@ body.carbon-theme .badge {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 96px;
+    min-height: 140px;
 }
 
 body.carbon-theme .badge.locked {
-    opacity: 0.5;
-    background: var(--carbon-ui-01);
+    opacity: 0.4;
+    background: var(--carbon-ui-background);
 }
 
 body.carbon-theme .badge:not(.locked) {
-    border-color: var(--carbon-interactive-01);
+    border-color: var(--ibm-blue-60);
     background: var(--carbon-ui-background);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 6px rgba(15, 98, 254, 0.1);
 }
 
 body.carbon-theme .badge:not(.locked):hover {
-    background: var(--carbon-hover-ui);
+    background: var(--carbon-ui-01);
+    box-shadow: 0 4px 12px rgba(15, 98, 254, 0.15);
+    transform: translateY(-2px);
 }
 
-/* IBM Pictogram SVG Styling - Override main.css */
+/* IBM Pictogram Line-Art Styling - Clean & Minimal */
 body.carbon-theme .badge-icon,
-body.carbon-theme .badge-icon.badge-icon {
+body.carbon-theme .badge-icon.badge-icon,
+body.carbon-theme svg.badge-icon {
     display: block !important;
-    width: 48px !important;
-    height: 48px !important;
-    margin: 0 auto var(--spacing-03) !important;
-    font-size: 0 !important;  /* Override main.css font-size */
-    color: var(--carbon-text-03) !important;
-    fill: var(--carbon-text-03) !important;
+    width: 64px !important;
+    height: 64px !important;
+    margin: 0 auto var(--spacing-05) !important;
+    font-size: 0 !important;
+    stroke: var(--ibm-gray-40) !important;
+    fill: none !important;
+    stroke-width: 1.5 !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
     transition: all 110ms cubic-bezier(0.2, 0, 0.38, 0.9) !important;
 }
 
 body.carbon-theme .badge:not(.locked) .badge-icon,
-body.carbon-theme .badge:not(.locked) .badge-icon.badge-icon {
-    color: var(--carbon-interactive-01) !important;
-    fill: var(--carbon-interactive-01) !important;
+body.carbon-theme .badge:not(.locked) svg.badge-icon {
+    stroke: var(--ibm-blue-60) !important;
 }
 
 body.carbon-theme .badge:not(.locked):hover .badge-icon,
-body.carbon-theme .badge:not(.locked):hover .badge-icon.badge-icon {
-    color: var(--carbon-hover-primary) !important;
-    fill: var(--carbon-hover-primary) !important;
-}
-
-/* Ensure SVG elements are visible and sized correctly */
-body.carbon-theme .badge-icon svg,
-body.carbon-theme svg.badge-icon {
-    width: 48px !important;
-    height: 48px !important;
-    display: block !important;
-    margin: 0 auto var(--spacing-03) !important;
+body.carbon-theme .badge:not(.locked):hover svg.badge-icon {
+    stroke: var(--ibm-blue-80) !important;
+    transform: scale(1.05);
 }
 
 /* Hide emoji content in Carbon theme */
@@ -314,11 +312,11 @@ body.carbon-theme .badge-icon:not(svg) {
 }
 
 body.carbon-theme .badge-name {
-    font-size: 0.75rem;
-    line-height: 1.33;
+    font-size: 0.875rem;
+    line-height: 1.4;
     color: var(--carbon-text-02);
     font-weight: 400;
-    letter-spacing: 0.32px;
+    letter-spacing: 0;
     margin: 0;
 }
 
