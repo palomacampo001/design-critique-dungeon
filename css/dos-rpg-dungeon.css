@@ -1,699 +1,607 @@
 /* ═══════════════════════════════════════════════════════════════════════════
-   DOS RPG DUNGEON THEME - 1990s SSI Gold Box Aesthetic
-   Authentic VGA colors, pixel borders, bitmap typography
+   DOS RPG DUNGEON MODE - Authentic 1990s DOS Fantasy RPG Aesthetic
+   Inspired by: Pool of Radiance, Eye of the Beholder, Gold Box Games
    ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ─────────────────────────────────────────────────────────────────────────
-   VGA Color Palette (Authentic DOS Colors)
-   ───────────────────────────────────────────────────────────────────────── */
-body.dungeon-theme {
-    /* Core VGA Colors */
+/* ═══════════════════════════════════════════════════════════════════════════
+   VGA COLOR PALETTE - Authentic DOS Colors
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* Background */
     --dos-black: #000000;
-    --dos-blue: #0000aa;
-    --dos-green: #00aa00;
-    --dos-cyan: #00aaaa;
-    --dos-red: #aa0000;
-    --dos-magenta: #aa00aa;
-    --dos-brown: #aa5500;
-    --dos-light-gray: #aaaaaa;
-    --dos-dark-gray: #555555;
-    --dos-light-blue: #5555ff;
-    --dos-light-green: #55ff55;
-    --dos-light-cyan: #55ffff;
-    --dos-light-red: #ff5555;
-    --dos-light-magenta: #ff55ff;
-    --dos-yellow: #ffff55;
-    --dos-white: #ffffff;
+    --dos-dark-gray: #0a0a0a;
+    --dos-darker-gray: #1a1a1a;
     
-    /* Theme-specific colors */
+    /* Stone & Metal */
+    --dos-stone: #808080;
+    --dos-iron: #505050;
+    --dos-silver: #c0c0c0;
+    --dos-steel: #6b6b6b;
+    
+    /* Gold & Treasure */
     --dos-gold: #ffaa00;
-    --dos-iron: #666666;
-    --dos-stone: #8b7355;
-    --dos-wood: #654321;
+    --dos-gold-dark: #cc8800;
+    --dos-gold-bright: #ffdd00;
     
-    /* Base styles */
-    background: var(--dos-black) !important;
-    color: #00ff66 !important;
-    font-family: 'VT323', monospace !important;
-    image-rendering: pixelated !important;
-    image-rendering: -moz-crisp-edges !important;
-    image-rendering: crisp-edges !important;
-}
-
-body.dungeon-theme .loading-container {
-    background: var(--dos-black);
-    border: 4px solid var(--dos-cyan);
-    padding: 32px;
-    text-align: center;
-}
-
-body.dungeon-theme .loading-spinner {
-    width: 64px;
-    height: 64px;
-    border: 4px solid var(--dos-iron);
-    border-top-color: var(--dos-gold);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin: 0 auto 24px;
-    box-shadow: 0 0 16px var(--dos-gold);
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-body.dungeon-theme .loading-text {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
-    color: var(--dos-gold);
-    margin-bottom: 24px;
-    text-shadow: 0 0 8px var(--dos-gold);
-}
-
-body.dungeon-theme .loading-steps {
-    text-align: left;
-    max-width: 500px;
-    margin: 0 auto;
-}
-
-body.dungeon-theme .loading-steps .step {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    color: var(--dos-light-gray);
-    padding: 8px 0;
-    border-bottom: 1px solid var(--dos-iron);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-body.dungeon-theme .loading-steps .step.active {
-    color: var(--dos-cyan);
-    text-shadow: 0 0 4px var(--dos-cyan);
-}
-
-body.dungeon-theme .loading-steps .step.complete {
-    color: var(--dos-green);
-}
-
-body.dungeon-theme .loading-steps .step-icon {
-    font-size: 24px;
-    min-width: 32px;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Results - Magical Codex Pages
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .score-overview {
-    background: var(--dos-black);
-    border: 4px solid var(--dos-gold);
-    padding: 24px;
-    margin-bottom: 24px;
-    box-shadow: 
-        inset 0 0 0 2px var(--dos-gold-dark),
-        0 4px 12px rgba(0, 0, 0, 0.9);
-}
-
-body.dungeon-theme .score-banner {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
-    color: var(--dos-gold);
-    text-align: center;
-    margin-bottom: 16px;
-    padding: 12px;
-    background: var(--dos-gold-dark);
-    color: var(--dos-black);
-    border: 2px solid var(--dos-gold);
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-body.dungeon-theme .score-number {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 48px;
-    color: var(--dos-gold);
-    text-align: center;
-    text-shadow: 
-        3px 3px 0 var(--dos-gold-dark),
-        0 0 24px var(--dos-gold);
-    margin: 16px 0;
-}
-
-body.dungeon-theme .score-stars {
-    text-align: center;
-    font-size: 32px;
-    margin: 16px 0;
-    filter: drop-shadow(0 0 8px var(--dos-gold));
-}
-
-body.dungeon-theme .score-label {
-    font-family: 'VT323', monospace;
-    font-size: 20px;
-    color: var(--dos-cyan);
-    text-align: center;
-}
-
-/* Category Scores */
-body.dungeon-theme .category-scores {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-top: 24px;
-}
-
-body.dungeon-theme .category-item {
-    background: var(--dos-dark-gray);
-    border: 2px solid var(--dos-stone);
-    padding: 12px;
-}
-
-body.dungeon-theme .category-label {
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--dos-light-gray);
-    margin-bottom: 4px;
-}
-
-body.dungeon-theme .category-value {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 20px;
-    color: var(--dos-cyan);
-    text-shadow: 0 0 4px var(--dos-cyan);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Critique Cards - Tome Pages
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .critique-card {
-    background: var(--dos-dark-gray);
-    border: 4px solid var(--dos-stone);
-    margin-bottom: 24px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.8);
-}
-
-body.dungeon-theme .card-header {
-    background: var(--dos-iron);
-    padding: 16px;
-    cursor: pointer;
-    border-bottom: 2px solid var(--dos-stone);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-body.dungeon-theme .card-header:hover {
-    background: var(--dos-stone);
-}
-
-body.dungeon-theme .card-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
-    color: var(--dos-gold);
-    text-shadow: 0 0 8px var(--dos-gold);
-}
-
-body.dungeon-theme .card-title::before {
-    content: '📖 ';
-    margin-right: 8px;
-}
-
-body.dungeon-theme .card-toggle {
-    color: var(--dos-cyan);
-    font-size: 20px;
-}
-
-body.dungeon-theme .card-body {
-    padding: 24px;
-    background: var(--dos-black);
-}
-
-/* Finding Items */
-body.dungeon-theme .finding-item {
-    background: var(--dos-dark-gray);
-    border-left: 4px solid var(--dos-stone);
-    padding: 16px;
-    margin-bottom: 16px;
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    line-height: 1.6;
-}
-
-body.dungeon-theme .finding-item.positive {
-    border-left-color: var(--dos-green);
-    background: rgba(0, 255, 0, 0.05);
-}
-
-body.dungeon-theme .finding-item.positive .finding-title::before {
-    content: '✓ ';
-    color: var(--dos-green);
-    text-shadow: 0 0 4px var(--dos-green);
-}
-
-body.dungeon-theme .finding-item.warning {
-    border-left-color: var(--dos-yellow);
-    background: rgba(255, 255, 0, 0.05);
-}
-
-body.dungeon-theme .finding-item.warning .finding-title::before {
-    content: '⚠️ ';
-}
-
-body.dungeon-theme .finding-item.critical {
-    border-left-color: var(--dos-red);
-    background: rgba(255, 0, 0, 0.05);
-}
-
-body.dungeon-theme .finding-item.critical .finding-title::before {
-    content: '🔴 ';
-}
-
-body.dungeon-theme .finding-title {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 12px;
-    color: var(--dos-cyan);
-    margin-bottom: 8px;
-    text-transform: uppercase;
-}
-
-body.dungeon-theme .finding-description {
-    color: var(--dos-parchment);
-    line-height: 1.6;
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   XP Rewards - Treasure Chest
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .xp-card {
-    background: linear-gradient(
-        135deg,
-        var(--dos-gold-dark) 0%,
-        var(--dos-gold) 50%,
-        var(--dos-gold-dark) 100%
-    );
-    border: 4px solid var(--dos-gold);
-    padding: 24px;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-        inset 0 0 32px rgba(255, 170, 0, 0.3),
-        0 4px 16px rgba(255, 170, 0, 0.5);
-}
-
-body.dungeon-theme .xp-card::before {
-    content: '✨';
-    position: absolute;
-    font-size: 32px;
-    animation: sparkle 2s ease-in-out infinite;
-    top: 10%;
-    left: 10%;
-}
-
-body.dungeon-theme .xp-card::after {
-    content: '✨';
-    position: absolute;
-    font-size: 32px;
-    animation: sparkle 2s ease-in-out infinite 1s;
-    bottom: 10%;
-    right: 10%;
-}
-
-@keyframes sparkle {
-    0%, 100% { opacity: 0; transform: scale(0.5); }
-    50% { opacity: 1; transform: scale(1); }
-}
-
-body.dungeon-theme .xp-icon {
-    font-size: 64px;
-    margin-bottom: 16px;
-    filter: drop-shadow(0 0 16px rgba(0, 0, 0, 0.5));
-}
-
-body.dungeon-theme .xp-amount {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 32px;
-    color: var(--dos-black);
-    text-shadow: 
-        2px 2px 0 rgba(255, 255, 255, 0.5),
-        0 0 16px rgba(255, 255, 255, 0.8);
-    margin: 16px 0;
-}
-
-body.dungeon-theme .xp-message {
-    font-family: 'VT323', monospace;
-    font-size: 20px;
-    color: var(--dos-black);
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Achievements - Badge Display
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .achievements-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 16px;
-}
-
-body.dungeon-theme .achievement-badge {
-    background: var(--dos-dark-gray);
-    border: 3px solid var(--dos-iron);
-    padding: 16px;
-    text-align: center;
-    aspect-ratio: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    transition: all 0.3s;
-}
-
-body.dungeon-theme .achievement-badge:not(.locked) {
-    border-color: var(--dos-gold);
-    box-shadow: 
-        inset 0 0 16px rgba(255, 170, 0, 0.2),
-        0 0 16px rgba(255, 170, 0, 0.3);
-    animation: badgeGlow 3s ease-in-out infinite;
-}
-
-@keyframes badgeGlow {
-    0%, 100% { box-shadow: inset 0 0 16px rgba(255, 170, 0, 0.2), 0 0 16px rgba(255, 170, 0, 0.3); }
-    50% { box-shadow: inset 0 0 24px rgba(255, 170, 0, 0.4), 0 0 24px rgba(255, 170, 0, 0.5); }
-}
-
-body.dungeon-theme .achievement-badge.locked {
-    opacity: 0.4;
-    filter: grayscale(100%);
-}
-
-body.dungeon-theme .badge-icon-large {
-    font-size: 48px;
-    filter: drop-shadow(0 0 8px var(--dos-gold));
-}
-
-body.dungeon-theme .badge-name {
-    font-family: 'VT323', monospace;
-    font-size: 14px;
-    color: var(--dos-cyan);
-    text-align: center;
-}
-
-body.dungeon-theme .achievement-badge.locked .badge-name {
-    color: var(--dos-iron);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Buttons - RPG UI Style
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .btn-primary {
-    background: linear-gradient(
-        180deg,
-        var(--dos-gold) 0%,
-        var(--dos-gold-dark) 100%
-    );
-    color: var(--dos-black);
-    border: 3px solid var(--dos-gold);
-    font-family: 'Press Start 2P', monospace;
-    font-size: 14px;
-    padding: 16px 32px;
-    text-transform: uppercase;
-    box-shadow: 
-        inset 0 2px 0 rgba(255, 255, 255, 0.3),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-        0 4px 8px rgba(0, 0, 0, 0.5);
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-body.dungeon-theme .btn-primary:hover {
-    background: linear-gradient(
-        180deg,
-        var(--dos-bright-yellow) 0%,
-        var(--dos-gold) 100%
-    );
-    box-shadow: 
-        inset 0 2px 0 rgba(255, 255, 255, 0.5),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.3),
-        0 0 16px var(--dos-gold);
-    transform: translateY(-2px);
-}
-
-body.dungeon-theme .btn-primary:active {
-    transform: translateY(0);
-    box-shadow: 
-        inset 0 2px 4px rgba(0, 0, 0, 0.3),
-        0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-body.dungeon-theme .btn-secondary {
-    background: var(--dos-iron);
-    color: var(--dos-cyan);
-    border: 3px solid var(--dos-stone);
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    padding: 12px 24px;
-    box-shadow: 
-        inset 0 2px 0 rgba(255, 255, 255, 0.2),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-        0 4px 8px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-body.dungeon-theme .btn-secondary:hover {
-    background: var(--dos-stone);
-    border-color: var(--dos-cyan);
-    box-shadow: 
-        inset 0 2px 0 rgba(255, 255, 255, 0.3),
-        inset 0 -2px 0 rgba(0, 0, 0, 0.5),
-        0 0 12px var(--dos-cyan);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Settings Drawer
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .drawer-overlay {
-    background: rgba(0, 0, 0, 0.9);
-}
-
-body.dungeon-theme .drawer-content {
-    background: var(--dos-black);
-    border-left: 4px solid var(--dos-gold);
-    box-shadow: -8px 0 32px rgba(0, 0, 0, 0.9);
-}
-
-body.dungeon-theme .drawer-header {
-    background: var(--dos-gold-dark);
-    border-bottom: 4px solid var(--dos-gold);
-    padding: 24px;
-}
-
-body.dungeon-theme .drawer-header h2 {
-    font-family: 'Press Start 2P', monospace;
-    font-size: 16px;
-    color: var(--dos-black);
-    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
-}
-
-body.dungeon-theme .drawer-body {
-    background: var(--dos-black);
-    padding: 24px;
-}
-
-body.dungeon-theme .setting-group {
-    margin-bottom: 32px;
-}
-
-body.dungeon-theme .setting-label {
-    font-family: 'VT323', monospace;
-    font-size: 18px;
-    color: var(--dos-cyan);
-    margin-bottom: 12px;
-    display: block;
-}
-
-body.dungeon-theme .theme-options {
-    display: flex;
-    gap: 12px;
-}
-
-body.dungeon-theme .theme-option {
-    flex: 1;
-    padding: 16px;
-    background: var(--dos-dark-gray);
-    border: 3px solid var(--dos-iron);
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    color: var(--dos-light-gray);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.2s;
-}
-
-body.dungeon-theme .theme-option:hover {
-    border-color: var(--dos-cyan);
-    background: var(--dos-iron);
-}
-
-body.dungeon-theme .theme-option.active {
-    border-color: var(--dos-gold);
-    background: var(--dos-gold-dark);
-    color: var(--dos-black);
-    box-shadow: 0 0 16px var(--dos-gold);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Bottom Navigation
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme .bottom-nav {
-    background: var(--dos-black);
-    border-top: 4px solid var(--dos-gold);
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.8);
-}
-
-body.dungeon-theme .nav-item {
-    color: var(--dos-light-gray);
-    font-family: 'VT323', monospace;
-    font-size: 16px;
-    border-right: 2px solid var(--dos-iron);
-}
-
-body.dungeon-theme .nav-item:hover {
-    background: var(--dos-dark-gray);
-    color: var(--dos-cyan);
-}
-
-body.dungeon-theme .nav-item.active {
-    background: var(--dos-gold-dark);
-    color: var(--dos-black);
-    box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.3);
-}
-
-body.dungeon-theme .nav-icon {
-    font-size: 24px;
-    filter: drop-shadow(0 0 4px currentColor);
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Mobile Layout (Game Boy Advance Style)
-   ───────────────────────────────────────────────────────────────────────── */
-
-@media (max-width: 767px) {
-    body.dungeon-theme {
-        font-size: 16px;
-    }
+    /* Magic & Energy */
+    --dos-magic-blue: #0088ff;
+    --dos-magic-cyan: #00ffff;
+    --dos-magic-purple: #aa00ff;
     
-    body.dungeon-theme .app-main {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        padding: 8px;
-    }
+    /* Health & Danger */
+    --dos-health-green: #00ff00;
+    --dos-health-yellow: #ffff00;
+    --dos-danger-red: #ff0000;
+    --dos-danger-orange: #ff8800;
     
-    body.dungeon-theme .pixel-title {
-        font-size: 16px;
-    }
+    /* Text Colors */
+    --dos-text-white: #ffffff;
+    --dos-text-gray: #aaaaaa;
+    --dos-text-dim: #666666;
     
-    body.dungeon-theme .pixel-heading {
-        font-size: 12px;
-    }
-    
-    body.dungeon-theme .vga-text {
-        font-size: 16px;
-    }
-    
-    body.dungeon-theme .illustration-window {
-        aspect-ratio: 16/9;
-    }
-    
-    body.dungeon-theme .illustration-window::before {
-        font-size: 64px;
-    }
-    
-    body.dungeon-theme .rpg-panel {
-        border-width: 3px;
-        padding: 12px;
-    }
-    
-    body.dungeon-theme .rpg-panel::before,
-    body.dungeon-theme .rpg-panel::after {
-        font-size: 10px;
-    }
-    
-    body.dungeon-theme .dungeon-master-panel {
-        min-height: 150px;
-    }
-    
-    body.dungeon-theme .dm-content {
-        padding: 16px;
-        font-size: 16px;
-    }
-    
-    body.dungeon-theme .btn-primary {
-        font-size: 12px;
-        padding: 12px 24px;
-    }
-    
-    body.dungeon-theme .score-number {
-        font-size: 36px;
-    }
-    
-    body.dungeon-theme .category-scores {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Accessibility
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme *:focus-visible {
-    outline: 3px solid var(--dos-cyan);
-    outline-offset: 2px;
-}
-
-/* Reduced Motion */
-@media (prefers-reduced-motion: reduce) {
-    body.dungeon-theme * {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-}
-
-/* ─────────────────────────────────────────────────────────────────────────
-   Scrollbar
-   ───────────────────────────────────────────────────────────────────────── */
-
-body.dungeon-theme ::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
-}
-
-body.dungeon-theme ::-webkit-scrollbar-track {
-    background: var(--dos-black);
-    border: 2px solid var(--dos-iron);
-}
-
-body.dungeon-theme ::-webkit-scrollbar-thumb {
-    background: var(--dos-gold-dark);
-    border: 2px solid var(--dos-gold);
-    box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
-}
-
-body.dungeon-theme ::-webkit-scrollbar-thumb:hover {
-    background: var(--dos-gold);
+    /* UI Elements */
+    --dos-border-light: #999999;
+    --dos-border-dark: #333333;
+    --dos-panel-bg: #1a1a1a;
+    --dos-panel-border: #666666;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   END OF DOS RPG DUNGEON THEME
-   "May your grids be 8px, your Plex be IBM, and your adventures be legendary."
+   DUNGEON THEME BASE
    ═══════════════════════════════════════════════════════════════════════════ */
+
+.dungeon-theme {
+    background: var(--dos-black);
+    color: var(--dos-text-white);
+    font-family: 'Press Start 2P', 'VT323', monospace;
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOS RPG PANEL SYSTEM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dos-panel {
+    background: var(--dos-panel-bg);
+    border: 3px solid var(--dos-panel-border);
+    border-style: double;
+    box-shadow: 
+        inset 0 0 0 1px var(--dos-border-dark),
+        inset 0 0 0 2px var(--dos-border-light),
+        0 4px 8px rgba(0, 0, 0, 0.8);
+    padding: 1rem;
+    position: relative;
+}
+
+.dos-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 2px,
+            rgba(255, 255, 255, 0.02) 2px,
+            rgba(255, 255, 255, 0.02) 4px
+        );
+    pointer-events: none;
+}
+
+/* Stone Panel Variant */
+.dos-panel-stone {
+    background: 
+        linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%),
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 10px,
+            rgba(128, 128, 128, 0.1) 10px,
+            rgba(128, 128, 128, 0.1) 20px
+        );
+    border-color: var(--dos-stone);
+}
+
+/* Iron Panel Variant */
+.dos-panel-iron {
+    background: linear-gradient(180deg, #2a2a2a 0%, #0a0a0a 100%);
+    border-color: var(--dos-iron);
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.1),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+        0 4px 8px rgba(0, 0, 0, 0.8);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOS RPG HEADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dos-header {
+    background: var(--dos-black);
+    border-bottom: 3px double var(--dos-gold);
+    padding: 0.5rem 1rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(255, 170, 0, 0.3);
+}
+
+.dos-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 1.5rem;
+    color: var(--dos-gold-bright);
+    text-shadow: 
+        2px 2px 0 var(--dos-gold-dark),
+        0 0 10px var(--dos-gold),
+        0 0 20px var(--dos-gold);
+    letter-spacing: 2px;
+    margin: 0;
+    animation: titleGlow 2s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+    0%, 100% {
+        text-shadow: 
+            2px 2px 0 var(--dos-gold-dark),
+            0 0 10px var(--dos-gold),
+            0 0 20px var(--dos-gold);
+    }
+    50% {
+        text-shadow: 
+            2px 2px 0 var(--dos-gold-dark),
+            0 0 15px var(--dos-gold-bright),
+            0 0 30px var(--dos-gold);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHARACTER SHEET PANEL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.character-sheet {
+    background: var(--dos-darker-gray);
+    border: 2px solid var(--dos-gold);
+    padding: 1rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+}
+
+.character-portrait {
+    width: 100%;
+    aspect-ratio: 1;
+    background: var(--dos-black);
+    border: 2px solid var(--dos-silver);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.character-portrait::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        repeating-linear-gradient(
+            0deg,
+            transparent,
+            transparent 4px,
+            rgba(255, 255, 255, 0.05) 4px,
+            rgba(255, 255, 255, 0.05) 8px
+        );
+    pointer-events: none;
+}
+
+.character-stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.25rem 0;
+    border-bottom: 1px dotted var(--dos-text-dim);
+}
+
+.character-stat-label {
+    color: var(--dos-text-gray);
+    text-transform: uppercase;
+}
+
+.character-stat-value {
+    color: var(--dos-gold);
+    font-weight: bold;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   XP BAR (DOS Style)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dos-xp-bar {
+    width: 100%;
+    height: 20px;
+    background: var(--dos-black);
+    border: 2px solid var(--dos-silver);
+    position: relative;
+    margin: 0.5rem 0;
+    overflow: hidden;
+}
+
+.dos-xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, 
+        var(--dos-health-green) 0%,
+        var(--dos-health-yellow) 50%,
+        var(--dos-gold) 100%
+    );
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.dos-xp-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 4px,
+        rgba(255, 255, 255, 0.2) 4px,
+        rgba(255, 255, 255, 0.2) 8px
+    );
+    animation: xpShimmer 1s linear infinite;
+}
+
+@keyframes xpShimmer {
+    0% { transform: translateX(-8px); }
+    100% { transform: translateX(0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DUNGEON MASTER DIALOGUE BOX
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dungeon-master-box {
+    background: var(--dos-black);
+    border: 3px double var(--dos-magic-blue);
+    padding: 1.5rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: var(--dos-text-white);
+    box-shadow: 
+        inset 0 0 20px rgba(0, 136, 255, 0.2),
+        0 0 20px rgba(0, 136, 255, 0.3);
+    position: relative;
+}
+
+.dungeon-master-box::before {
+    content: '╔═══════════════════════════════════════════════════════════╗';
+    position: absolute;
+    top: -1.5rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--dos-magic-blue);
+    font-size: 0.8rem;
+}
+
+.dungeon-master-box::after {
+    content: '╚═══════════════════════════════════════════════════════════╝';
+    position: absolute;
+    bottom: -1.5rem;
+    left: 0;
+    right: 0;
+    text-align: center;
+    color: var(--dos-magic-blue);
+    font-size: 0.8rem;
+}
+
+.dm-text {
+    margin: 0;
+    color: var(--dos-text-white);
+}
+
+.dm-prompt {
+    color: var(--dos-gold);
+    margin-top: 1rem;
+}
+
+.dm-prompt::before {
+    content: '> ';
+    color: var(--dos-magic-cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUEST LOG (DOS RPG Style)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dos-quest-log {
+    background: var(--dos-darker-gray);
+    border: 2px solid var(--dos-gold);
+    padding: 1rem;
+}
+
+.dos-quest-header {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.9rem;
+    color: var(--dos-gold-bright);
+    text-align: center;
+    padding: 0.5rem;
+    border-bottom: 2px solid var(--dos-gold);
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+}
+
+.dos-quest-item {
+    background: var(--dos-black);
+    border: 2px solid var(--dos-iron);
+    padding: 0.75rem;
+    margin-bottom: 0.75rem;
+    font-family: 'VT323', monospace;
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.dos-quest-item:hover {
+    border-color: var(--dos-gold);
+    box-shadow: 0 0 10px rgba(255, 170, 0, 0.3);
+}
+
+.dos-quest-item.boss-quest {
+    border-color: var(--dos-danger-red);
+    background: linear-gradient(135deg, 
+        rgba(255, 0, 0, 0.1) 0%, 
+        transparent 100%
+    );
+}
+
+.dos-quest-title {
+    color: var(--dos-gold);
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dos-quest-icon {
+    font-size: 1.5rem;
+}
+
+.dos-quest-difficulty {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    background: var(--dos-iron);
+    color: var(--dos-text-white);
+    font-size: 0.8rem;
+    border: 1px solid var(--dos-border-light);
+    margin-left: auto;
+}
+
+.dos-quest-difficulty.legendary {
+    background: var(--dos-magic-purple);
+    border-color: var(--dos-magic-cyan);
+    animation: legendaryPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes legendaryPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px var(--dos-magic-purple);
+    }
+    50% {
+        box-shadow: 0 0 15px var(--dos-magic-cyan);
+    }
+}
+
+.dos-quest-description {
+    color: var(--dos-text-gray);
+    margin: 0.5rem 0;
+    line-height: 1.4;
+}
+
+.dos-quest-reward {
+    color: var(--dos-gold-bright);
+    font-weight: bold;
+}
+
+.dos-quest-reward::before {
+    content: '⚡ ';
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOS BUTTONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dos-button {
+    background: linear-gradient(180deg, var(--dos-stone) 0%, var(--dos-iron) 100%);
+    border: 2px solid var(--dos-silver);
+    color: var(--dos-text-white);
+    padding: 0.75rem 1.5rem;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.dos-button:hover {
+    background: linear-gradient(180deg, var(--dos-silver) 0%, var(--dos-stone) 100%);
+    border-color: var(--dos-gold);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 10px rgba(255, 170, 0, 0.5);
+}
+
+.dos-button:active {
+    transform: translateY(2px);
+    box-shadow: 
+        inset 0 2px 4px rgba(0, 0, 0, 0.5),
+        0 0 5px rgba(255, 170, 0, 0.3);
+}
+
+.dos-button-primary {
+    background: linear-gradient(180deg, var(--dos-gold) 0%, var(--dos-gold-dark) 100%);
+    border-color: var(--dos-gold-bright);
+    color: var(--dos-black);
+}
+
+.dos-button-primary:hover {
+    background: linear-gradient(180deg, var(--dos-gold-bright) 0%, var(--dos-gold) 100%);
+    box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 15px var(--dos-gold);
+}
+
+.dos-button-danger {
+    background: linear-gradient(180deg, var(--dos-danger-red) 0%, #aa0000 100%);
+    border-color: var(--dos-danger-orange);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACHIEVEMENT BADGES (DOS Style)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dos-achievement {
+    background: var(--dos-black);
+    border: 2px solid var(--dos-iron);
+    padding: 0.75rem;
+    text-align: center;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dos-achievement.unlocked {
+    border-color: var(--dos-gold);
+    background: linear-gradient(135deg, 
+        rgba(255, 170, 0, 0.1) 0%, 
+        transparent 100%
+    );
+}
+
+.dos-achievement.unlocked::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        45deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.1) 50%,
+        transparent 70%
+    );
+    animation: achievementShine 3s ease-in-out infinite;
+}
+
+@keyframes achievementShine {
+    0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+    100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.dos-achievement-icon {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    filter: grayscale(100%);
+}
+
+.dos-achievement.unlocked .dos-achievement-icon {
+    filter: grayscale(0%);
+    animation: achievementPop 0.5s ease;
+}
+
+@keyframes achievementPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.dos-achievement-name {
+    font-family: 'VT323', monospace;
+    font-size: 0.9rem;
+    color: var(--dos-text-dim);
+}
+
+.dos-achievement.unlocked .dos-achievement-name {
+    color: var(--dos-gold);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SCANLINE EFFECT (CRT Monitor)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.dungeon-theme::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.3) 2px,
+        rgba(0, 0, 0, 0.3) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.3;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PIXEL ART UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pixel-art {
+    image-rendering: pixelated;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: crisp-edges;
+}
+
+.dos-divider {
+    border: none;
+    border-top: 2px solid var(--dos-border-dark);
+    border-bottom: 1px solid var(--dos-border-light);
+    margin: 1rem 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE ADJUSTMENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .dos-title {
+        font-size: 1rem;
+    }
+    
+    .dos-button {
+        font-size: 0.7rem;
+        padding: 0.5rem 1rem;
+    }
+    
+    .character-sheet {
+        font-size: 1rem;
+    }
+    
+    .dungeon-master-box {
+        font-size: 1rem;
+        padding: 1rem;
+    }
+}
+
+/* Made with Bob */

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ Design Critique Dungeon - DOS RPG Mode</title>
+    <meta name="description" content="Authentic DOS RPG design critique experience">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="./css/dos-rpg-dungeon.css">
+    <link rel="stylesheet" href="./css/quest-system.css">
+</head>
+<body class="dungeon-theme">
+    
+    <!-- DOS RPG Header -->
+    <header class="dos-header">
+        <h1 class="dos-title">⚔️ CARBON QUEST ⚔️</h1>
+        <p style="font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--dos-text-gray); margin: 0.5rem 0 0 0;">
+            Design Critique Dungeon
+        </p>
+    </header>
+
+    <!-- Main RPG Interface -->
+    <main class="dos-main-container" style="display: grid; grid-template-columns: 300px 1fr 300px; gap: 1rem; padding: 1rem; max-width: 1600px; margin: 0 auto;">
+        
+        <!-- LEFT PANEL: Character Sheet -->
+        <aside class="dos-panel dos-panel-stone">
+            <div class="character-sheet">
+                <div class="dos-quest-header">⚔️ ADVENTURER ⚔️</div>
+                
+                <div class="character-portrait" id="characterPortrait">
+                    🧙‍♂️
+                </div>
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">Name:</span>
+                    <span class="character-stat-value" id="characterName">Designer</span>
+                </div>
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">Guild Rank:</span>
+                    <span class="character-stat-value" id="guildRank">Apprentice</span>
+                </div>
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">Level:</span>
+                    <span class="character-stat-value" id="characterLevel">1</span>
+                </div>
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">XP:</span>
+                    <span class="character-stat-value">
+                        <span id="currentXP">0</span> / <span id="nextLevelXP">100</span>
+                    </span>
+                </div>
+                
+                <div class="dos-xp-bar">
+                    <div class="dos-xp-fill" id="xpBar" style="width: 0%"></div>
+                </div>
+                
+                <hr class="dos-divider">
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">Quests:</span>
+                    <span class="character-stat-value" id="questCount">0</span>
+                </div>
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">Victories:</span>
+                    <span class="character-stat-value" id="victoryCount">0</span>
+                </div>
+                
+                <div class="character-stat">
+                    <span class="character-stat-label">Bosses:</span>
+                    <span class="character-stat-value" id="bossCount">0</span>
+                </div>
+                
+                <hr class="dos-divider">
+                
+                <button class="dos-button dos-button-primary" style="width: 100%; margin-top: 1rem;" id="btnSwitchMode">
+                    Switch to Carbon Mode
+                </button>
+            </div>
+        </aside>
+
+        <!-- CENTER PANEL: Main Content -->
+        <section class="dos-panel dos-panel-iron" style="min-height: 600px;">
+            
+            <!-- Dungeon Master Dialogue -->
+            <div class="dungeon-master-box" id="dungeonMasterBox">
+                <p class="dm-text" id="dmText">
+                    Greetings, brave designer! Welcome to the Design Critique Dungeon.
+                    <br><br>
+                    I am the Dungeon Master, guardian of IBM Design Language and keeper of Carbon Design System wisdom.
+                    <br><br>
+                    Submit your design scroll for critique, and I shall reveal its strengths and weaknesses. Complete quests to gain experience and rise through the guild ranks!
+                </p>
+                <p class="dm-prompt" id="dmPrompt">
+                    Submit your design scroll to begin your quest...
+                </p>
+            </div>
+            
+            <!-- Upload Area -->
+            <div class="dos-panel" style="margin-top: 1rem; text-align: center; padding: 2rem;" id="uploadArea">
+                <div style="font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--dos-text-gray); margin-bottom: 1rem;">
+                    📜 SUBMIT DESIGN SCROLL 📜
+                </div>
+                <input type="file" id="fileInput" accept="image/*" style="display: none;">
+                <button class="dos-button dos-button-primary" id="btnUpload" style="font-size: 1rem; padding: 1rem 2rem;">
+                    Choose Design Scroll
+                </button>
+                <div id="imagePreview" style="display: none; margin-top: 1rem;">
+                    <img id="previewImage" style="max-width: 100%; border: 2px solid var(--dos-gold); image-rendering: auto;">
+                    <div style="margin-top: 1rem; display: flex; gap: 1rem; justify-content: center;">
+                        <button class="dos-button" id="btnRemove">Remove</button>
+                        <button class="dos-button dos-button-primary" id="btnAnalyze">
+                            ⚔️ Enter the Dungeon ⚔️
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div id="loadingState" style="display: none; text-align: center; padding: 2rem;">
+                <div style="font-family: 'Press Start 2P', monospace; font-size: 1.2rem; color: var(--dos-gold); margin-bottom: 2rem; animation: titleGlow 1s ease-in-out infinite;">
+                    ⚔️ ANALYZING DESIGN ⚔️
+                </div>
+                <div style="font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--dos-text-gray); line-height: 1.8;" id="loadingText">
+                    The Dungeon Master examines your scroll...<br>
+                    Ancient runes begin to glow...<br>
+                    Consulting the Carbon Codex...<br>
+                    Preparing your quests...
+                </div>
+            </div>
+            
+            <!-- Results Area -->
+            <div id="resultsArea" style="display: none; margin-top: 1rem;">
+                <div class="dos-panel" style="margin-bottom: 1rem;">
+                    <div class="dos-quest-header">⚡ CRITIQUE RESULTS ⚡</div>
+                    <div id="critiqueResults" style="font-family: 'VT323', monospace; font-size: 1.1rem; color: var(--dos-text-white); padding: 1rem; line-height: 1.6;">
+                        <!-- Results will be inserted here -->
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT PANEL: Quest Log & Achievements -->
+        <aside class="dos-panel dos-panel-stone">
+            
+            <!-- Active Quests -->
+            <div class="dos-quest-log">
+                <div class="dos-quest-header">📜 ACTIVE QUESTS 📜</div>
+                <div id="activeQuests">
+                    <div style="text-align: center; padding: 2rem; font-family: 'VT323', monospace; color: var(--dos-text-dim);">
+                        No active quests.<br>
+                        Submit a design to receive quests!
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="dos-divider">
+            
+            <!-- Achievements -->
+            <div style="margin-top: 1rem;">
+                <div class="dos-quest-header">🏆 ACHIEVEMENTS 🏆</div>
+                <div id="achievementGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; margin-top: 1rem;">
+                    <!-- Achievements will be inserted here -->
+                    <div class="dos-achievement">
+                        <div class="dos-achievement-icon">🛡️</div>
+                        <div class="dos-achievement-name">First Quest</div>
+                    </div>
+                    <div class="dos-achievement">
+                        <div class="dos-achievement-icon">⚔️</div>
+                        <div class="dos-achievement-name">Veteran</div>
+                    </div>
+                    <div class="dos-achievement">
+                        <div class="dos-achievement-icon">♿</div>
+                        <div class="dos-achievement-name">A11y Hero</div>
+                    </div>
+                    <div class="dos-achievement">
+                        <div class="dos-achievement-icon">💎</div>
+                        <div class="dos-achievement-name">Carbon Master</div>
+                    </div>
+                </div>
+            </div>
+            
+            <hr class="dos-divider">
+            
+            <!-- Quick Stats -->
+            <div style="margin-top: 1rem; font-family: 'VT323', monospace; font-size: 1rem;">
+                <div class="dos-quest-header">📊 STATISTICS 📊</div>
+                <div style="padding: 0.5rem;">
+                    <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; color: var(--dos-text-gray);">
+                        <span>Dungeons Cleared:</span>
+                        <span style="color: var(--dos-gold);" id="dungeonsCleared">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; color: var(--dos-text-gray);">
+                        <span>Total XP:</span>
+                        <span style="color: var(--dos-gold);" id="totalXP">0</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; padding: 0.25rem 0; color: var(--dos-text-gray);">
+                        <span>Perfect Scores:</span>
+                        <span style="color: var(--dos-gold);" id="perfectScores">0</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.9); z-index: 10000; padding: 2rem; overflow-y: auto;">
+        <div class="dos-panel dos-panel-iron" style="max-width: 600px; margin: 2rem auto;">
+            <div class="dos-quest-header">⚙️ SETTINGS ⚙️</div>
+            <div style="padding: 1rem; font-family: 'VT323', monospace; font-size: 1.1rem;">
+                <div style="margin-bottom: 1rem;">
+                    <label style="display: block; color: var(--dos-text-gray); margin-bottom: 0.5rem;">AI Provider:</label>
+                    <select id="aiProvider" style="width: 100%; padding: 0.5rem; background: var(--dos-black); color: var(--dos-text-white); border: 2px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1rem;">
+                        <option value="demo">Demo Mode (No API Key)</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic Claude</option>
+                        <option value="azure">Azure OpenAI</option>
+                    </select>
+                </div>
+                <div id="apiKeySection" style="display: none; margin-bottom: 1rem;">
+                    <label style="display: block; color: var(--dos-text-gray); margin-bottom: 0.5rem;">API Key:</label>
+                    <input type="password" id="apiKey" style="width: 100%; padding: 0.5rem; background: var(--dos-black); color: var(--dos-text-white); border: 2px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1rem;">
+                </div>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="dos-button dos-button-primary" id="btnSaveSettings" style="flex: 1;">Save</button>
+                    <button class="dos-button" id="btnCloseSettings" style="flex: 1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./js/config.js"></script>
+    <script src="./js/game-engine/xp-system.js"></script>
+    <script src="./js/game-engine/quest-system.js"></script>
+    <script src="./js/quest-integration.js"></script>
+    <script src="./js/dungeon-mode.js"></script>
+</body>
+</html>
