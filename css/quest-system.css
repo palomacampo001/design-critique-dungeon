@@ -1,0 +1,380 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   QUEST SYSTEM STYLES
+   Styles for quest cards, notifications, and progress tracking
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Quest Log Section */
+.quest-log-section,
+.achievements-section,
+.stats-section {
+    margin-top: 2rem;
+}
+
+.subsection-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-primary, #161616);
+}
+
+.quest-log {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Quest Card */
+.quest-card {
+    background: var(--layer-01, #ffffff);
+    border: 1px solid var(--border-subtle, #e0e0e0);
+    border-radius: 8px;
+    padding: 1rem;
+    transition: all 0.2s ease;
+}
+
+.quest-card:hover {
+    border-color: var(--border-strong, #8d8d8d);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Boss Quest Styling */
+.quest-card.boss-quest {
+    border: 2px solid var(--support-error, #da1e28);
+    background: linear-gradient(135deg, rgba(218, 30, 40, 0.05) 0%, transparent 100%);
+}
+
+.quest-card.boss-quest:hover {
+    border-color: var(--support-error, #da1e28);
+    box-shadow: 0 4px 12px rgba(218, 30, 40, 0.2);
+}
+
+/* Quest Header */
+.quest-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.quest-icon {
+    font-size: 2rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.quest-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.quest-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.25rem 0;
+    color: var(--text-primary, #161616);
+}
+
+.quest-difficulty {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.quest-difficulty.easy {
+    background: var(--support-success-inverse, #24a148);
+    color: white;
+}
+
+.quest-difficulty.medium {
+    background: var(--support-warning-inverse, #f1c21b);
+    color: #161616;
+}
+
+.quest-difficulty.hard {
+    background: var(--support-error-inverse, #fa4d56);
+    color: white;
+}
+
+.quest-difficulty.legendary {
+    background: linear-gradient(135deg, #8a3ffc 0%, #d12771 100%);
+    color: white;
+}
+
+.quest-xp {
+    font-weight: 600;
+    color: var(--link-primary, #0f62fe);
+    white-space: nowrap;
+}
+
+/* Quest Content */
+.quest-description {
+    font-size: 0.875rem;
+    color: var(--text-secondary, #525252);
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.quest-objective {
+    font-size: 0.875rem;
+    color: var(--text-primary, #161616);
+    margin: 0 0 0.75rem 0;
+}
+
+.boss-health {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--support-error, #da1e28);
+    margin: 0 0 0.75rem 0;
+}
+
+/* Quest Progress */
+.quest-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--layer-accent, #e0e0e0);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: var(--interactive-01, #0f62fe);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-fill.boss-progress {
+    background: linear-gradient(90deg, #da1e28 0%, #fa4d56 100%);
+}
+
+.progress-text {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary, #525252);
+    min-width: 3rem;
+    text-align: right;
+}
+
+/* Quest Footer */
+.quest-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.quest-attempts {
+    font-size: 0.75rem;
+    color: var(--text-secondary, #525252);
+}
+
+.btn-complete-quest {
+    padding: 0.5rem 1rem;
+    background: var(--interactive-01, #0f62fe);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+.btn-complete-quest:hover {
+    background: var(--interactive-01-hover, #0353e9);
+}
+
+.btn-complete-quest:active {
+    background: var(--interactive-01-active, #002d9c);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: var(--text-secondary, #525252);
+    font-size: 0.875rem;
+}
+
+/* Statistics Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+}
+
+.stat-item {
+    background: var(--layer-01, #ffffff);
+    border: 1px solid var(--border-subtle, #e0e0e0);
+    border-radius: 8px;
+    padding: 1rem;
+    text-align: center;
+}
+
+.stat-item .stat-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-secondary, #525252);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-item .stat-value {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary, #161616);
+}
+
+/* Quest Notifications */
+.quest-notification {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    max-width: 400px;
+    padding: 1rem 1.5rem;
+    background: var(--layer-01, #ffffff);
+    border: 2px solid var(--border-strong, #8d8d8d);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
+    z-index: 10000;
+    transform: translateX(calc(100% + 2rem));
+    transition: transform 0.3s ease;
+}
+
+.quest-notification.show {
+    transform: translateX(0);
+}
+
+.quest-notification.success {
+    border-color: var(--support-success, #24a148);
+    background: linear-gradient(135deg, rgba(36, 161, 72, 0.1) 0%, transparent 100%);
+}
+
+.quest-notification.boss {
+    border-color: var(--support-error, #da1e28);
+    background: linear-gradient(135deg, rgba(218, 30, 40, 0.1) 0%, transparent 100%);
+}
+
+.quest-notification.levelup {
+    border-color: #8a3ffc;
+    background: linear-gradient(135deg, rgba(138, 63, 252, 0.1) 0%, transparent 100%);
+}
+
+.quest-notification.quest {
+    border-color: var(--interactive-01, #0f62fe);
+    background: linear-gradient(135deg, rgba(15, 98, 254, 0.1) 0%, transparent 100%);
+}
+
+/* Dungeon Theme Overrides */
+.dungeon-theme .quest-card {
+    background: #1a1a2e;
+    border-color: #16213e;
+}
+
+.dungeon-theme .quest-card:hover {
+    border-color: #0f3460;
+    box-shadow: 0 2px 8px rgba(0, 255, 65, 0.2);
+}
+
+.dungeon-theme .quest-card.boss-quest {
+    border-color: #ff3366;
+    background: linear-gradient(135deg, rgba(255, 51, 102, 0.1) 0%, transparent 100%);
+}
+
+.dungeon-theme .quest-title {
+    color: #00ff41;
+}
+
+.dungeon-theme .quest-description,
+.dungeon-theme .quest-objective {
+    color: #a0a0a0;
+}
+
+.dungeon-theme .progress-bar {
+    background: #0f3460;
+}
+
+.dungeon-theme .progress-fill {
+    background: linear-gradient(90deg, #00ff41 0%, #00d4ff 100%);
+}
+
+.dungeon-theme .stat-item {
+    background: #1a1a2e;
+    border-color: #16213e;
+}
+
+.dungeon-theme .stat-item .stat-value {
+    color: #00ff41;
+}
+
+.dungeon-theme .subsection-title {
+    color: #00ff41;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .quest-notification {
+        top: auto;
+        bottom: 5rem;
+        right: 1rem;
+        left: 1rem;
+        max-width: none;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .quest-header {
+        flex-wrap: wrap;
+    }
+
+    .quest-xp {
+        width: 100%;
+        text-align: right;
+        margin-top: 0.5rem;
+    }
+}
+
+/* Animations */
+@keyframes questAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.quest-card {
+    animation: questAppear 0.3s ease;
+}
+
+@keyframes progressPulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.progress-fill[style*="100%"] {
+    animation: progressPulse 1s ease infinite;
+}
+
+/* Made with Bob */

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚔️ Critique Dungeon 2.0 - Quest System Demo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #0a0e14;
+            color: #e6e6e6;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            padding: 30px 0;
+            border: 2px solid #00ff41;
+            background: #151922;
+            margin-bottom: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .header h1 {
+            color: #00ff41;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .header p {
+            color: #a0a0a0;
+            font-size: 1.1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .panel {
+            background: #151922;
+            border: 1px solid #1a2332;
+            padding: 20px;
+        }
+
+        .panel-header {
+            color: #ffb000;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #1a2332;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: #0a0e14;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+        }
+
+        .stat-value {
+            color: #00ff41;
+            font-weight: bold;
+        }
+
+        .xp-bar {
+            width: 100%;
+            height: 30px;
+            background: #0a0e14;
+            border: 1px solid #1a2332;
+            margin: 15px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00cc33, #00ff41);
+            transition: width 0.5s ease;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+        }
+
+        .xp-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-weight: bold;
+            text-shadow: 0 0 5px #000;
+        }
+
+        .quest-card {
+            background: #0a0e14;
+            border: 2px solid #1a2332;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .quest-card:hover {
+            border-color: #00ff41;
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.2);
+        }
+
+        .quest-card.boss {
+            border-color: #ff3366;
+            background: linear-gradient(135deg, #0a0e14 0%, #1a0a14 100%);
+        }
+
+        .quest-card.boss:hover {
+            box-shadow: 0 0 20px rgba(255, 51, 102, 0.3);
+        }
+
+        .quest-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .quest-icon {
+            font-size: 2rem;
+        }
+
+        .quest-title {
+            color: #00ff41;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .quest-card.boss .quest-title {
+            color: #ff3366;
+        }
+
+        .quest-description {
+            color: #a0a0a0;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .quest-objective {
+            color: #00d4ff;
+            font-style: italic;
+            margin-bottom: 10px;
+        }
+
+        .quest-reward {
+            color: #ffb000;
+            font-weight: bold;
+        }
+
+        .quest-progress {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #0a0e14;
+            border: 1px solid #1a2332;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00cc33, #00ff41);
+            transition: width 0.5s ease;
+        }
+
+        .quest-card.boss .progress-fill {
+            background: linear-gradient(90deg, #cc0033, #ff3366);
+        }
+
+        .button {
+            background: #00ff41;
+            color: #0a0e14;
+            border: none;
+            padding: 12px 24px;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+        }
+
+        .button:hover {
+            background: #00cc33;
+            transform: translateY(-2px);
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button-secondary {
+            background: transparent;
+            color: #00ff41;
+            border: 2px solid #00ff41;
+        }
+
+        .button-secondary:hover {
+            background: rgba(0, 255, 65, 0.1);
+        }
+
+        .button-danger {
+            background: #ff3366;
+            color: #fff;
+        }
+
+        .button-danger:hover {
+            background: #cc0033;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #151922;
+            border: 2px solid #00ff41;
+            padding: 20px;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.5);
+            animation: slideIn 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.level-up {
+            border-color: #ffb000;
+            box-shadow: 0 0 30px rgba(255, 176, 0, 0.5);
+        }
+
+        .notification.boss {
+            border-color: #ff3366;
+            box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .notification-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #00ff41;
+        }
+
+        .notification.level-up .notification-title {
+            color: #ffb000;
+        }
+
+        .notification.boss .notification-title {
+            color: #ff3366;
+        }
+
+        .ascii-art {
+            color: #00ff41;
+            font-size: 0.7rem;
+            line-height: 1.2;
+            white-space: pre;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .badge-easy { background: #00ff41; color: #0a0e14; }
+        .badge-medium { background: #ffb000; color: #0a0e14; }
+        .badge-hard { background: #ff3366; color: #fff; }
+        .badge-legendary { background: #bd93f9; color: #fff; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>⚔️ CRITIQUE DUNGEON 2.0 ⚔️</h1>
+            <p>Quest System Demo - Experience the RPG Magic</p>
+        </div>
+
+        <!-- Player Stats -->
+        <div class="grid">
+            <div class="panel">
+                <div class="panel-header">👤 CHARACTER SHEET</div>
+                <div class="stat-row">
+                    <span class="stat-label">Level:</span>
+                    <span class="stat-value" id="playerLevel">1</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Title:</span>
+                    <span class="stat-value" id="playerTitle">Apprentice Designer</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total XP:</span>
+                    <span class="stat-value" id="totalXP">0</span>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                    <div class="xp-text" id="xpText">0 / 100 XP</div>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Quests Completed:</span>
+                    <span class="stat-value" id="questsCompleted">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Bosses Defeated:</span>
+                    <span class="stat-value" id="bossesDefeated">0</span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">📊 QUEST STATISTICS</div>
+                <div class="stat-row">
+                    <span class="stat-label">Active Quests:</span>
+                    <span class="stat-value" id="activeQuestCount">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Completed Quests:</span>
+                    <span class="stat-value" id="completedQuestCount">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Total XP Earned:</span>
+                    <span class="stat-value" id="totalXPEarned">0</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-label">Average Attempts:</span>
+                    <span class="stat-value" id="avgAttempts">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Quests -->
+        <div class="panel">
+            <div class="panel-header">⚔️ ACTIVE QUESTS</div>
+            <div id="activeQuests">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🗺️</div>
+                    <p>No active quests. Generate some quests to begin your adventure!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="actions">
+            <button class="button" onclick="simulateAnalysis()">🎲 Simulate Design Analysis</button>
+            <button class="button button-secondary" onclick="simulateImprovement()">✨ Simulate Design Improvement</button>
+            <button class="button button-secondary" onclick="completeRandomQuest()">✅ Complete Random Quest</button>
+            <button class="button button-danger" onclick="resetProgress()">🔄 Reset All Progress</button>
+        </div>
+
+        <div class="ascii-art">
+╔═══════════════════════════════════════════════════════════════╗
+║  Welcome to the Critique Dungeon Quest System Demo!          ║
+║                                                               ║
+║  This demo showcases the RPG mechanics:                       ║
+║  • Dynamic quest generation from design violations            ║
+║  • Boss battles for critical issues                           ║
+║  • XP and leveling system (50 levels!)                        ║
+║  • Quest progress tracking                                    ║
+║                                                               ║
+║  Click "Simulate Design Analysis" to generate quests!        ║
+╚═══════════════════════════════════════════════════════════════╝
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/game-engine/quest-system.js"></script>
+    <script src="js/game-engine/xp-system.js"></script>
+    <script>
+        // Update UI with current stats
+        function updateUI() {
+            const playerStats = xpSystem.getPlayerStats();
+            const questStats = questSystem.getQuestStats();
+            const levelInfo = xpSystem.getCurrentLevel();
+
+            // Player stats
+            document.getElementById('playerLevel').textContent = levelInfo.level;
+            document.getElementById('playerTitle').textContent = levelInfo.title;
+            document.getElementById('totalXP').textContent = playerStats.totalXP;
+            document.getElementById('questsCompleted').textContent = playerStats.questsCompleted;
+            document.getElementById('bossesDefeated').textContent = playerStats.bossesDefeated;
+
+            // XP bar
+            const xpFill = document.getElementById('xpFill');
+            const xpText = document.getElementById('xpText');
+            xpFill.style.width = levelInfo.progress + '%';
+            xpText.textContent = `${levelInfo.currentXP} / ${levelInfo.nextLevelXP} XP`;
+
+            // Quest stats
+            document.getElementById('activeQuestCount').textContent = questStats.activeCount;
+            document.getElementById('completedQuestCount').textContent = questStats.completedCount;
+            document.getElementById('totalXPEarned').textContent = questStats.totalXPEarned;
+            document.getElementById('avgAttempts').textContent = questStats.averageAttempts.toFixed(1);
+
+            // Render active quests
+            renderActiveQuests();
+        }
+
+        // Render active quests
+        function renderActiveQuests() {
+            const container = document.getElementById('activeQuests');
+            const quests = questSystem.getActiveQuests();
+
+            if (quests.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🗺️</div>
+                        <p>No active quests. Generate some quests to begin your adventure!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = quests.map(quest => `
+                <div class="quest-card ${quest.isBossBattle ? 'boss' : ''}">
+                    <div class="quest-header">
+                        <div class="quest-icon">${quest.icon}</div>
+                        <div>
+                            <div class="quest-title">${quest.title}</div>
+                            <span class="badge badge-${quest.difficulty.toLowerCase()}">${quest.difficulty}</span>
+                        </div>
+                    </div>
+                    <div class="quest-description">${quest.description}</div>
+                    <div class="quest-objective">📋 ${quest.objective}</div>
+                    <div class="quest-reward">⚡ Reward: ${quest.xpReward} XP + ${quest.badge} Badge</div>
+                    ${quest.isBossBattle ? `<div style="color: #ff3366; margin-top: 10px;">💀 Boss Health: ${quest.bossHealth}</div>` : ''}
+                    <div class="quest-progress">
+                        <div style="color: #a0a0a0; margin-bottom: 5px;">Progress: ${Math.round(quest.progress)}% (Attempts: ${quest.attempts})</div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${quest.progress}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Simulate design analysis
+        function simulateAnalysis() {
+            // Generate random findings
+            const findings = generateRandomFindings();
+            
+            // Generate quests from findings
+            const newQuests = questSystem.generateQuestsFromFindings(findings);
+
+            if (newQuests.length > 0) {
+                showNotification(
+                    `🎯 ${newQuests.length} New Quest${newQuests.length > 1 ? 's' : ''} Generated!`,
+                    newQuests.map(q => `• ${q.title}`).join('<br>'),
+                    newQuests.some(q => q.isBossBattle) ? 'boss' : 'normal'
+                );
+
+                // Award base XP for analysis
+                const xpResult = xpSystem.awardXP(50, 'Design analysis completed');
+                if (xpResult.leveledUp) {
+                    setTimeout(() => {
+                        showLevelUpNotification(xpResult.newLevel);
+                    }, 1000);
+                }
+            }
+
+            updateUI();
+        }
+
+        // Simulate design improvement
+        function simulateImprovement() {
+            const activeQuests = questSystem.getActiveQuests();
+            
+            if (activeQuests.length === 0) {
+                alert('No active quests! Generate some quests first.');
+                return;
+            }
+
+            // Simulate improved findings (fewer issues)
+            const improvedFindings = generateImprovedFindings();
+            
+            // Update quest progress
+            const updates = questSystem.updateQuestProgress(improvedFindings);
+
+            if (updates.length > 0) {
+                updates.forEach(update => {
+                    if (update.status === 'COMPLETED') {
+                        // Award XP
+                        const xpResult = xpSystem.awardXP(update.quest.xpReward, `Quest completed: ${update.quest.title}`);
+                        xpSystem.recordQuestCompletion(update.quest);
+
+                        showNotification(
+                            '✅ Quest Completed!',
+                            `${update.quest.title}<br>+${update.quest.xpReward} XP`,
+                            'normal'
+                        );
+
+                        if (xpResult.leveledUp) {
+                            setTimeout(() => {
+                                showLevelUpNotification(xpResult.newLevel);
+                            }, 1000);
+                        }
+                    }
+                });
+            } else {
+                showNotification(
+                    '📈 Progress Made!',
+                    'Your quests have been updated with your improvements.',
+                    'normal'
+                );
+            }
+
+            updateUI();
+        }
+
+        // Complete random quest
+        function completeRandomQuest() {
+            const activeQuests = questSystem.getActiveQuests();
+            
+            if (activeQuests.length === 0) {
+                alert('No active quests!');
+                return;
+            }
+
+            const randomQuest = activeQuests[Math.floor(Math.random() * activeQuests.length)];
+            const completedQuest = questSystem.completeQuest(randomQuest.id);
+
+            if (completedQuest) {
+                const xpResult = xpSystem.awardXP(completedQuest.xpReward, `Quest completed: ${completedQuest.title}`);
+                xpSystem.recordQuestCompletion(completedQuest);
+
+                showNotification(
+                    '✅ Quest Completed!',
+                    `${completedQuest.title}<br>+${completedQuest.xpReward} XP`,
+                    completedQuest.isBossBattle ? 'boss' : 'normal'
+                );
+
+                if (xpResult.leveledUp) {
+                    setTimeout(() => {
+                        showLevelUpNotification(xpResult.newLevel);
+                    }, 1000);
+                }
+
+                updateUI();
+            }
+        }
+
+        // Reset progress
+        function resetProgress() {
+            if (confirm('Are you sure you want to reset all progress? This cannot be undone.')) {
+                questSystem.resetAllQuests();
+                xpSystem.resetPlayerData();
+                updateUI();
+                showNotification('🔄 Progress Reset', 'All progress has been reset. Begin your journey anew!', 'normal');
+            }
+        }
+
+        // Generate random findings
+        function generateRandomFindings() {
+            const possibleFindings = [
+                { category: 'Grid & Spacing', type: 'CRITICAL', description: 'Elements not aligned to 8px grid system' },
+                { category: 'Typography', type: 'WARNING', description: 'Heading hierarchy unclear, IBM Plex not used consistently' },
+                { category: 'Accessibility', type: 'CRITICAL', description: 'Contrast ratio fails WCAG AA standards at 3.2:1' },
+                { category: 'Color', type: 'WARNING', description: 'Color palette deviates from IBM Design Language tokens' },
+                { category: 'Components', type: 'WARNING', description: 'Button hierarchy unclear, primary and secondary not distinguished' },
+                { category: 'Spacing', type: 'WARNING', description: 'Inconsistent margin and padding values' },
+                { category: 'Accessibility', type: 'CRITICAL', description: 'Missing focus indicators for keyboard navigation' },
+                { category: 'Layout', type: 'WARNING', description: 'Responsive design issues at mobile breakpoints' },
+                { category: 'Typography', type: 'WARNING', description: 'Font sizes do not follow IBM Plex type scale' },
+                { category: 'Accessibility', type: 'CRITICAL', description: 'ARIA labels missing on interactive elements' }
+            ];
+
+            // Return 3-7 random findings
+            const count = Math.floor(Math.random() * 5) + 3;
+            const findings = [];
+            for (let i = 0; i < count; i++) {
+                findings.push(possibleFindings[Math.floor(Math.random() * possibleFindings.length)]);
+            }
+            return findings;
+        }
+
+        // Generate improved findings (fewer issues)
+        function generateImprovedFindings() {
+            const findings = generateRandomFindings();
+            // Return only 30% of findings (simulating improvement)
+            return findings.slice(0, Math.ceil(findings.length * 0.3));
+        }
+
+        // Show notification
+        function showNotification(title, message, type = 'normal') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="notification-title">${title}</div>
+                <div>${message}</div>
+            `;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.style.animation = 'slideIn 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
+        }
+
+        // Show level up notification
+        function showLevelUpNotification(levelInfo) {
+            showNotification(
+                '⚔️ LEVEL UP! 🛡️',
+                `<div style="font-size: 2rem; margin: 10px 0;">${levelInfo.level}</div>
+                <div style="font-size: 1.2rem; color: #ffb000;">${levelInfo.title}</div>`,
+                'level-up'
+            );
+        }
+
+        // Initialize
+        updateUI();
+    </script>
+</body>
+</html>

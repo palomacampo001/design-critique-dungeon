@@ -21,6 +21,7 @@
     <link rel="stylesheet" href="./css/mobile-main.css">
     <link rel="stylesheet" href="./css/mobile-carbon.css">
     <link rel="stylesheet" href="./css/fantasy-dungeon.css">
+    <link rel="stylesheet" href="./css/quest-system.css">
 </head>
 <body class="carbon-theme">
     
@@ -144,8 +145,12 @@
             
             <div class="progress-card">
                 <div class="progress-stat">
-                    <span class="stat-label">Level</span>
+                    <span class="stat-label" data-carbon="Level" data-dungeon="Rank">Level</span>
                     <span class="stat-value" id="playerLevel">1</span>
+                </div>
+                <div class="progress-stat">
+                    <span class="stat-label">Title</span>
+                    <span class="stat-value" id="playerTitle">Apprentice Designer</span>
                 </div>
                 <div class="progress-stat">
                     <span class="stat-label">XP</span>
@@ -156,9 +161,45 @@
                 </div>
             </div>
 
+            <!-- Quest Log -->
+            <div class="quest-log-section">
+                <h4 class="subsection-title" data-carbon="Active Quests" data-dungeon="⚔️ Active Quests">Active Quests</h4>
+                <div class="quest-log" id="questLog">
+                    <div class="empty-state" data-carbon="Complete an analysis to unlock quests" data-dungeon="Submit a design to receive quests from the guild">
+                        Complete an analysis to unlock quests
+                    </div>
+                </div>
+            </div>
+
             <!-- Achievements -->
-            <div class="achievements-grid" id="achievementsGrid">
-                <!-- Achievement badges will be inserted here -->
+            <div class="achievements-section">
+                <h4 class="subsection-title" data-carbon="Achievements" data-dungeon="🏆 Achievements">Achievements</h4>
+                <div class="achievements-grid" id="achievementsGrid">
+                    <!-- Achievement badges will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Statistics -->
+            <div class="stats-section">
+                <h4 class="subsection-title" data-carbon="Statistics" data-dungeon="📊 Guild Records">Statistics</h4>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <span class="stat-label" data-carbon="Quests Completed" data-dungeon="Quests Completed">Quests Completed</span>
+                        <span class="stat-value" id="questsCompleted">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" data-carbon="Bosses Defeated" data-dungeon="Bosses Defeated">Bosses Defeated</span>
+                        <span class="stat-value" id="bossesDefeated">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" data-carbon="Total XP" data-dungeon="Total XP">Total XP</span>
+                        <span class="stat-value" id="totalXP">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label" data-carbon="Analyses" data-dungeon="Dungeons Cleared">Analyses</span>
+                        <span class="stat-value" id="analysisCount">0</span>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -225,6 +266,9 @@
 
     <!-- Scripts -->
     <script src="./js/config.js"></script>
+    <script src="./js/game-engine/xp-system.js"></script>
+    <script src="./js/game-engine/quest-system.js"></script>
+    <script src="./js/quest-integration.js"></script>
     <script src="./js/mobile-app.js"></script>
     <script src="./js/mobile-ui.js"></script>
     <script src="./js/gamification.js"></script>
