@@ -1,0 +1,557 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DUNGEON THEME - Retro RPG Terminal Aesthetic
+   Playful, nostalgic design with minimal ASCII decoration on mobile
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+body.dungeon-theme {
+    /* Terminal Colors */
+    --color-bg: #0a0e14;
+    --color-bg-secondary: #1a1f2e;
+    --color-bg-tertiary: #2a2f3e;
+    --color-text: #00ff41;
+    --color-text-secondary: #00cc33;
+    --color-text-tertiary: #009922;
+    --color-border: #00ff41;
+    --color-border-strong: #00cc33;
+    
+    /* Accent Colors */
+    --color-primary: #00ff41;
+    --color-primary-hover: #00cc33;
+    --color-primary-active: #009922;
+    
+    /* Support Colors */
+    --color-success: #00ff41;
+    --color-warning: #ffaa00;
+    --color-error: #ff4444;
+    --color-info: #00ccff;
+    
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Header
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .app-header {
+    background: var(--color-bg-secondary);
+    border-bottom-color: var(--color-border);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+body.dungeon-theme .app-name {
+    color: var(--color-text);
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+    font-family: 'VT323', monospace;
+    letter-spacing: 2px;
+}
+
+body.dungeon-theme .btn-icon {
+    color: var(--color-text);
+}
+
+body.dungeon-theme .btn-icon:hover {
+    background: var(--color-bg-tertiary);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Hero
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .hero-section {
+    position: relative;
+}
+
+body.dungeon-theme .hero-section::before {
+    content: '▼▼▼';
+    display: block;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-sm);
+    font-size: var(--text-sm);
+}
+
+body.dungeon-theme .hero-title {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+}
+
+body.dungeon-theme .hero-description {
+    color: var(--color-text-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Upload Section
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .upload-card {
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+body.dungeon-theme .upload-zone {
+    background: var(--color-bg);
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+}
+
+body.dungeon-theme .upload-zone:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.4);
+}
+
+body.dungeon-theme .upload-icon {
+    color: var(--color-primary);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.5));
+}
+
+body.dungeon-theme .upload-title {
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+}
+
+body.dungeon-theme .image-preview {
+    background: var(--color-bg);
+}
+
+body.dungeon-theme .image-preview img {
+    border: 2px solid var(--color-border);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Loading
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .loading-card {
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+}
+
+body.dungeon-theme .loading-spinner {
+    border-color: var(--color-bg-tertiary);
+    border-top-color: var(--color-primary);
+    filter: drop-shadow(0 0 10px rgba(0, 255, 65, 0.5));
+}
+
+body.dungeon-theme .loading-text {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+}
+
+body.dungeon-theme .loading-steps .step {
+    color: var(--color-text-secondary);
+}
+
+body.dungeon-theme .loading-steps .step::before {
+    content: '>';
+    color: var(--color-primary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Score Overview
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .score-overview {
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.2);
+    position: relative;
+}
+
+body.dungeon-theme .score-overview::before {
+    content: '═══════════════════════════════';
+    display: block;
+    text-align: center;
+    color: var(--color-text-tertiary);
+    font-size: var(--text-xs);
+    margin-bottom: var(--space-md);
+    overflow: hidden;
+}
+
+body.dungeon-theme .score-number {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 20px rgba(0, 255, 65, 0.8);
+}
+
+body.dungeon-theme .score-stars {
+    color: var(--color-warning);
+    filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.5));
+}
+
+body.dungeon-theme .score-label {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+}
+
+body.dungeon-theme .category-label {
+    color: var(--color-text-secondary);
+}
+
+body.dungeon-theme .category-value {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Critique Cards
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .critique-card {
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
+}
+
+body.dungeon-theme .card-header {
+    background: var(--color-bg-tertiary);
+}
+
+body.dungeon-theme .card-header:hover {
+    background: var(--color-bg);
+    box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+body.dungeon-theme .card-title {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+}
+
+body.dungeon-theme .card-toggle {
+    color: var(--color-text-secondary);
+}
+
+body.dungeon-theme .card-body {
+    background: var(--color-bg);
+}
+
+/* Finding Types */
+body.dungeon-theme .finding-item {
+    background: var(--color-bg-tertiary);
+    border-left-width: 3px;
+}
+
+body.dungeon-theme .finding-item.positive {
+    border-left-color: var(--color-success);
+    background: rgba(0, 255, 65, 0.1);
+}
+
+body.dungeon-theme .finding-item.warning {
+    border-left-color: var(--color-warning);
+    background: rgba(255, 170, 0, 0.1);
+}
+
+body.dungeon-theme .finding-item.critical {
+    border-left-color: var(--color-error);
+    background: rgba(255, 68, 68, 0.1);
+}
+
+body.dungeon-theme .finding-title {
+    color: var(--color-text);
+}
+
+body.dungeon-theme .finding-title::before {
+    content: '▶ ';
+    color: var(--color-primary);
+}
+
+body.dungeon-theme .finding-description {
+    color: var(--color-text-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   XP Card
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .xp-card {
+    background: var(--color-bg-secondary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    animation: xpPulse 2s ease-in-out;
+}
+
+@keyframes xpPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 65, 0.5); }
+}
+
+body.dungeon-theme .xp-icon {
+    color: var(--color-warning);
+    filter: drop-shadow(0 0 10px rgba(255, 170, 0, 0.8));
+    animation: xpSpin 3s linear infinite;
+}
+
+@keyframes xpSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+body.dungeon-theme .xp-amount {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    text-shadow: 0 0 10px rgba(0, 255, 65, 0.8);
+}
+
+body.dungeon-theme .xp-message {
+    color: var(--color-text-secondary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Progress Section
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .section-title {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    letter-spacing: 2px;
+}
+
+body.dungeon-theme .section-title::before {
+    content: '⚔ ';
+}
+
+body.dungeon-theme .progress-card {
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.15);
+}
+
+body.dungeon-theme .stat-label {
+    color: var(--color-text-secondary);
+}
+
+body.dungeon-theme .stat-value {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+}
+
+body.dungeon-theme .xp-bar {
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+}
+
+body.dungeon-theme .xp-fill {
+    background: var(--color-primary);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* Achievements */
+body.dungeon-theme .achievement-badge {
+    background: var(--color-bg-secondary);
+    border: 2px solid var(--color-border);
+}
+
+body.dungeon-theme .achievement-badge:not(.locked) {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.3);
+}
+
+body.dungeon-theme .achievement-badge:not(.locked):hover {
+    background: var(--color-bg-tertiary);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+    transform: translateY(-4px);
+}
+
+body.dungeon-theme .badge-icon-large {
+    filter: drop-shadow(0 0 5px rgba(0, 255, 65, 0.5));
+}
+
+body.dungeon-theme .badge-name {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+}
+
+body.dungeon-theme .achievement-badge.locked .badge-name {
+    color: var(--color-text-tertiary);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Buttons
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .btn-primary {
+    background: var(--color-primary);
+    color: var(--color-bg);
+    border: 2px solid var(--color-primary);
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+body.dungeon-theme .btn-primary:hover {
+    background: var(--color-primary-hover);
+    box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+}
+
+body.dungeon-theme .btn-primary:active {
+    background: var(--color-primary-active);
+    transform: translateY(2px);
+}
+
+body.dungeon-theme .btn-secondary {
+    background: transparent;
+    color: var(--color-text);
+    border: 2px solid var(--color-border-strong);
+    font-family: 'VT323', monospace;
+    letter-spacing: 1px;
+}
+
+body.dungeon-theme .btn-secondary:hover {
+    background: var(--color-bg-tertiary);
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+body.dungeon-theme .btn-secondary:active {
+    background: var(--color-bg);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Settings Drawer
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .drawer-overlay {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+body.dungeon-theme .drawer-content {
+    background: var(--color-bg-secondary);
+    border-left: 2px solid var(--color-border);
+    box-shadow: -4px 0 20px rgba(0, 255, 65, 0.3);
+}
+
+body.dungeon-theme .drawer-header {
+    background: var(--color-bg-tertiary);
+    border-bottom-color: var(--color-border);
+}
+
+body.dungeon-theme .drawer-header h2 {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    letter-spacing: 2px;
+}
+
+body.dungeon-theme .drawer-body {
+    background: var(--color-bg-secondary);
+}
+
+body.dungeon-theme .setting-label {
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+}
+
+body.dungeon-theme .theme-option {
+    border-color: var(--color-border-strong);
+    color: var(--color-text);
+    font-family: 'VT323', monospace;
+    background: var(--color-bg);
+}
+
+body.dungeon-theme .theme-option:hover {
+    background: var(--color-bg-tertiary);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
+}
+
+body.dungeon-theme .theme-option.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary);
+    color: var(--color-bg);
+    box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+}
+
+body.dungeon-theme .setting-select,
+body.dungeon-theme .setting-input {
+    background: var(--color-bg);
+    border: 2px solid var(--color-border-strong);
+    color: var(--color-text);
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+body.dungeon-theme .setting-select:focus,
+body.dungeon-theme .setting-input:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Bottom Navigation
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme .bottom-nav {
+    background: var(--color-bg-secondary);
+    border-top: 2px solid var(--color-border);
+    box-shadow: 0 -4px 20px rgba(0, 255, 65, 0.2);
+}
+
+body.dungeon-theme .nav-item {
+    color: var(--color-text-secondary);
+    font-family: 'VT323', monospace;
+}
+
+body.dungeon-theme .nav-item:hover {
+    background: var(--color-bg-tertiary);
+    color: var(--color-text);
+}
+
+body.dungeon-theme .nav-item.active {
+    color: var(--color-primary);
+    background: var(--color-bg);
+    box-shadow: inset 0 0 10px rgba(0, 255, 65, 0.3);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Focus States
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme *:focus-visible {
+    outline-color: var(--color-primary);
+    outline-width: 2px;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Scrollbar (Webkit)
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+body.dungeon-theme ::-webkit-scrollbar-track {
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+}
+
+body.dungeon-theme ::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 0;
+    box-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+}
+
+body.dungeon-theme ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-primary-hover);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Scanline Effect (Subtle on mobile)
+   ───────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+    body.dungeon-theme::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.1) 0px,
+            transparent 1px,
+            transparent 2px,
+            rgba(0, 0, 0, 0.1) 3px
+        );
+        pointer-events: none;
+        z-index: 1000;
+        opacity: 0.3;
+    }
+}
+
+/* Made with Bob */

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>💎 Carbon Quest</title>
+    <meta name="description" content="AI-powered design critique for IBM Carbon Design System">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- IBM Carbon Icons -->
+    <link rel="stylesheet" href="https://unpkg.com/@carbon/icons@11.32.1/css/icons.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/mobile-main.css">
+    <link rel="stylesheet" href="css/mobile-dungeon.css">
+    <link rel="stylesheet" href="css/mobile-carbon.css">
+</head>
+<body class="carbon-theme">
+    
+    <!-- Compact Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <div class="logo-section">
+                <span class="logo-icon">💎</span>
+                <h1 class="app-name">Carbon Quest</h1>
+            </div>
+            <div class="header-actions">
+                <button class="btn-icon theme-toggle" id="themeToggle" aria-label="Toggle theme">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z"/>
+                    </svg>
+                </button>
+                <button class="btn-icon settings-toggle" id="settingsToggle" aria-label="Settings">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 6a4 4 0 100 8 4 4 0 000-8zm0 6a2 2 0 110-4 2 2 0 010 4z"/>
+                        <path d="M17.5 9h-1.1a6.5 6.5 0 00-.5-1.2l.8-.8a.5.5 0 000-.7l-1.4-1.4a.5.5 0 00-.7 0l-.8.8a6.5 6.5 0 00-1.2-.5V3.5a.5.5 0 00-.5-.5h-2a.5.5 0 00-.5.5v1.1a6.5 6.5 0 00-1.2.5l-.8-.8a.5.5 0 00-.7 0L4.7 5.7a.5.5 0 000 .7l.8.8a6.5 6.5 0 00-.5 1.2H3.5a.5.5 0 00-.5.5v2a.5.5 0 00.5.5h1.1a6.5 6.5 0 00.5 1.2l-.8.8a.5.5 0 000 .7l1.4 1.4a.5.5 0 00.7 0l.8-.8a6.5 6.5 0 001.2.5v1.1a.5.5 0 00.5.5h2a.5.5 0 00.5-.5v-1.1a6.5 6.5 0 001.2-.5l.8.8a.5.5 0 00.7 0l1.4-1.4a.5.5 0 000-.7l-.8-.8a6.5 6.5 0 00.5-1.2h1.1a.5.5 0 00.5-.5v-2a.5.5 0 00-.5-.5z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <h2 class="hero-title">AI Design Critique for IBM Carbon & IDL</h2>
+            <p class="hero-description">Upload a screenshot. Get instant feedback on Carbon compliance, accessibility, and IBM Design Language principles.</p>
+        </section>
+
+        <!-- Upload Section -->
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-card">
+                <div class="upload-zone" id="uploadZone">
+                    <svg class="upload-icon" width="48" height="48" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M26 15v10H6V15M16 21V5M11 10l5-5 5 5"/>
+                    </svg>
+                    <h3 class="upload-title">Upload Screenshot</h3>
+                    <p class="upload-hint">Drag & drop or tap to select</p>
+                    <input type="file" id="fileInput" accept="image/*" hidden>
+                </div>
+                
+                <!-- Image Preview (hidden initially) -->
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImage" alt="Uploaded screenshot">
+                    <div class="preview-actions">
+                        <button class="btn-secondary btn-small" id="removeImage">Remove</button>
+                        <button class="btn-primary" id="analyzeButton">Analyze Design</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <section class="loading-section" id="loadingSection" style="display: none;">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Analyzing your design...</p>
+                <div class="loading-steps">
+                    <div class="step">Extracting visual elements</div>
+                    <div class="step">Checking Carbon compliance</div>
+                    <div class="step">Evaluating accessibility</div>
+                    <div class="step">Generating feedback</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Results Section -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            
+            <!-- Overall Score -->
+            <div class="score-overview">
+                <div class="score-main">
+                    <div class="score-number" id="overallScore">--</div>
+                    <div class="score-stars" id="scoreStars">★★★★★</div>
+                    <div class="score-label" id="scoreLabel">Analyzing...</div>
+                </div>
+                <div class="score-categories">
+                    <div class="category-score">
+                        <span class="category-label">Design</span>
+                        <span class="category-value" id="designScore">--</span>
+                    </div>
+                    <div class="category-score">
+                        <span class="category-label">Accessibility</span>
+                        <span class="category-value" id="accessibilityScore">--</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Critique Cards -->
+            <div class="critique-cards" id="critiqueCards">
+                <!-- Cards will be dynamically inserted here -->
+            </div>
+
+            <!-- XP Reward -->
+            <div class="xp-card" id="xpCard" style="display: none;">
+                <div class="xp-content">
+                    <div class="xp-icon">⚡</div>
+                    <div class="xp-details">
+                        <div class="xp-amount" id="xpAmount">+0 XP</div>
+                        <div class="xp-message" id="xpMessage">Experience gained!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="result-actions">
+                <button class="btn-secondary" id="newAnalysis">New Analysis</button>
+                <button class="btn-secondary" id="exportReport">Export Report</button>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section class="progress-section" id="progressSection">
+            <h3 class="section-title">Your Progress</h3>
+            
+            <div class="progress-card">
+                <div class="progress-stat">
+                    <span class="stat-label">Level</span>
+                    <span class="stat-value" id="playerLevel">1</span>
+                </div>
+                <div class="progress-stat">
+                    <span class="stat-label">XP</span>
+                    <span class="stat-value"><span id="currentXP">0</span> / <span id="nextLevelXP">100</span></span>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xpFill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="achievements-grid" id="achievementsGrid">
+                <!-- Achievement badges will be inserted here -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Settings Drawer -->
+    <aside class="settings-drawer" id="settingsDrawer">
+        <div class="drawer-overlay" id="drawerOverlay"></div>
+        <div class="drawer-content">
+            <div class="drawer-header">
+                <h2>Settings</h2>
+                <button class="btn-icon" id="closeSettings" aria-label="Close settings">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 8.586L2.929 1.515 1.515 2.929 8.586 10l-7.071 7.071 1.414 1.414L10 11.414l7.071 7.071 1.414-1.414L11.414 10l7.071-7.071-1.414-1.414L10 8.586z"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="drawer-body">
+                <div class="setting-group">
+                    <label class="setting-label">Theme</label>
+                    <div class="theme-options">
+                        <button class="theme-option active" data-theme="carbon">Carbon</button>
+                        <button class="theme-option" data-theme="dungeon">Dungeon</button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">AI Provider</label>
+                    <select class="setting-select" id="aiProvider">
+                        <option value="demo">Demo Mode</option>
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="watsonx">IBM watsonx</option>
+                    </select>
+                </div>
+                <div class="setting-group" id="apiKeyGroup" style="display: none;">
+                    <label class="setting-label">API Key</label>
+                    <input type="password" class="setting-input" id="apiKey" placeholder="Enter your API key">
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-section="upload">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            <span>Quest</span>
+        </button>
+        <button class="nav-item" data-section="results">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            </svg>
+            <span>Results</span>
+        </button>
+        <button class="nav-item" data-section="progress">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>Progress</span>
+        </button>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="js/mobile-app.js"></script>
+    <script src="js/mobile-ui.js"></script>
+    <script src="js/gamification.js"></script>
+    <script src="js/ai-analyzer-demo.js"></script>
+</body>
+</html>
