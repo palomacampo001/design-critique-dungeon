@@ -1,0 +1,666 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON MODE - Professional IBM Carbon Design System Interface
+   Executive-level design critique experience
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   IBM CARBON COLOR TOKENS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* Background Layers */
+    --carbon-ui-background: #ffffff;
+    --carbon-layer-01: #f4f4f4;
+    --carbon-layer-02: #ffffff;
+    --carbon-layer-03: #f4f4f4;
+    --carbon-layer-accent: #e0e0e0;
+    
+    /* Text Colors */
+    --carbon-text-primary: #161616;
+    --carbon-text-secondary: #525252;
+    --carbon-text-placeholder: #a8a8a8;
+    --carbon-text-on-color: #ffffff;
+    --carbon-text-helper: #6f6f6f;
+    
+    /* Interactive Colors */
+    --carbon-interactive-01: #0f62fe;
+    --carbon-interactive-02: #393939;
+    --carbon-interactive-03: #0f62fe;
+    --carbon-interactive-04: #0f62fe;
+    
+    /* Hover States */
+    --carbon-hover-primary: #0353e9;
+    --carbon-hover-secondary: #4c4c4c;
+    --carbon-hover-ui: #e5e5e5;
+    --carbon-hover-selected-ui: #cacaca;
+    
+    /* Active States */
+    --carbon-active-primary: #002d9c;
+    --carbon-active-secondary: #6f6f6f;
+    --carbon-active-ui: #c6c6c6;
+    
+    /* Border Colors */
+    --carbon-border-subtle: #e0e0e0;
+    --carbon-border-strong: #8d8d8d;
+    --carbon-border-inverse: #161616;
+    
+    /* Support Colors */
+    --carbon-support-error: #da1e28;
+    --carbon-support-success: #24a148;
+    --carbon-support-warning: #f1c21b;
+    --carbon-support-info: #0043ce;
+    
+    /* Focus */
+    --carbon-focus: #0f62fe;
+    
+    /* Shadows */
+    --carbon-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    --carbon-shadow-hover: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* Dark Theme Tokens */
+.carbon-theme-dark {
+    --carbon-ui-background: #161616;
+    --carbon-layer-01: #262626;
+    --carbon-layer-02: #393939;
+    --carbon-layer-03: #525252;
+    --carbon-layer-accent: #393939;
+    
+    --carbon-text-primary: #f4f4f4;
+    --carbon-text-secondary: #c6c6c6;
+    --carbon-text-placeholder: #6f6f6f;
+    --carbon-text-on-color: #ffffff;
+    
+    --carbon-border-subtle: #393939;
+    --carbon-border-strong: #8d8d8d;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON THEME BASE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-theme {
+    background: var(--carbon-ui-background);
+    color: var(--carbon-text-primary);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON HEADER
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-header {
+    background: var(--carbon-layer-01);
+    border-bottom: 1px solid var(--carbon-border-subtle);
+    padding: 0;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.carbon-header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 1rem;
+    max-width: 1584px;
+    margin: 0 auto;
+}
+
+.carbon-header-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--carbon-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.carbon-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON GRID SYSTEM (2x Grid)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-grid {
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 1rem;
+    max-width: 1584px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+}
+
+.carbon-col-4 { grid-column: span 4; }
+.carbon-col-8 { grid-column: span 8; }
+.carbon-col-12 { grid-column: span 12; }
+.carbon-col-16 { grid-column: span 16; }
+
+@media (max-width: 1056px) {
+    .carbon-col-4 { grid-column: span 8; }
+    .carbon-col-8 { grid-column: span 16; }
+}
+
+@media (max-width: 672px) {
+    .carbon-col-4,
+    .carbon-col-8,
+    .carbon-col-12 { grid-column: span 16; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON TILES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-tile {
+    background: var(--carbon-layer-01);
+    padding: 1rem;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+.carbon-tile-clickable {
+    cursor: pointer;
+}
+
+.carbon-tile-clickable:hover {
+    background: var(--carbon-hover-ui);
+}
+
+.carbon-tile-elevated {
+    box-shadow: var(--carbon-shadow);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-card {
+    background: var(--carbon-layer-01);
+    border: 1px solid var(--carbon-border-subtle);
+    padding: 1.5rem;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+.carbon-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--carbon-border-subtle);
+}
+
+.carbon-card-title {
+    font-size: 20px;
+    font-weight: 400;
+    color: var(--carbon-text-primary);
+    margin: 0;
+}
+
+.carbon-card-body {
+    color: var(--carbon-text-secondary);
+    line-height: 1.5;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON BUTTONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.875rem 1rem;
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.125rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+    outline: none;
+    position: relative;
+}
+
+.carbon-btn:focus {
+    outline: 2px solid var(--carbon-focus);
+    outline-offset: 2px;
+}
+
+.carbon-btn-primary {
+    background: var(--carbon-interactive-01);
+    color: var(--carbon-text-on-color);
+}
+
+.carbon-btn-primary:hover {
+    background: var(--carbon-hover-primary);
+}
+
+.carbon-btn-primary:active {
+    background: var(--carbon-active-primary);
+}
+
+.carbon-btn-secondary {
+    background: var(--carbon-interactive-02);
+    color: var(--carbon-text-on-color);
+}
+
+.carbon-btn-secondary:hover {
+    background: var(--carbon-hover-secondary);
+}
+
+.carbon-btn-tertiary {
+    background: transparent;
+    color: var(--carbon-interactive-03);
+    border: 1px solid var(--carbon-interactive-03);
+}
+
+.carbon-btn-tertiary:hover {
+    background: var(--carbon-interactive-03);
+    color: var(--carbon-text-on-color);
+}
+
+.carbon-btn-ghost {
+    background: transparent;
+    color: var(--carbon-interactive-03);
+}
+
+.carbon-btn-ghost:hover {
+    background: var(--carbon-hover-ui);
+}
+
+.carbon-btn-danger {
+    background: var(--carbon-support-error);
+    color: var(--carbon-text-on-color);
+}
+
+.carbon-btn-danger:hover {
+    background: #ba1b23;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON PROGRESS INDICATORS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--carbon-layer-accent);
+    position: relative;
+    overflow: hidden;
+}
+
+.carbon-progress-fill {
+    height: 100%;
+    background: var(--carbon-interactive-01);
+    transition: width 0.3s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+.carbon-progress-fill-success {
+    background: var(--carbon-support-success);
+}
+
+.carbon-progress-fill-warning {
+    background: var(--carbon-support-warning);
+}
+
+.carbon-progress-fill-error {
+    background: var(--carbon-support-error);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON TAGS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    height: 1.5rem;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.5rem;
+    border-radius: 0;
+    background: var(--carbon-layer-accent);
+    color: var(--carbon-text-primary);
+}
+
+.carbon-tag-blue {
+    background: #d0e2ff;
+    color: #002d9c;
+}
+
+.carbon-tag-green {
+    background: #defbe6;
+    color: #0e6027;
+}
+
+.carbon-tag-red {
+    background: #ffd7d9;
+    color: #750e13;
+}
+
+.carbon-tag-yellow {
+    background: #fcf4d6;
+    color: #684e00;
+}
+
+.carbon-tag-purple {
+    background: #e8daff;
+    color: #491d8b;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON NOTIFICATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-notification {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem;
+    border-left: 3px solid;
+    background: var(--carbon-layer-01);
+    box-shadow: var(--carbon-shadow);
+    margin-bottom: 1rem;
+}
+
+.carbon-notification-success {
+    border-color: var(--carbon-support-success);
+}
+
+.carbon-notification-error {
+    border-color: var(--carbon-support-error);
+}
+
+.carbon-notification-warning {
+    border-color: var(--carbon-support-warning);
+}
+
+.carbon-notification-info {
+    border-color: var(--carbon-support-info);
+}
+
+.carbon-notification-icon {
+    margin-right: 1rem;
+    font-size: 20px;
+}
+
+.carbon-notification-content {
+    flex: 1;
+}
+
+.carbon-notification-title {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.carbon-notification-subtitle {
+    color: var(--carbon-text-secondary);
+    font-size: 14px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON DATA TABLE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--carbon-layer-01);
+}
+
+.carbon-data-table thead {
+    background: var(--carbon-layer-accent);
+}
+
+.carbon-data-table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--carbon-text-primary);
+    border-bottom: 1px solid var(--carbon-border-subtle);
+}
+
+.carbon-data-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--carbon-border-subtle);
+    color: var(--carbon-text-secondary);
+}
+
+.carbon-data-table tbody tr:hover {
+    background: var(--carbon-hover-ui);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON SCORE DISPLAY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-score-display {
+    text-align: center;
+    padding: 2rem;
+}
+
+.carbon-score-number {
+    font-size: 72px;
+    font-weight: 300;
+    color: var(--carbon-text-primary);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.carbon-score-label {
+    font-size: 14px;
+    color: var(--carbon-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.16px;
+}
+
+.carbon-score-breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.carbon-score-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--carbon-layer-02);
+}
+
+.carbon-score-item-value {
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--carbon-text-primary);
+}
+
+.carbon-score-item-label {
+    font-size: 12px;
+    color: var(--carbon-text-secondary);
+    margin-top: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON QUEST CARDS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-quest-card {
+    background: var(--carbon-layer-01);
+    border: 1px solid var(--carbon-border-subtle);
+    padding: 1rem;
+    margin-bottom: 1rem;
+    transition: all 0.11s cubic-bezier(0.2, 0, 0.38, 0.9);
+}
+
+.carbon-quest-card:hover {
+    border-color: var(--carbon-border-strong);
+    box-shadow: var(--carbon-shadow);
+}
+
+.carbon-quest-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+}
+
+.carbon-quest-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--carbon-text-primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.carbon-quest-card-xp {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--carbon-interactive-01);
+}
+
+.carbon-quest-card-description {
+    font-size: 14px;
+    color: var(--carbon-text-secondary);
+    margin-bottom: 0.75rem;
+    line-height: 1.5;
+}
+
+.carbon-quest-card-progress {
+    margin-top: 1rem;
+}
+
+.carbon-quest-card-progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--carbon-text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON LOADING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-loading {
+    display: inline-block;
+    width: 88px;
+    height: 88px;
+    border: 8px solid var(--carbon-layer-accent);
+    border-top-color: var(--carbon-interactive-01);
+    border-radius: 50%;
+    animation: carbonSpin 1s linear infinite;
+}
+
+@keyframes carbonSpin {
+    to { transform: rotate(360deg); }
+}
+
+.carbon-loading-small {
+    width: 44px;
+    height: 44px;
+    border-width: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON TYPOGRAPHY
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-heading-01 {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.125rem;
+    letter-spacing: 0.16px;
+}
+
+.carbon-heading-02 {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.375rem;
+    letter-spacing: 0;
+}
+
+.carbon-heading-03 {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.75rem;
+    letter-spacing: 0;
+}
+
+.carbon-heading-04 {
+    font-size: 28px;
+    font-weight: 400;
+    line-height: 2.25rem;
+    letter-spacing: 0;
+}
+
+.carbon-heading-05 {
+    font-size: 32px;
+    font-weight: 300;
+    line-height: 2.5rem;
+    letter-spacing: 0;
+}
+
+.carbon-body-01 {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.25rem;
+    letter-spacing: 0.16px;
+}
+
+.carbon-body-02 {
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.5rem;
+    letter-spacing: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CARBON UTILITIES
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.carbon-spacing-03 { padding: 0.5rem; }
+.carbon-spacing-05 { padding: 1rem; }
+.carbon-spacing-06 { padding: 1.5rem; }
+.carbon-spacing-07 { padding: 2rem; }
+
+.carbon-mb-03 { margin-bottom: 0.5rem; }
+.carbon-mb-05 { margin-bottom: 1rem; }
+.carbon-mb-06 { margin-bottom: 1.5rem; }
+.carbon-mb-07 { margin-bottom: 2rem; }
+
+.carbon-text-center { text-align: center; }
+.carbon-text-right { text-align: right; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE DESIGN
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 672px) {
+    .carbon-grid {
+        padding: 1rem;
+        gap: 0.5rem;
+    }
+    
+    .carbon-card {
+        padding: 1rem;
+    }
+    
+    .carbon-score-number {
+        font-size: 48px;
+    }
+}
+
+/* Made with Bob */
