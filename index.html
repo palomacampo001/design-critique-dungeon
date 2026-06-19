@@ -14,9 +14,12 @@
     <!-- IBM Carbon Icons -->
     <link rel="stylesheet" href="https://unpkg.com/@carbon/icons@11.32.1/css/icons.min.css">
     
+    <!-- IBM Pictograms -->
+    <link rel="stylesheet" href="https://unpkg.com/@carbon/pictograms@12.32.1/css/pictograms.min.css">
+    
     <!-- Styles -->
     <link rel="stylesheet" href="css/mobile-main.css">
-    <link rel="stylesheet" href="css/mobile-dungeon.css">
+    <link rel="stylesheet" href="css/mobile-dungeon-enhanced.css">
     <link rel="stylesheet" href="css/mobile-carbon.css">
 </head>
 <body class="carbon-theme">
@@ -49,8 +52,8 @@
         
         <!-- Hero Section -->
         <section class="hero-section">
-            <h2 class="hero-title">AI Design Critique for IBM Carbon & IDL</h2>
-            <p class="hero-description">Upload a screenshot. Get instant feedback on Carbon compliance, accessibility, and IBM Design Language principles.</p>
+            <h2 class="hero-title" data-carbon="AI Design Critique for IBM Carbon & IDL" data-dungeon="⚔️ Begin Your Quest ⚔️">AI Design Critique for IBM Carbon & IDL</h2>
+            <p class="hero-description" data-carbon="Upload a screenshot. Get instant feedback on Carbon compliance, accessibility, and IBM Design Language principles." data-dungeon="The guild awaits your design scroll. Submit your work to receive wisdom from the Dungeon Master and earn XP on your journey to mastery.">Upload a screenshot. Get instant feedback on Carbon compliance, accessibility, and IBM Design Language principles.</p>
         </section>
 
         <!-- Upload Section -->
@@ -60,8 +63,8 @@
                     <svg class="upload-icon" width="48" height="48" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M26 15v10H6V15M16 21V5M11 10l5-5 5 5"/>
                     </svg>
-                    <h3 class="upload-title">Upload Screenshot</h3>
-                    <p class="upload-hint">Drag & drop or tap to select</p>
+                    <h3 class="upload-title" data-carbon="Upload Screenshot" data-dungeon="Submit Design Scroll">Upload Screenshot</h3>
+                    <p class="upload-hint" data-carbon="Drag & drop or tap to select" data-dungeon="Present your work to the guild">Drag & drop or tap to select</p>
                     <input type="file" id="fileInput" accept="image/*" hidden>
                 </div>
                 
@@ -69,8 +72,8 @@
                 <div class="image-preview" id="imagePreview" style="display: none;">
                     <img id="previewImage" alt="Uploaded screenshot">
                     <div class="preview-actions">
-                        <button class="btn-secondary btn-small" id="removeImage">Remove</button>
-                        <button class="btn-primary" id="analyzeButton">Analyze Design</button>
+                        <button class="btn-secondary btn-small" id="removeImage" data-carbon="Remove" data-dungeon="Discard Scroll">Remove</button>
+                        <button class="btn-primary" id="analyzeButton" data-carbon="Analyze Design" data-dungeon="Consult Dungeon Master">Analyze Design</button>
                     </div>
                 </div>
             </div>
@@ -80,12 +83,12 @@
         <section class="loading-section" id="loadingSection" style="display: none;">
             <div class="loading-card">
                 <div class="loading-spinner"></div>
-                <p class="loading-text">Analyzing your design...</p>
-                <div class="loading-steps">
-                    <div class="step">Extracting visual elements</div>
-                    <div class="step">Checking Carbon compliance</div>
-                    <div class="step">Evaluating accessibility</div>
-                    <div class="step">Generating feedback</div>
+                <p class="loading-text" data-carbon="Analyzing your design..." data-dungeon="Consulting the Dungeon Master...">Analyzing your design...</p>
+                <div class="loading-steps" id="loadingSteps">
+                    <div class="step" data-carbon="Extracting visual elements" data-dungeon="Reading the Ancient Codex...">Extracting visual elements</div>
+                    <div class="step" data-carbon="Checking Carbon compliance" data-dungeon="Inspecting Carbon Components...">Checking Carbon compliance</div>
+                    <div class="step" data-carbon="Evaluating accessibility" data-dungeon="Casting Accessibility Spells...">Evaluating accessibility</div>
+                    <div class="step" data-carbon="Generating feedback" data-dungeon="Preparing Final Verdict...">Generating feedback</div>
                 </div>
             </div>
         </section>
@@ -130,14 +133,14 @@
 
             <!-- Actions -->
             <div class="result-actions">
-                <button class="btn-secondary" id="newAnalysis">New Analysis</button>
-                <button class="btn-secondary" id="exportReport">Export Report</button>
+                <button class="btn-secondary" id="newAnalysis" data-carbon="New Analysis" data-dungeon="New Quest">New Analysis</button>
+                <button class="btn-secondary" id="exportReport" data-carbon="Export Report" data-dungeon="Save to Tome">Export Report</button>
             </div>
         </section>
 
         <!-- Progress Section -->
         <section class="progress-section" id="progressSection">
-            <h3 class="section-title">Your Progress</h3>
+            <h3 class="section-title" data-carbon="Your Progress" data-dungeon="Guild Status">Your Progress</h3>
             
             <div class="progress-card">
                 <div class="progress-stat">
@@ -177,8 +180,8 @@
                 <div class="setting-group">
                     <label class="setting-label">Theme</label>
                     <div class="theme-options">
-                        <button class="theme-option active" data-theme="carbon">Carbon</button>
-                        <button class="theme-option" data-theme="dungeon">Dungeon</button>
+                        <button class="theme-option active" data-theme="carbon">⚙️ Carbon</button>
+                        <button class="theme-option" data-theme="dungeon">⚔️ Dungeon</button>
                     </div>
                 </div>
                 <div class="setting-group">
@@ -204,19 +207,19 @@
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
-            <span>Quest</span>
+            <span data-carbon="Quest" data-dungeon="Quest">Quest</span>
         </button>
         <button class="nav-item" data-section="results">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
             </svg>
-            <span>Results</span>
+            <span data-carbon="Results" data-dungeon="Verdict">Results</span>
         </button>
         <button class="nav-item" data-section="progress">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
             </svg>
-            <span>Progress</span>
+            <span data-carbon="Progress" data-dungeon="Guild">Progress</span>
         </button>
     </nav>
 

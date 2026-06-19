@@ -14,6 +14,7 @@ class CarbonQuestApp {
     
     init() {
         this.setupTheme();
+        this.updateThemeLanguage(this.currentTheme); // Set initial language
         this.setupUpload();
         this.setupSettings();
         this.setupNavigation();
@@ -58,6 +59,21 @@ class CarbonQuestApp {
         // Update active state in settings
         document.querySelectorAll('.theme-option').forEach(btn => {
             btn.classList.toggle('active', btn.dataset.theme === theme);
+        });
+        
+        // Update language for theme
+        this.updateThemeLanguage(theme);
+    }
+    
+    updateThemeLanguage(theme) {
+        // Update all elements with data attributes for theme-specific text
+        document.querySelectorAll('[data-carbon][data-dungeon]').forEach(el => {
+            const text = theme === 'carbon' ? el.dataset.carbon : el.dataset.dungeon;
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = text;
+            } else {
+                el.textContent = text;
+            }
         });
     }
     
@@ -210,11 +226,29 @@ class CarbonQuestApp {
             categories[finding.category].push(finding);
         });
         
-        // Create cards
+        // Create cards with theme-appropriate titles
         Object.entries(categories).forEach(([category, items]) => {
-            const card = this.createCritiqueCard(category, items);
+            const themeCategory = this.getThemeCategory(category);
+            const card = this.createCritiqueCard(themeCategory, items);
             container.appendChild(card);
         });
+    }
+    
+    getThemeCategory(category) {
+        if (this.currentTheme === 'dungeon') {
+            const dungeonNames = {
+                'Visual Hierarchy': 'The Scroll of Hierarchy',
+                'Typography': 'The Book of Typography',
+                'Accessibility': 'The Tome of Accessibility',
+                'Spacing': 'The Sacred Grid',
+                'Color': 'The Oracle of Color',
+                'Components': 'The Codex of Components',
+                'Consistency': 'The Book of Consistency',
+                '8px Grid System': 'The Sacred Grid'
+            };
+            return dungeonNames[category] || category;
+        }
+        return category;
     }
     
     createCritiqueCard(category, findings) {
