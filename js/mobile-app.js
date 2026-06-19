@@ -7,7 +7,7 @@ class CarbonQuestApp {
     constructor() {
         this.currentImage = null;
         this.currentResults = null;
-        this.currentTheme = localStorage.getItem('theme') || 'carbon';
+        this.currentTheme = localStorage.getItem('carbonQuestTheme') || 'carbon';
         
         this.init();
     }
@@ -25,7 +25,10 @@ class CarbonQuestApp {
        Theme Management
        ───────────────────────────────────────────────────────────────────── */
     setupTheme() {
-        document.body.className = `${this.currentTheme}-theme`;
+        // Apply saved theme on load
+        const isDungeon = this.currentTheme === 'dungeon';
+        document.body.classList.toggle('dungeon-theme', isDungeon);
+        document.body.classList.toggle('carbon-theme', !isDungeon);
         
         // Theme toggle button
         const themeToggle = document.getElementById('themeToggle');
@@ -53,8 +56,13 @@ class CarbonQuestApp {
     
     setTheme(theme) {
         this.currentTheme = theme;
-        document.body.className = `${theme}-theme`;
-        localStorage.setItem('theme', theme);
+        const isDungeon = theme === 'dungeon';
+        
+        // Toggle theme classes properly
+        document.body.classList.toggle('dungeon-theme', isDungeon);
+        document.body.classList.toggle('carbon-theme', !isDungeon);
+        
+        localStorage.setItem('carbonQuestTheme', theme);
         
         // Update active state in settings
         document.querySelectorAll('.theme-option').forEach(btn => {
@@ -66,9 +74,11 @@ class CarbonQuestApp {
     }
     
     updateThemeLanguage(theme) {
+        const isDungeon = theme === 'dungeon';
+        
         // Update all elements with data attributes for theme-specific text
         document.querySelectorAll('[data-carbon][data-dungeon]').forEach(el => {
-            const text = theme === 'carbon' ? el.dataset.carbon : el.dataset.dungeon;
+            const text = isDungeon ? el.dataset.dungeon : el.dataset.carbon;
             if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
                 el.placeholder = text;
             } else {

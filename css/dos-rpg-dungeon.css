@@ -1,3 +1,45 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   DOS RPG DUNGEON THEME - 1990s SSI Gold Box Aesthetic
+   Authentic VGA colors, pixel borders, bitmap typography
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────────────
+   VGA Color Palette (Authentic DOS Colors)
+   ───────────────────────────────────────────────────────────────────────── */
+body.dungeon-theme {
+    /* Core VGA Colors */
+    --dos-black: #000000;
+    --dos-blue: #0000aa;
+    --dos-green: #00aa00;
+    --dos-cyan: #00aaaa;
+    --dos-red: #aa0000;
+    --dos-magenta: #aa00aa;
+    --dos-brown: #aa5500;
+    --dos-light-gray: #aaaaaa;
+    --dos-dark-gray: #555555;
+    --dos-light-blue: #5555ff;
+    --dos-light-green: #55ff55;
+    --dos-light-cyan: #55ffff;
+    --dos-light-red: #ff5555;
+    --dos-light-magenta: #ff55ff;
+    --dos-yellow: #ffff55;
+    --dos-white: #ffffff;
+    
+    /* Theme-specific colors */
+    --dos-gold: #ffaa00;
+    --dos-iron: #666666;
+    --dos-stone: #8b7355;
+    --dos-wood: #654321;
+    
+    /* Base styles */
+    background: var(--dos-black) !important;
+    color: #00ff66 !important;
+    font-family: 'VT323', monospace !important;
+    image-rendering: pixelated !important;
+    image-rendering: -moz-crisp-edges !important;
+    image-rendering: crisp-edges !important;
+}
+
 body.dungeon-theme .loading-container {
     background: var(--dos-black);
     border: 4px solid var(--dos-cyan);
