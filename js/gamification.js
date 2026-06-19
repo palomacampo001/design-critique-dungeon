@@ -220,21 +220,30 @@ class GamificationSystem {
     updateStatsDisplay() {
         const levelInfo = ConfigHelper.getLevelInfo(this.playerStats.totalXP);
         
-        // Update level and title
-        document.getElementById('playerLevel').textContent = levelInfo.level;
-        document.getElementById('playerTitle').textContent = levelInfo.title;
+        // Update level and title (with null checks)
+        const playerLevel = document.getElementById('playerLevel');
+        if (playerLevel) playerLevel.textContent = levelInfo.level;
+        
+        const playerTitle = document.getElementById('playerTitle');
+        if (playerTitle) playerTitle.textContent = levelInfo.title;
         
         // Update XP
-        document.getElementById('currentXP').textContent = this.playerStats.totalXP;
-        document.getElementById('nextLevelXP').textContent = levelInfo.nextLevelXP;
+        const currentXP = document.getElementById('currentXP');
+        if (currentXP) currentXP.textContent = this.playerStats.totalXP;
+        
+        const nextLevelXP = document.getElementById('nextLevelXP');
+        if (nextLevelXP) nextLevelXP.textContent = levelInfo.nextLevelXP;
         
         // Update XP bar
         const xpFill = document.getElementById('xpFill');
-        xpFill.style.width = `${levelInfo.progress}%`;
+        if (xpFill) xpFill.style.width = `${levelInfo.progress}%`;
         
-        // Update other stats
-        document.getElementById('dungeonsCleared').textContent = this.playerStats.dungeonsCleared;
-        document.getElementById('totalScore').textContent = Math.round(this.playerStats.totalScore);
+        // Update other stats (with null checks)
+        const dungeonsCleared = document.getElementById('dungeonsCleared');
+        if (dungeonsCleared) dungeonsCleared.textContent = this.playerStats.dungeonsCleared;
+        
+        const totalScore = document.getElementById('totalScore');
+        if (totalScore) totalScore.textContent = Math.round(this.playerStats.totalScore);
     }
     
     /**
@@ -242,6 +251,8 @@ class GamificationSystem {
      */
     updateBadgesDisplay() {
         const container = document.getElementById('badgesContainer');
+        if (!container) return; // Exit early if container doesn't exist
+        
         container.innerHTML = '';
         
         Object.values(CONFIG.BADGES).forEach(badge => {
