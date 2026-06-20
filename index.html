@@ -1,439 +1,2830 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚔️ Carbon Quest - Design Critique Dungeon</title>
-    <meta name="description" content="AI-powered design critique with RPG gamification">
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Styles -->
-    <link rel="stylesheet" href="./css/dos-rpg-dungeon.css">
-    <link rel="stylesheet" href="./css/quest-system.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Carbon Quest</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
+
+    @font-face {
+      font-family: "DungeonPixel";
+      src: local("Perfect DOS VGA 437"), local("Px437 IBM VGA8"), local("Courier New");
+    }
+
+    :root {
+      color-scheme: light dark;
+      --ibm-blue: #0f62fe;
+      --ibm-blue-hover: #002d9c;
+      --ibm-blue-dark: #001141;
+      --ibm-cyan: #33b1ff;
+      --ibm-teal: #08bdba;
+      --ibm-text: #161616;
+      --ibm-muted: #525252;
+      --ibm-border: #e0e0e0;
+      --ibm-layer: #f4f4f4;
+      --ibm-layer-2: #ffffff;
+      --ibm-layer-3: #e0e0e0;
+      --ibm-success: #42be65;
+      --ibm-danger: #fa4d56;
+      --ibm-purple: #a56eff;
+      --ibm-yellow: #fddc69;
+      --d-black: #161616;
+      --d-cyan: #33b1ff;
+      --d-green: #42be65;
+      --d-white: #f4f4f4;
+      --d-red: #fa4d56;
+      --d-yellow: #fddc69;
+      --d-gold: #b28600;
+      --d-blue: #001141;
+      --d-panel: #161616;
+      --d-shadow: #750e13;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      min-height: 100%;
+      background: #ffffff;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app-shell {
+      min-height: 100vh;
+    }
+
+    .skin {
+      display: none;
+      min-height: 100vh;
+    }
+
+    .skin.is-active {
+      display: block;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      clip-path: inset(50%);
+    }
+
+    .dungeon {
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, .035) 1px, transparent 1px),
+        var(--d-black);
+      background-size: 8px 8px;
+      color: var(--d-white);
+      font-family: "DungeonPixel", "Courier New", monospace;
+      letter-spacing: 0;
+      image-rendering: pixelated;
+      padding: 14px;
+      text-transform: uppercase;
+    }
+
+    .dungeon-screen {
+      height: calc(100vh - 28px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) minmax(132px, 26vh) auto;
+      border: 8px solid var(--d-red);
+      outline: 4px solid var(--d-gold);
+      background: var(--d-black);
+      box-shadow:
+        inset 0 0 0 4px var(--d-shadow),
+        0 0 0 3px #000;
+      position: relative;
+    }
+
+    .dungeon-screen::before,
+    .dungeon-screen::after {
+      content: "";
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: var(--d-yellow);
+      box-shadow:
+        calc(100vw - 76px) 0 0 var(--d-yellow),
+        0 calc(100vh - 76px) 0 var(--d-yellow),
+        calc(100vw - 76px) calc(100vh - 76px) 0 var(--d-yellow);
+      pointer-events: none;
+    }
+
+    .dungeon-screen::before {
+      top: -12px;
+      left: -12px;
+    }
+
+    .dungeon-screen::after {
+      display: none;
+    }
+
+    .d-topbar,
+    .d-command-bar {
+      display: grid;
+      align-items: center;
+      gap: 8px;
+      background: #000;
+      border-bottom: 4px solid var(--d-red);
+      padding: 8px;
+    }
+
+    .d-topbar {
+      grid-template-columns: 1fr auto auto auto;
+    }
+
+    .d-command-bar {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      border-top: 4px solid var(--d-red);
+      border-bottom: 0;
+    }
+
+    .d-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--d-yellow);
+      font-size: clamp(18px, 2vw, 30px);
+      line-height: 1;
+      text-shadow: 2px 2px 0 var(--d-red);
+      min-width: 0;
+    }
+
+    .d-title-badge {
+      flex: 0 0 auto;
+      width: 18px;
+      height: 18px;
+      background: var(--d-red);
+      border: 3px solid var(--d-yellow);
+      box-shadow: 5px 5px 0 var(--d-shadow);
+    }
+
+    .d-mini-stat {
+      border: 3px solid var(--d-cyan);
+      color: var(--d-green);
+      padding: 5px 8px;
+      font-size: 14px;
+      background: #020202;
+      white-space: nowrap;
+    }
+
+    .d-skin-switch {
+      border-color: var(--d-red);
+      color: var(--d-yellow);
+      min-height: 36px;
+      animation: d-pulse 1.2s steps(2, end) infinite;
+    }
+
+    @keyframes d-pulse {
+      50% {
+        background: var(--d-red);
+        color: #fff;
+        box-shadow: inset 0 0 0 3px var(--d-yellow), 4px 4px 0 #000;
+      }
+    }
+
+    .d-main {
+      display: grid;
+      grid-template-columns: minmax(390px, 1.45fr) minmax(310px, .85fr);
+      gap: 0;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .d-panel {
+      position: relative;
+      background: var(--d-panel);
+      border: 4px solid var(--d-cyan);
+      box-shadow:
+        inset 0 0 0 3px #000,
+        inset 0 0 0 6px var(--d-blue);
+      margin: 8px;
+      min-width: 0;
+    }
+
+    .d-panel::before,
+    .d-panel::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: var(--d-yellow);
+      border: 3px solid var(--d-red);
+      z-index: 2;
+    }
+
+    .d-panel::before {
+      top: -9px;
+      left: -9px;
+    }
+
+    .d-panel::after {
+      right: -9px;
+      bottom: -9px;
+    }
+
+    .d-panel-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 36px;
+      background: var(--d-blue);
+      border-bottom: 4px solid var(--d-cyan);
+      color: var(--d-yellow);
+      padding: 6px 10px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .d-panel-title span:last-child {
+      color: var(--d-green);
+      font-size: 14px;
+    }
+
+    .d-preview {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      min-height: 100%;
+    }
+
+    .d-scroll-window {
+      display: grid;
+      place-items: center;
+      min-height: 0;
+      padding: 18px;
+    }
+
+    .d-scroll {
+      width: min(100%, 760px);
+      min-height: clamp(190px, 34vh, 300px);
+      border: 6px solid var(--d-gold);
+      outline: 4px solid var(--d-red);
+      background:
+        repeating-linear-gradient(0deg, rgba(255, 240, 90, .12) 0 2px, transparent 2px 16px),
+        #111;
+      display: grid;
+      place-items: center;
+      color: var(--d-cyan);
+      text-align: center;
+      padding: 16px;
+      box-shadow: 10px 10px 0 #000;
+      overflow: hidden;
+      cursor: pointer;
+      transition: none;
+    }
+
+    .d-scroll.is-dragover {
+      background:
+        repeating-linear-gradient(0deg, rgba(51, 255, 102, .2) 0 2px, transparent 2px 16px),
+        #061806;
+      border-color: var(--d-green);
+      color: var(--d-yellow);
+    }
+
+    .d-scroll img {
+      display: block;
+      max-width: 100%;
+      max-height: 36vh;
+      object-fit: contain;
+      border: 4px solid var(--d-white);
+      filter: contrast(1.08) saturate(1.05);
+    }
+
+    .d-placeholder {
+      display: grid;
+      gap: 14px;
+      justify-items: center;
+      color: var(--d-white);
+      font-size: clamp(16px, 2vw, 26px);
+      line-height: 1.25;
+    }
+
+    .d-placeholder-mark {
+      width: 72px;
+      height: 72px;
+      border: 8px solid var(--d-red);
+      background:
+        linear-gradient(90deg, transparent 41%, var(--d-yellow) 41% 59%, transparent 59%),
+        linear-gradient(0deg, transparent 41%, var(--d-yellow) 41% 59%, transparent 59%),
+        var(--d-blue);
+      box-shadow: 8px 8px 0 #000;
+    }
+
+    .d-upload-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 12px;
+      align-items: center;
+      border-top: 4px solid var(--d-cyan);
+      padding: 10px;
+      color: var(--d-green);
+      font-size: 14px;
+    }
+
+    .d-button,
+    .d-command {
+      appearance: none;
+      border: 4px solid var(--d-yellow);
+      background: #020202;
+      color: var(--d-white);
+      box-shadow: inset 0 0 0 3px var(--d-red), 4px 4px 0 #000;
+      padding: 8px 10px;
+      cursor: pointer;
+      text-transform: uppercase;
+      text-align: center;
+      line-height: 1;
+      min-height: 42px;
+    }
+
+    .d-submit {
+      display: none;
+      min-width: min(100%, 240px);
+      border-color: var(--d-green);
+      color: var(--d-yellow);
+      background: var(--d-red);
+      font-size: 18px;
+      min-height: 50px;
+    }
+
+    .d-submit.is-visible {
+      display: inline-grid;
+      place-items: center;
+    }
+
+    .d-button:hover,
+    .d-command:hover,
+    .d-submit:hover,
+    .d-command.is-selected {
+      background: var(--d-blue);
+      color: var(--d-yellow);
+    }
+
+    .d-button:focus-visible,
+    .d-command:focus-visible,
+    .d-submit:focus-visible,
+    .carbon button:focus-visible,
+    .carbon input:focus-visible {
+      outline: 3px solid currentColor;
+      outline-offset: 2px;
+    }
+
+    .d-status {
+      display: grid;
+      grid-template-rows: auto auto 1fr;
+    }
+
+    .d-portrait-row {
+      display: grid;
+      grid-template-columns: 104px 1fr;
+      gap: 12px;
+      padding: 14px;
+      border-bottom: 4px solid var(--d-cyan);
+    }
+
+    .d-portrait {
+      min-height: 104px;
+      border: 5px solid var(--d-gold);
+      background: #000;
+      box-shadow: 5px 5px 0 #000;
+      overflow: hidden;
+      image-rendering: pixelated;
+      display: grid;
+      place-items: center;
+    }
+
+    .d-portrait img,
+    .d-portrait canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      min-height: 104px;
+      object-fit: cover;
+      image-rendering: pixelated;
+    }
+
+    .d-master h2,
+    .d-master p {
+      margin: 0;
+    }
+
+    .d-master h2 {
+      color: var(--d-yellow);
+      font-size: 19px;
+      line-height: 1;
+    }
+
+    .d-master p {
+      margin-top: 8px;
+      color: var(--d-cyan);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .d-bars {
+      display: grid;
+      gap: 9px;
+      padding: 12px 14px;
+      border-bottom: 4px solid var(--d-cyan);
+    }
+
+    .d-meter {
+      display: grid;
+      grid-template-columns: 44px 1fr 42px;
+      gap: 8px;
+      align-items: center;
+      font-size: 13px;
+      color: var(--d-white);
+    }
+
+    .d-meter-track {
+      height: 16px;
+      border: 3px solid var(--d-white);
+      background: #000;
+    }
+
+    .d-meter-fill {
+      height: 100%;
+      background: var(--d-green);
+    }
+
+    .d-meter:nth-child(2) .d-meter-fill,
+    #dXpFill {
+      background: var(--d-yellow);
+    }
+
+    .d-meter:nth-child(3) .d-meter-fill,
+    #dRiskFill {
+      background: var(--d-red);
+    }
+
+    .d-party {
+      padding: 12px 14px 16px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .d-party-title {
+      color: var(--d-yellow);
+      font-size: 16px;
+    }
+
+    .d-character {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      border: 3px solid var(--d-green);
+      padding: 7px;
+      color: var(--d-white);
+      background: #000;
+      min-width: 0;
+    }
+
+    .d-character strong {
+      color: var(--d-cyan);
+      font-weight: 700;
+    }
+
+    .d-character span {
+      color: var(--d-yellow);
+      white-space: nowrap;
+    }
+
+    .d-narration {
+      margin: 0 8px 8px;
+      border-color: var(--d-red);
+      box-shadow:
+        inset 0 0 0 3px #000,
+        inset 0 0 0 6px var(--d-gold);
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .d-narration-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      height: calc(100% - 36px);
+      min-height: 0;
+    }
+
+    .d-textbox {
+      padding: 12px 14px;
+      border-right: 4px solid var(--d-red);
+      color: var(--d-white);
+      font-size: clamp(14px, 1.2vw, 17px);
+      line-height: 1.45;
+      min-height: 0;
+      overflow: auto;
+    }
+
+    .d-textbox strong {
+      color: var(--d-yellow);
+    }
+
+    .d-critique-list {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px;
+      color: var(--d-green);
+      font-size: 14px;
+      line-height: 1.3;
+      min-height: 0;
+      overflow: auto;
+      align-content: start;
+    }
+
+    .d-critique-list div::before {
+      content: ">";
+      color: var(--d-red);
+      margin-right: 8px;
+    }
+
+    .d-credits-roll {
+      overflow: hidden;
+      position: relative;
+    }
+
+    .d-credits-roll {
+      min-height: 108px;
+      border-left: 4px solid var(--d-red);
+      background: #050505;
+    }
+
+    .d-credits-track {
+      animation: dungeon-credits-roll var(--credits-duration, 34s) linear infinite;
+      will-change: transform;
+    }
+
+    .d-credits-track {
+      display: grid;
+      gap: 10px;
+      padding: 120px 14px 18px;
+      color: var(--d-white);
+      font-size: 14px;
+      line-height: 1.35;
+      text-align: left;
+    }
+
+    .d-credit-section {
+      display: grid;
+      gap: 4px;
+      border: 3px solid var(--d-cyan);
+      background: #000;
+      box-shadow: inset 0 0 0 2px var(--d-blue);
+      padding: 8px;
+    }
+
+    .d-credit-section strong {
+      color: var(--d-yellow);
+      font-size: 16px;
+    }
+
+    .d-credit-section span {
+      color: var(--d-cyan);
+    }
+
+    .d-credit-section p {
+      margin: 0;
+      color: var(--d-white);
+    }
+
+    @keyframes dungeon-credits-roll {
+      from {
+        transform: translateY(var(--credits-start, 100%));
+      }
+
+      to {
+        transform: translateY(calc(-1 * var(--credits-distance, 1200px)));
+      }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 50;
+    }
+
+    .modal.is-open {
+      display: grid;
+      place-items: center;
+    }
+
+    .modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, .72);
+    }
+
+    .modal-close {
+      appearance: none;
+      cursor: pointer;
+    }
+
+    .d-modal-window {
+      position: relative;
+      width: min(920px, calc(100vw - 28px));
+      max-height: min(720px, calc(100vh - 28px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: var(--d-black);
+      border: 8px solid var(--d-red);
+      outline: 4px solid var(--d-gold);
+      box-shadow: 0 0 0 4px #000, inset 0 0 0 4px var(--d-blue);
+      color: var(--d-white);
+      font-family: "DungeonPixel", "Courier New", monospace;
+      text-transform: uppercase;
+    }
+
+    .d-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 52px;
+      padding: 8px 12px;
+      background: var(--d-blue);
+      border-bottom: 4px solid var(--d-cyan);
+      color: var(--d-yellow);
+      font-size: 18px;
+    }
+
+    .d-modal-close {
+      min-width: 42px;
+      min-height: 36px;
+      border: 4px solid var(--d-yellow);
+      background: #000;
+      color: var(--d-yellow);
+      box-shadow: inset 0 0 0 3px var(--d-red);
+      font-weight: 700;
+    }
+
+    .d-modal-window .d-credits-roll {
+      height: min(520px, calc(100vh - 132px));
+      min-height: 320px;
+      border: 0;
+    }
+
+    .d-modal-window .d-credits-track {
+      padding: 0 18px 36px;
+    }
+
+    .d-reward-window {
+      width: min(1120px, calc(100vw - 28px));
+      max-height: min(820px, calc(100vh - 28px));
+    }
+
+    .d-reward-body {
+      overflow: auto;
+      padding: 16px;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, .04) 1px, transparent 1px),
+        #050505;
+      background-size: 10px 10px;
+    }
+
+    .d-reward-summary {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      border: 4px solid var(--d-cyan);
+      background: #000;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      color: var(--d-white);
+      font-size: 14px;
+    }
+
+    .d-reward-xp {
+      color: var(--d-yellow);
+      white-space: nowrap;
+    }
+
+    .d-reward-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .reward-card {
+      --frame: var(--d-gold);
+      position: relative;
+      display: grid;
+      gap: 8px;
+      border: 6px solid var(--frame);
+      outline: 3px solid #000;
+      background: #050505;
+      padding: 8px;
+      color: var(--d-white);
+      box-shadow: inset 0 0 0 3px #000, 6px 6px 0 #000;
+      min-width: 0;
+      image-rendering: pixelated;
+    }
+
+    .reward-card.is-locked {
+      filter: grayscale(.9);
+      opacity: .62;
+    }
+
+    .reward-card.is-unlocked {
+      animation: reward-unlock .7s steps(4, end);
+    }
+
+    .reward-card[data-rarity="Common"] {
+      --frame: #7b4a27;
+    }
+
+    .reward-card[data-rarity="Rare"] {
+      --frame: #7b7b7b;
+    }
+
+    .reward-card[data-rarity="Epic"] {
+      --frame: #d96b2c;
+    }
+
+    .reward-card[data-rarity="Legendary"] {
+      --frame: #f0c33c;
+      box-shadow: inset 0 0 0 3px #000, 0 0 0 4px #7a221a, 6px 6px 0 #000;
+    }
+
+    .reward-card[data-rarity="Legendary"]::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 20%, #fff 0 2px, transparent 3px),
+        radial-gradient(circle at 82% 32%, #f0c33c 0 2px, transparent 3px),
+        radial-gradient(circle at 68% 84%, #fff 0 2px, transparent 3px);
+      animation: reward-sparkle 1.3s steps(2, end) infinite;
+    }
+
+    .reward-scene {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border: 4px solid #000;
+      background: #6cc6e8;
+      image-rendering: pixelated;
+    }
+
+    .reward-scene::before,
+    .reward-scene::after {
+      content: "";
+      position: absolute;
+      image-rendering: pixelated;
+    }
+
+    .reward-scene.tavern {
+      background:
+        linear-gradient(#6cc6e8 0 34%, #73c04e 34%),
+        #6cc6e8;
+    }
+
+    .reward-scene.tavern::before {
+      left: 18%;
+      top: 30%;
+      width: 64%;
+      height: 44%;
+      background:
+        linear-gradient(135deg, transparent 0 46%, #c13b2a 47% 70%, transparent 71%),
+        linear-gradient(#7b4a27 0 18%, #f8f1d0 18% 74%, #4a2b16 74%);
+      border: 4px solid #000;
+    }
+
+    .reward-scene.tavern::after {
+      left: 35%;
+      top: 20%;
+      width: 32%;
+      height: 16%;
+      background: #f0c33c;
+      border: 3px solid #000;
+      box-shadow: 10px 36px 0 #285a8a, 42px 36px 0 #285a8a, 28px 54px 0 #7b4a27;
+    }
+
+    .reward-scene.campfire {
+      background:
+        linear-gradient(#285a8a 0 46%, #4f8f38 46%),
+        #285a8a;
+    }
+
+    .reward-scene.campfire::before {
+      left: 36%;
+      top: 45%;
+      width: 28%;
+      height: 30%;
+      background:
+        linear-gradient(90deg, transparent 0 36%, #f0c33c 37% 62%, transparent 63%),
+        linear-gradient(135deg, transparent 0 45%, #c13b2a 46% 70%, transparent 71%);
+      box-shadow: -32px 34px 0 #7b7b7b, 0 42px 0 #7b7b7b, 32px 34px 0 #7b7b7b, -46px 12px 0 #f8f1d0, 48px 10px 0 #f8f1d0;
+    }
+
+    .reward-scene.forge {
+      background: #111;
+    }
+
+    .reward-scene.forge::before {
+      left: 12%;
+      top: 22%;
+      width: 76%;
+      height: 54%;
+      background:
+        linear-gradient(#4a2b16 0 28%, #000 28% 42%, #d96b2c 42% 64%, #7a221a 64%),
+        #4a2b16;
+      border: 4px solid #7b7b7b;
+    }
+
+    .reward-scene.forge::after {
+      right: 15%;
+      top: 18%;
+      width: 26%;
+      height: 28%;
+      background: #f0c33c;
+      clip-path: polygon(50% 0, 100% 30%, 82% 100%, 18% 100%, 0 30%);
+      box-shadow: -48px 32px 0 #7b7b7b, -28px 58px 0 #c13b2a;
+    }
+
+    .reward-scene.observatory {
+      background:
+        radial-gradient(circle at 20% 20%, #fff 0 2px, transparent 3px),
+        radial-gradient(circle at 78% 18%, #f0c33c 0 2px, transparent 3px),
+        #001141;
+    }
+
+    .reward-scene.observatory::before {
+      left: 30%;
+      top: 28%;
+      width: 42%;
+      height: 58%;
+      background:
+        linear-gradient(90deg, transparent 0 46%, #33b1ff 47% 53%, transparent 54%),
+        linear-gradient(#7b7b7b 0 22%, #f8f1d0 22% 72%, #4a2b16 72%);
+      border: 4px solid #000;
+    }
+
+    .reward-scene.vault {
+      background: #4a2b16;
+    }
+
+    .reward-scene.vault::before {
+      left: 18%;
+      top: 36%;
+      width: 64%;
+      height: 38%;
+      background: #f0c33c;
+      border: 5px solid #000;
+      box-shadow: 8px -22px 0 #285a8a, 34px -18px 0 #c13b2a, 64px -20px 0 #73c04e;
+    }
+
+    .reward-scene.lighthouse {
+      background:
+        linear-gradient(#001141 0 54%, #285a8a 54%),
+        #001141;
+    }
+
+    .reward-scene.lighthouse::before {
+      left: 42%;
+      top: 22%;
+      width: 18%;
+      height: 62%;
+      background: #f8f1d0;
+      border: 4px solid #000;
+      box-shadow: 0 -18px 0 #f0c33c, -42px 12px 0 rgba(240, 195, 60, .55), 34px 16px 0 rgba(240, 195, 60, .55);
+    }
+
+    .reward-scene.lab {
+      background: #111;
+    }
+
+    .reward-scene.lab::before {
+      left: 12%;
+      top: 28%;
+      width: 76%;
+      height: 54%;
+      background: #4a2b16;
+      border: 4px solid #000;
+      box-shadow: 22px -18px 0 #73c04e, 52px -22px 0 #6cc6e8, 82px -16px 0 #c13b2a;
+    }
+
+    .reward-scene.cavern {
+      background: #111;
+    }
+
+    .reward-scene.cavern::before {
+      left: 12%;
+      top: 18%;
+      width: 76%;
+      height: 70%;
+      background:
+        linear-gradient(135deg, transparent 0 30%, #6cc6e8 31% 44%, transparent 45%),
+        linear-gradient(45deg, transparent 0 46%, #a56eff 47% 62%, transparent 63%),
+        #4a2b16;
+      border: 4px solid #000;
+    }
+
+    .reward-scene.library {
+      background: #4a2b16;
+    }
+
+    .reward-scene.library::before {
+      left: 12%;
+      top: 18%;
+      width: 76%;
+      height: 66%;
+      background:
+        repeating-linear-gradient(90deg, #7b4a27 0 12px, #f0c33c 12px 15px, #c13b2a 15px 24px),
+        #7b4a27;
+      border: 4px solid #000;
+      box-shadow: 42px 58px 0 #f8f1d0;
+    }
+
+    .reward-scene.workshop {
+      background: #7b4a27;
+    }
+
+    .reward-scene.workshop::before {
+      left: 12%;
+      top: 46%;
+      width: 76%;
+      height: 22%;
+      background: #4a2b16;
+      border: 4px solid #000;
+      box-shadow: 14px -28px 0 #f8f1d0, 54px -36px 0 #6cc6e8, 92px -24px 0 #7b7b7b;
+    }
+
+    .reward-scene.boss {
+      background: #111;
+    }
+
+    .reward-scene.boss::before {
+      left: 18%;
+      top: 20%;
+      width: 64%;
+      height: 62%;
+      background:
+        linear-gradient(#7a221a 0 30%, #000 30% 46%, #f0c33c 46% 62%, #4f8f38 62%),
+        #7a221a;
+      border: 5px solid #f0c33c;
+    }
+
+    .reward-scene.shrine {
+      background: #285a8a;
+    }
+
+    .reward-scene.shrine::before {
+      left: 20%;
+      top: 28%;
+      width: 60%;
+      height: 52%;
+      background:
+        linear-gradient(90deg, transparent 0 46%, #33b1ff 47% 53%, transparent 54%),
+        linear-gradient(#7b7b7b 0 24%, #f8f1d0 24% 100%);
+      border: 5px solid #000;
+      box-shadow: 0 -18px 0 #f0c33c;
+    }
+
+    .reward-title {
+      color: var(--d-yellow);
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .reward-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      color: var(--d-cyan);
+      font-size: 12px;
+    }
+
+    .reward-text {
+      color: var(--d-white);
+      font-size: 12px;
+      line-height: 1.35;
+      min-height: 48px;
+    }
+
+    .reward-lock {
+      color: var(--d-green);
+      font-size: 12px;
+    }
+
+    @keyframes reward-unlock {
+      0% {
+        transform: translateY(12px);
+        filter: brightness(2);
+      }
+
+      100% {
+        transform: translateY(0);
+        filter: brightness(1);
+      }
+    }
+
+    @keyframes reward-sparkle {
+      50% {
+        opacity: .35;
+      }
+    }
+
+    .d-command-status {
+      color: var(--d-yellow);
+    }
+
+    .d-cursor {
+      color: var(--d-green);
+      animation: d-cursor-blink 1s steps(2, end) infinite;
+    }
+
+    @keyframes d-cursor-blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    .carbon {
+      min-height: 100vh;
+      background: #ffffff;
+      color: var(--ibm-text);
+      font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    .carbon * {
+      font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .carbon-header {
+      height: 56px;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      border-bottom: 1px solid var(--ibm-border);
+      background: #ffffff;
+    }
+
+    .carbon-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      height: 100%;
+      padding: 0 24px;
+      border-right: 1px solid var(--ibm-border);
+      font-weight: 600;
+    }
+
+    .ibm-mark {
+      font-weight: 700;
+      letter-spacing: 0;
+      color: var(--ibm-blue-dark);
+    }
+
+    .carbon-nav {
+      display: flex;
+      gap: 2px;
+      padding-left: 12px;
+      color: var(--ibm-muted);
+    }
+
+    .carbon-nav button,
+    .carbon-switch {
+      appearance: none;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      min-height: 40px;
+      padding: 0 14px;
+      cursor: pointer;
+    }
+
+    .carbon-nav button.is-active {
+      color: var(--ibm-text);
+      box-shadow: inset 0 -3px 0 var(--ibm-blue);
+    }
+
+    .carbon-switch {
+      margin-right: 16px;
+      background: var(--ibm-blue-dark);
+      color: #ffffff;
+    }
+
+    .carbon-switch:hover,
+    .carbon-primary:hover {
+      background: var(--ibm-blue-hover);
+    }
+
+    .carbon-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
+      gap: 32px;
+      padding: 32px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    .carbon-hero {
+      display: grid;
+      gap: 24px;
+      align-content: start;
+    }
+
+    .carbon-heading {
+      display: grid;
+      gap: 12px;
+      max-width: 760px;
+    }
+
+    .carbon-heading p,
+    .carbon-card p,
+    .carbon-meta,
+    .carbon-list span {
+      color: var(--ibm-muted);
+    }
+
+    .carbon-heading h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 64px);
+      line-height: 1.05;
+      font-weight: 400;
+    }
+
+    .carbon-heading p {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+
+    .carbon-card,
+    .carbon-preview,
+    .carbon-score {
+      background: var(--ibm-layer-2);
+      border: 1px solid var(--ibm-border);
+    }
+
+    .carbon-preview {
+      min-height: 460px;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    .carbon-section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--ibm-border);
+      font-weight: 600;
+    }
+
+    .carbon-preview-stage {
+      display: grid;
+      place-items: center;
+      min-height: 320px;
+      background:
+        linear-gradient(90deg, var(--ibm-layer) 1px, transparent 1px),
+        linear-gradient(180deg, var(--ibm-layer) 1px, transparent 1px),
+        #ffffff;
+      background-size: 32px 32px;
+      padding: 24px;
+      cursor: pointer;
+    }
+
+    .carbon-preview-stage.is-dragover {
+      background:
+        linear-gradient(90deg, rgba(51, 177, 255, .22) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(51, 177, 255, .22) 1px, transparent 1px),
+        #e5f6ff;
+      outline: 3px solid var(--ibm-blue);
+      outline-offset: -3px;
+    }
+
+    .carbon-preview-stage img {
+      display: block;
+      max-width: 100%;
+      max-height: 52vh;
+      object-fit: contain;
+      border: 1px solid var(--ibm-border);
+    }
+
+    .carbon-empty {
+      max-width: 420px;
+      color: var(--ibm-muted);
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .carbon-empty strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--ibm-text);
+      font-weight: 500;
+    }
+
+    .carbon-actions {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, max-content));
+      justify-content: start;
+      align-items: stretch;
+      gap: 1px;
+      border-top: 1px solid var(--ibm-border);
+      background: var(--ibm-border);
+    }
+
+    .carbon-primary,
+    .carbon-secondary {
+      appearance: none;
+      border: 0;
+      min-height: 48px;
+      padding: 0 18px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: left;
+      white-space: nowrap;
+      font-weight: 500;
+    }
+
+    .carbon-primary {
+      background: var(--ibm-blue);
+      color: #ffffff;
+    }
+
+    .carbon-secondary {
+      background: #ffffff;
+      color: var(--ibm-text);
+    }
+
+    .carbon-secondary:hover {
+      background: var(--ibm-layer);
+    }
+
+    .carbon-secondary:disabled {
+      color: #8d8d8d;
+      cursor: not-allowed;
+      background: var(--ibm-layer);
+    }
+
+    .carbon-reset {
+      display: none;
+      background: var(--ibm-blue-dark);
+      color: #ffffff;
+    }
+
+    .carbon-reset.is-visible {
+      display: inline-flex;
+    }
+
+    .carbon-sidebar {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .carbon-card {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .carbon-card h2,
+    .carbon-card h3,
+    .carbon-card p {
+      margin: 0;
+    }
+
+    .carbon-card h2 {
+      font-size: 24px;
+      line-height: 1.25;
+      font-weight: 400;
+    }
+
+    .carbon-card h3 {
+      font-size: 16px;
+      line-height: 1.3;
+    }
+
+    .carbon-score {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-left: 0;
+      border-bottom: 0;
+    }
+
+    .carbon-score div {
+      padding: 16px;
+      border-left: 1px solid var(--ibm-border);
+      border-bottom: 1px solid var(--ibm-border);
+    }
+
+    .carbon-score strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1;
+      font-weight: 400;
+      margin-bottom: 8px;
+    }
+
+    .carbon-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .carbon-list div {
+      display: grid;
+      grid-template-columns: 12px 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+
+    .carbon-dot {
+      width: 12px;
+      height: 12px;
+      margin-top: 3px;
+      background: var(--ibm-blue);
+    }
+
+    .carbon-dot.green {
+      background: var(--ibm-success);
+    }
+
+    .carbon-dot.red {
+      background: var(--ibm-danger);
+    }
+
+    .carbon-dot.teal {
+      background: var(--ibm-teal);
+    }
+
+    .carbon-dot.purple {
+      background: var(--ibm-purple);
+    }
+
+    .carbon-results {
+      grid-column: 1 / -1;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .carbon-credits-track {
+      display: grid;
+      gap: 16px;
+      padding: 0;
+    }
+
+    .carbon-credit-block {
+      display: grid;
+      gap: 6px;
+      border-left: 4px solid var(--ibm-blue);
+      background: var(--ibm-layer);
+      padding: 16px 20px;
+    }
+
+    .carbon-credit-block:nth-child(2n) {
+      border-left-color: var(--ibm-teal);
+      background: #ffffff;
+    }
+
+    .carbon-credit-block.is-credit {
+      border-left-color: var(--ibm-purple);
+    }
+
+    .carbon-credit-kicker {
+      color: var(--ibm-blue);
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .carbon-credit-block h3,
+    .carbon-credit-block p {
+      margin: 0;
+    }
+
+    .carbon-credit-block h3 {
+      font-size: 24px;
+      font-weight: 400;
+    }
+
+    .carbon-credit-block p {
+      line-height: 1.55;
+      color: var(--ibm-muted);
+    }
+
+    .carbon-modal-window {
+      position: relative;
+      width: min(880px, calc(100vw - 32px));
+      max-height: min(760px, calc(100vh - 32px));
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      background: #ffffff;
+      color: var(--ibm-text);
+      border: 1px solid var(--ibm-border);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+      font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .carbon-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 56px;
+      padding: 0 0 0 20px;
+      border-bottom: 1px solid var(--ibm-border);
+      font-weight: 600;
+    }
+
+    .carbon-modal-close {
+      width: 56px;
+      height: 56px;
+      border: 0;
+      border-left: 1px solid var(--ibm-border);
+      background: #ffffff;
+      color: var(--ibm-text);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .carbon-modal-close:hover {
+      background: var(--ibm-layer);
+    }
+
+    .carbon-modal-body {
+      overflow: auto;
+      padding: 20px;
+      background: var(--ibm-layer-2);
+    }
+
+    @media (max-width: 900px) {
+      .dungeon {
+        padding: 8px;
+      }
+
+      .dungeon-screen {
+        height: auto;
+        min-height: calc(100vh - 16px);
+        grid-template-rows: auto auto auto auto;
+        border-width: 6px;
+        outline-width: 3px;
+      }
+
+      .dungeon-screen::before {
+        box-shadow:
+          calc(100vw - 56px) 0 0 var(--d-yellow),
+          0 calc(100vh - 56px) 0 var(--d-yellow),
+          calc(100vw - 56px) calc(100vh - 56px) 0 var(--d-yellow);
+      }
+
+      .d-topbar {
+        grid-template-columns: 1fr;
+      }
+
+      .d-title {
+        font-size: 18px;
+      }
+
+      .d-main {
+        display: contents;
+      }
+
+      .d-panel {
+        margin: 6px;
+      }
+
+      .d-preview {
+        order: 1;
+      }
+
+      .d-narration {
+        order: 2;
+        overflow: visible;
+      }
+
+      .d-status {
+        order: 3;
+      }
+
+      .d-scroll-window {
+        min-height: 280px;
+        padding: 14px;
+      }
+
+      .d-scroll {
+        min-height: 235px;
+      }
+
+      .d-upload-row,
+      .d-portrait-row,
+      .d-narration-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .d-narration-grid {
+        height: auto;
+      }
+
+      .d-submit {
+        width: 100%;
+      }
+
+      .d-textbox {
+        border-right: 0;
+        border-bottom: 4px solid var(--d-red);
+        overflow: visible;
+      }
+
+      .d-critique-list {
+        overflow: visible;
+      }
+
+      .d-credits-roll {
+        border-left: 0;
+        border-top: 4px solid var(--d-red);
+      }
+
+      .d-command-bar {
+        z-index: 5;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        padding: 6px;
+        order: 4;
+      }
+
+      .d-command {
+        min-height: 44px;
+        padding: 7px 5px;
+        font-size: 12px;
+      }
+
+      .carbon-header {
+        height: auto;
+        grid-template-columns: 1fr;
+      }
+
+      .carbon-brand {
+        min-height: 56px;
+        border-right: 0;
+        border-bottom: 1px solid var(--ibm-border);
+      }
+
+      .carbon-nav {
+        overflow-x: auto;
+        padding: 0 8px;
+        border-bottom: 1px solid var(--ibm-border);
+      }
+
+      .carbon-switch {
+        margin: 8px;
+      }
+
+      .carbon-main {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 20px;
+      }
+
+      .carbon-preview {
+        min-height: 360px;
+      }
+
+      .carbon-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .carbon-primary,
+      .carbon-secondary {
+        width: 100%;
+        justify-content: flex-start;
+      }
+
+      .carbon-results,
+      .carbon-score {
+        grid-template-columns: 1fr;
+      }
+
+      .carbon-modal-body {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .dungeon {
+        padding: 4px;
+      }
+
+      .d-panel-title,
+      .d-master h2 {
+        font-size: 15px;
+      }
+
+      .d-mini-stat,
+      .d-upload-row,
+      .d-meter,
+      .d-character,
+      .d-critique-list {
+        font-size: 12px;
+      }
+
+      .d-command-bar {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .carbon-main {
+        padding: 16px;
+      }
+
+      .carbon-heading h1 {
+        font-size: 34px;
+      }
+    }
+  </style>
 </head>
-<body class="dungeon-theme">
-    
-    <!-- Carbon Mode Button (Top Right) -->
-    <button class="carbon-mode-btn" id="carbonModeBtn" style="position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 0.75rem 1.5rem; background: rgba(0, 0, 0, 0.8); border: 2px solid var(--dos-green); color: var(--dos-green); font-family: 'VT323', monospace; font-size: 1.1rem; cursor: pointer; transition: all 0.3s ease;">
-        💎 Carbon Mode
-    </button>
-    
-    <!-- DOS RPG Header -->
-    <header class="dos-header">
-        <div style="text-align: center; padding: 2rem 1rem;">
-            <div style="border: 3px solid var(--dos-green); display: inline-block; padding: 1.5rem 3rem; background: rgba(0, 0, 0, 0.5);">
-                <h1 style="font-family: 'Press Start 2P', monospace; font-size: 3rem; color: var(--dos-green); margin: 0; text-shadow: 0 0 10px var(--dos-green), 0 0 20px var(--dos-green); letter-spacing: 0.2em;">
-                    CARBON<br>QUEST
-                </h1>
-                <div style="text-align: center; margin-top: 0.5rem;">
-                    <span style="color: var(--dos-cyan); font-size: 1.2rem;">💎</span>
+<body>
+  <main class="app-shell">
+    <section class="skin dungeon is-active" id="dungeonSkin" aria-label="Dungeon skin">
+      <div class="dungeon-screen">
+        <header class="d-topbar">
+          <div class="d-title"><span class="d-title-badge" aria-hidden="true"></span><span>Carbon Quest: Master the IBM Design System</span></div>
+          <div class="d-mini-stat">Score 08740</div>
+          <div class="d-mini-stat">Skin: Dungeon</div>
+          <button class="d-button d-skin-switch" data-switch="carbon">Switch to Carbon</button>
+        </header>
+
+        <div class="d-main">
+          <section class="d-panel d-preview" aria-label="Uploaded design scroll">
+            <div class="d-panel-title"><span>Uploaded Design Scroll</span><span>Viewport I</span></div>
+            <div class="d-scroll-window">
+              <div class="d-scroll" id="dungeonPreview" role="button" tabindex="0" aria-label="Drop an image here or click to upload">
+                <div class="d-placeholder">
+                  <span class="d-placeholder-mark" aria-hidden="true"></span>
+                  <span>Drop image here<br>or click to upload</span>
                 </div>
+              </div>
             </div>
-            <p style="font-family: 'VT323', monospace; font-size: 1.3rem; color: var(--dos-text-gray); margin: 1rem 0 0 0; letter-spacing: 0.1em;">
-                ▶ AI-Powered UX Analysis Through the Eyes of a Dungeon Master
-            </p>
+            <div class="d-upload-row">
+              <label class="d-button" for="designUploadDungeon">Upload Scroll</label>
+              <span id="dungeonFileName">No artifact equipped</span>
+              <button class="d-button d-submit" id="dungeonSubmit" type="button">Submit for Analysis</button>
+            </div>
+          </section>
+
+          <aside class="d-panel d-status" aria-label="Dungeon Master status">
+            <div class="d-panel-title"><span>Dungeon Master Status</span><span>DM-01</span></div>
+            <div class="d-portrait-row">
+              <div class="d-portrait" id="dungeonResultScene" aria-label="Dungeon Master analysis scene"></div>
+              <div class="d-master">
+                <h2 id="dMasterTitle">Archmage of Usability</h2>
+                <p id="dMasterDescription">Watching hierarchy, contrast, spacing, and conversion traps from the torchlit review chamber.</p>
+              </div>
+            </div>
+            <div class="d-bars">
+              <div class="d-meter"><span>HP</span><div class="d-meter-track"><div class="d-meter-fill" id="dHpFill" style="width: 84%"></div></div><span id="dHpValue">84</span></div>
+              <div class="d-meter"><span>XP</span><div class="d-meter-track"><div class="d-meter-fill" id="dXpFill" style="width: 62%"></div></div><span id="dXpValue">62</span></div>
+              <div class="d-meter"><span>RISK</span><div class="d-meter-track"><div class="d-meter-fill" id="dRiskFill" style="width: 38%"></div></div><span id="dRiskValue">38</span></div>
+            </div>
+            <div class="d-party">
+              <div class="d-party-title">Quest Party</div>
+              <div class="d-character"><strong>Hierarchy Knight</strong><span id="dHierarchyLevel">LV 12</span></div>
+              <div class="d-character"><strong>Contrast Cleric</strong><span id="dContrastLevel">LV 09</span></div>
+              <div class="d-character"><strong>Flow Ranger</strong><span id="dFlowLevel">LV 10</span></div>
+              <div class="d-character"><strong>Copy Bard</strong><span id="dCopyLevel">LV 08</span></div>
+            </div>
+          </aside>
         </div>
-    </header>
 
-    <!-- Main RPG Interface -->
-    <main class="dos-main-container" style="display: grid; grid-template-columns: 300px 1fr 300px; gap: 1rem; padding: 1rem; max-width: 1600px; margin: 0 auto;">
-        
-        <!-- LEFT PANEL: Character Sheet -->
-        <aside class="dos-panel dos-panel-stone">
-            <div class="character-sheet">
-                <div class="dos-quest-header" style="background: linear-gradient(180deg, var(--dos-gold) 0%, #8B6914 100%); color: var(--dos-black); text-align: center; padding: 0.5rem; font-family: 'Press Start 2P', monospace; font-size: 0.7rem; border-bottom: 2px solid var(--dos-gold);">
-                    ⚔️ ADVENTURER STATUS
-                </div>
-                
-                <div class="character-portrait" id="characterPortrait" style="text-align: center; font-size: 4rem; padding: 1rem; background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, transparent 70%);">
-                    🧙‍♂️
-                </div>
-                
-                <div style="padding: 0 1rem;">
-                    <div class="character-stat" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1.1rem;">
-                        <span class="character-stat-label" style="color: var(--dos-text-gray);">Level:</span>
-                        <span class="character-stat-value" style="color: var(--dos-green); font-weight: bold;" id="characterLevel">6</span>
-                    </div>
-                    
-                    <div class="character-stat" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1.1rem;">
-                        <span class="character-stat-label" style="color: var(--dos-text-gray);">Title:</span>
-                        <span class="character-stat-value" style="color: var(--dos-green);" id="guildRank">Master Designer</span>
-                    </div>
-                    
-                    <div class="character-stat" style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1.1rem;">
-                        <span class="character-stat-label" style="color: var(--dos-text-gray);">XP:</span>
-                        <span class="character-stat-value" style="color: var(--dos-green);">
-                            <span id="currentXP">3300</span> / <span id="nextLevelXP">3500</span>
-                        </span>
-                    </div>
-                    
-                    <div class="dos-xp-bar" style="height: 20px; background: var(--dos-black); border: 2px solid var(--dos-silver); margin: 0.5rem 0; position: relative; overflow: hidden;">
-                        <div class="dos-xp-fill" id="xpBar" style="width: 94%; height: 100%; background: linear-gradient(90deg, var(--dos-green) 0%, var(--dos-cyan) 100%); transition: width 0.5s ease;"></div>
-                    </div>
-                    
-                    <hr class="dos-divider" style="border: none; border-top: 2px solid var(--dos-silver); margin: 1rem 0;">
-                    
-                    <div class="character-stat" style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-family: 'VT323', monospace; font-size: 1.1rem;">
-                        <span class="character-stat-label" style="color: var(--dos-text-gray);">Dungeons Cleared:</span>
-                        <span class="character-stat-value" style="color: var(--dos-gold);" id="questCount">24</span>
-                    </div>
-                    
-                    <div class="character-stat" style="display: flex; justify-content: space-between; padding: 0.5rem 0; font-family: 'VT323', monospace; font-size: 1.1rem;">
-                        <span class="character-stat-label" style="color: var(--dos-text-gray);">Total Score:</span>
-                        <span class="character-stat-value" style="color: var(--dos-gold);" id="victoryCount">1792</span>
-                    </div>
-                </div>
-                
-                <div style="text-align: center; padding: 2rem 1rem;">
-                    <div style="font-size: 5rem; filter: drop-shadow(0 0 10px var(--dos-gold));">
-                        🔱
-                    </div>
-                </div>
+        <section class="d-panel d-narration" aria-label="Dungeon Master narration and critique">
+          <div class="d-panel-title"><span>Dungeon Master Narration</span><span>Round 03</span></div>
+          <div class="d-narration-grid">
+            <div class="d-textbox" id="dungeonNarration"><strong>The Dungeon Master speaks:</strong> Your design enters the chamber. The first test is legibility under pressure; the second is whether the user can find the next action before the torch burns low.</div>
+            <div class="d-critique-list" id="dungeonCritique">
+              <div>Primary action must read before secondary loot.</div>
+              <div>Panel divisions should guide the eye like a map grid.</div>
+              <div>Reward clarity with color; punish noise with restraint.</div>
             </div>
-        </aside>
-
-        <!-- CENTER PANEL: Main Content -->
-        <section class="dos-panel dos-panel-iron" style="min-height: 600px;">
-            
-            <!-- Dungeon Master Dialogue -->
-            <div class="dungeon-master-box" id="dungeonMasterBox" style="background: rgba(0, 0, 0, 0.7); border: 2px solid var(--dos-gold); padding: 1.5rem; margin-bottom: 1rem; font-family: 'VT323', monospace; font-size: 1.2rem; line-height: 1.8; color: var(--dos-text-white);">
-                <p class="dm-text" id="dmText" style="margin: 0;">
-                    <span style="color: var(--dos-gold); font-weight: bold;">[DUNGEON MASTER]:</span> Greetings, brave designer. You stand at the entrance of the <span style="color: var(--dos-green);">Design Critique Dungeon</span>, where interfaces are judged by the sacred standards of <span style="color: var(--dos-green);">IBM Design Language</span> and the <span style="color: var(--dos-cyan);">Carbon Design System</span>.
-                    <br><br>
-                    Within these digital halls, your interfaces will be tested against IBM's three pillars: <span style="color: var(--dos-green);">Productive Design</span> (efficiency and clarity), <span style="color: var(--dos-green);">Expressive Design</span> (humanity and delight), and <span style="color: var(--dos-green);">Universal Design</span> (inclusive and accessible).
-                    <br><br>
-                    Your designs will be evaluated for Carbon compliance: <span style="color: var(--dos-green);">The Sacred Grid</span>, <span style="color: var(--dos-green);">IBM Plex typography</span>, <span style="color: var(--dos-green);">color tokens</span>, proper <span style="color: var(--dos-green);">spacing scales</span>, and <span style="color: var(--dos-green);">WCAG 2.1 AA accessibility</span>.
-                    <br><br>
-                    Upload a screenshot of your UI, and I shall guide you through its strengths and weaknesses against IBM's design standards. Face the critique. Earn experience. Master Carbon. Level up your craft.
-                </p>
-                <p class="dm-prompt" id="dmPrompt" style="margin: 1rem 0 0 0; padding: 0.5rem; background: rgba(255, 215, 0, 0.1); border-left: 3px solid var(--dos-gold); color: var(--dos-gold);">
-                    ⚠️ Warning: IBM IDL-based constructive feedback ahead. Carbon compliance armor recommended.
-                </p>
-            </div>
-            
-            <!-- Upload Area -->
-            <div class="dos-panel" style="margin-top: 1rem; text-align: center; padding: 2rem; background: rgba(0, 0, 0, 0.5); border: 2px solid var(--dos-silver);" id="uploadArea">
-                <div style="font-family: 'VT323', monospace; font-size: 1.3rem; color: var(--dos-text-gray); margin-bottom: 1.5rem;">
-                    📜 SUBMIT DESIGN SCROLL 📜
-                </div>
-                <input type="file" id="fileInput" accept="image/*" style="display: none;">
-                <button class="dos-button dos-button-primary" id="btnUpload" style="font-size: 1.1rem; padding: 1rem 2.5rem; background: var(--dos-green); color: var(--dos-black); border: 2px solid var(--dos-green); font-family: 'Press Start 2P', monospace; cursor: pointer; transition: all 0.3s ease;">
-                    Choose Design Scroll
-                </button>
-                <div id="imagePreview" style="display: none; margin-top: 1.5rem;">
-                    <img id="previewImage" style="max-width: 100%; max-height: 400px; border: 3px solid var(--dos-gold); image-rendering: auto; box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);">
-                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
-                        <button class="dos-button" id="btnRemove" style="padding: 0.75rem 1.5rem; font-family: 'VT323', monospace; font-size: 1.1rem;">Remove</button>
-                        <button class="dos-button dos-button-primary" id="btnAnalyze" style="padding: 0.75rem 2rem; font-family: 'Press Start 2P', monospace; font-size: 0.9rem; background: var(--dos-gold); color: var(--dos-black);">
-                            ⚔️ Enter the Dungeon ⚔️
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Loading State -->
-            <div id="loadingState" style="display: none; text-align: center; padding: 3rem;">
-                <div style="font-family: 'Press Start 2P', monospace; font-size: 1.3rem; color: var(--dos-gold); margin-bottom: 2rem; animation: titleGlow 1s ease-in-out infinite;">
-                    ⚔️ ANALYZING DESIGN ⚔️
-                </div>
-                <div style="font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--dos-text-gray); line-height: 2;" id="loadingText">
-                    The Dungeon Master examines your scroll...<br>
-                    Ancient runes begin to glow...<br>
-                    Consulting the Carbon Codex...<br>
-                    Preparing your quests...
-                </div>
-            </div>
-            
-            <!-- Results Area -->
-            <div id="resultsArea" style="display: none; margin-top: 1rem;">
-                <div class="dos-panel" style="margin-bottom: 1rem; background: rgba(0, 0, 0, 0.7); border: 2px solid var(--dos-gold);">
-                    <div class="dos-quest-header" style="background: linear-gradient(180deg, var(--dos-gold) 0%, #8B6914 100%); color: var(--dos-black); text-align: center; padding: 0.75rem; font-family: 'Press Start 2P', monospace; font-size: 0.8rem;">
-                        ⚡ CRITIQUE RESULTS ⚡
-                    </div>
-                    <div id="critiqueResults" style="font-family: 'VT323', monospace; font-size: 1.2rem; color: var(--dos-text-white); padding: 1.5rem; line-height: 1.8;">
-                        <!-- Results will be inserted here -->
-                    </div>
-                </div>
-                <div style="text-align: center; margin-top: 1.5rem;">
-                    <button class="dos-button dos-button-primary" id="btnNewQuest" style="padding: 1rem 2rem; font-family: 'Press Start 2P', monospace; font-size: 0.9rem;">
-                        🎮 New Quest
-                    </button>
-                </div>
-            </div>
+          </div>
         </section>
 
-        <!-- RIGHT PANEL: Quest Log & Achievements -->
-        <aside class="dos-panel dos-panel-stone">
-            
-            <!-- Active Quests -->
-            <div class="dos-quest-log">
-                <div class="dos-quest-header" style="background: linear-gradient(180deg, var(--dos-gold) 0%, #8B6914 100%); color: var(--dos-black); text-align: center; padding: 0.5rem; font-family: 'Press Start 2P', monospace; font-size: 0.7rem; border-bottom: 2px solid var(--dos-gold);">
-                    📜 ACTIVE QUESTS 📜
-                </div>
-                <div id="activeQuests" style="padding: 1rem;">
-                    <div style="text-align: center; padding: 2rem 1rem; font-family: 'VT323', monospace; color: var(--dos-text-dim); font-size: 1.1rem;">
-                        No active quests.<br><br>
-                        Submit a design to receive quests!
-                    </div>
-                </div>
+        <nav class="d-command-bar" aria-label="Dungeon command menu">
+          <button class="d-command" data-upload-trigger>Upload</button>
+          <button class="d-command is-selected" data-command="analyze">Analyze</button>
+          <button class="d-command" data-command="quests">Quests</button>
+          <button class="d-command" data-rewards-open>Rewards</button>
+          <button class="d-command" data-command="settings">Settings</button>
+          <button class="d-command" data-modal-open="dungeonCreditsModal" onclick="openCreditsModal('dungeonCreditsModal')">Credits</button>
+          <button class="d-command" data-switch="carbon">Switch to Carbon</button>
+        </nav>
+      </div>
+      <input class="visually-hidden" id="designUploadDungeon" type="file" accept="image/*">
+    </section>
+
+    <section class="skin carbon" id="carbonSkin" aria-label="Carbon skin">
+      <header class="carbon-header">
+        <div class="carbon-brand"><span class="ibm-mark">IBM</span><span>Carbon Quest</span></div>
+        <nav class="carbon-nav" aria-label="Primary">
+          <button class="is-active" data-carbon-nav="overview">Overview</button>
+          <button data-carbon-nav="analysis">Analysis</button>
+          <button data-carbon-nav="actions">Actions</button>
+          <button data-carbon-nav="settings">Settings</button>
+          <button data-modal-open="carbonCreditsModal" onclick="openCreditsModal('carbonCreditsModal')">Credits</button>
+        </nav>
+        <button class="carbon-switch" data-switch="dungeon">Switch to Dungeon</button>
+      </header>
+
+      <div class="carbon-main">
+        <section class="carbon-hero">
+          <div class="carbon-heading">
+            <h1>Carbon Quest: The Design Guild</h1>
+            <p>An IBM design review workspace where interface critiques become structured quests for hierarchy, typography, accessibility, spacing, component usage, and UX.</p>
+          </div>
+
+          <section class="carbon-preview" aria-label="Uploaded design preview">
+            <div class="carbon-section-title"><span>Design preview</span><span class="carbon-meta" id="carbonFileName">No file selected</span></div>
+            <div class="carbon-preview-stage" id="carbonPreview" role="button" tabindex="0" aria-label="Drop an image here or click to upload">
+              <div class="carbon-empty"><strong>Drop an image here</strong>or upload an image to preview the design and prepare a structured critique.</div>
             </div>
-            
-            <hr class="dos-divider" style="border: none; border-top: 2px solid var(--dos-silver); margin: 1rem 0;">
-            
-            <!-- Achievements -->
-            <div style="margin-top: 1rem;">
-                <div class="dos-quest-header" style="background: linear-gradient(180deg, var(--dos-gold) 0%, #8B6914 100%); color: var(--dos-black); text-align: center; padding: 0.5rem; font-family: 'Press Start 2P', monospace; font-size: 0.7rem; border-bottom: 2px solid var(--dos-gold);">
-                    🏆 ACHIEVEMENTS 🏆
-                </div>
-                <div id="achievementGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; margin-top: 1rem; padding: 0 1rem;">
-                    <div class="dos-achievement" style="text-align: center; padding: 1rem; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--dos-gold);">
-                        <div class="dos-achievement-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">🛡️</div>
-                        <div class="dos-achievement-name" style="font-family: 'VT323', monospace; font-size: 0.9rem; color: var(--dos-text-gray);">First Quest</div>
-                    </div>
-                    <div class="dos-achievement" style="text-align: center; padding: 1rem; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--dos-gold);">
-                        <div class="dos-achievement-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">⚔️</div>
-                        <div class="dos-achievement-name" style="font-family: 'VT323', monospace; font-size: 0.9rem; color: var(--dos-text-gray);">Veteran</div>
-                    </div>
-                    <div class="dos-achievement" style="text-align: center; padding: 1rem; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--dos-gold);">
-                        <div class="dos-achievement-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">♿</div>
-                        <div class="dos-achievement-name" style="font-family: 'VT323', monospace; font-size: 0.9rem; color: var(--dos-text-gray);">A11y Hero</div>
-                    </div>
-                    <div class="dos-achievement" style="text-align: center; padding: 1rem; background: rgba(255, 215, 0, 0.1); border: 2px solid var(--dos-gold);">
-                        <div class="dos-achievement-icon" style="font-size: 2rem; margin-bottom: 0.5rem;">💎</div>
-                        <div class="dos-achievement-name" style="font-family: 'VT323', monospace; font-size: 0.9rem; color: var(--dos-text-gray);">Carbon Master</div>
-                    </div>
-                </div>
+            <div class="carbon-actions">
+              <label class="carbon-primary" for="designUploadCarbon">Upload image</label>
+              <button class="carbon-secondary" id="carbonAnalyze" type="button">Analyze</button>
+              <button class="carbon-secondary" id="carbonExport" type="button" disabled>Export findings</button>
+              <button class="carbon-secondary carbon-reset" id="carbonReset" type="button">Upload another design</button>
             </div>
-            
-            <hr class="dos-divider" style="border: none; border-top: 2px solid var(--dos-silver); margin: 1rem 0;">
-            
-            <!-- Quick Stats -->
-            <div style="margin-top: 1rem; font-family: 'VT323', monospace; font-size: 1.1rem;">
-                <div class="dos-quest-header" style="background: linear-gradient(180deg, var(--dos-gold) 0%, #8B6914 100%); color: var(--dos-black); text-align: center; padding: 0.5rem; font-family: 'Press Start 2P', monospace; font-size: 0.7rem; border-bottom: 2px solid var(--dos-gold);">
-                    📊 GUILD RECORDS 📊
-                </div>
-                <div style="padding: 1rem;">
-                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: var(--dos-text-gray); border-bottom: 1px solid var(--dos-silver);">
-                        <span>Dungeons Cleared:</span>
-                        <span style="color: var(--dos-gold);" id="dungeonsCleared">24</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: var(--dos-text-gray); border-bottom: 1px solid var(--dos-silver);">
-                        <span>Total XP:</span>
-                        <span style="color: var(--dos-gold);" id="totalXP">3300</span>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; padding: 0.5rem 0; color: var(--dos-text-gray);">
-                        <span>Perfect Scores:</span>
-                        <span style="color: var(--dos-gold);" id="perfectScores">0</span>
-                    </div>
-                </div>
+          </section>
+        </section>
+
+        <aside class="carbon-sidebar" aria-label="Analysis summary">
+          <section class="carbon-card">
+            <h2>Evaluation summary</h2>
+            <p id="carbonSummary">Calm product framing with measurable signals for design quality and implementation readiness.</p>
+            <div class="carbon-score">
+              <div><strong id="carbonClarity">84</strong><span class="carbon-meta">Clarity</span></div>
+              <div><strong id="carbonAccessibility">62</strong><span class="carbon-meta">Accessibility</span></div>
+              <div><strong id="carbonRisk">38</strong><span class="carbon-meta">Risk</span></div>
             </div>
+          </section>
+
+          <section class="carbon-card">
+            <h3>Recommended focus</h3>
+            <div class="carbon-list" id="carbonFocusList">
+              <div><span class="carbon-dot"></span><span>Strengthen visual hierarchy for the primary user task.</span></div>
+              <div><span class="carbon-dot teal"></span><span>Maintain accessible contrast across dense content areas.</span></div>
+              <div><span class="carbon-dot red"></span><span>Reduce competing calls to action before launch review.</span></div>
+            </div>
+          </section>
         </aside>
-    </main>
 
-    <!-- Settings Modal -->
-    <div id="settingsModal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; padding: 2rem; overflow-y: auto;">
-        <div class="dos-panel dos-panel-iron" style="max-width: 600px; margin: 2rem auto; border: 3px solid var(--dos-gold);">
-            <div class="dos-quest-header" style="background: linear-gradient(180deg, var(--dos-gold) 0%, #8B6914 100%); color: var(--dos-black); text-align: center; padding: 1rem; font-family: 'Press Start 2P', monospace; font-size: 1rem;">
-                ⚙️ SETTINGS ⚙️
-            </div>
-            <div style="padding: 2rem; font-family: 'VT323', monospace; font-size: 1.2rem;">
-                <div style="margin-bottom: 1.5rem;">
-                    <label style="display: block; color: var(--dos-text-gray); margin-bottom: 0.5rem;">AI Provider:</label>
-                    <select id="aiProvider" style="width: 100%; padding: 0.75rem; background: var(--dos-black); color: var(--dos-text-white); border: 2px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1.1rem; cursor: pointer;">
-                        <option value="demo">Demo Mode (No API Key)</option>
-                        <option value="openai">OpenAI</option>
-                        <option value="anthropic">Anthropic Claude</option>
-                        <option value="azure">Azure OpenAI</option>
-                    </select>
-                </div>
-                <div id="apiKeySection" style="display: none; margin-bottom: 1.5rem;">
-                    <label style="display: block; color: var(--dos-text-gray); margin-bottom: 0.5rem;">API Key:</label>
-                    <input type="password" id="apiKey" style="width: 100%; padding: 0.75rem; background: var(--dos-black); color: var(--dos-text-white); border: 2px solid var(--dos-silver); font-family: 'VT323', monospace; font-size: 1.1rem;">
-                </div>
-                <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                    <button class="dos-button dos-button-primary" id="btnSaveSettings" style="flex: 1; padding: 1rem; font-family: 'Press Start 2P', monospace; font-size: 0.8rem;">Save</button>
-                    <button class="dos-button" id="btnCloseSettings" style="flex: 1; padding: 1rem; font-family: 'VT323', monospace; font-size: 1.1rem;">Cancel</button>
-                </div>
-            </div>
+        <section class="carbon-results">
+          <article class="carbon-card">
+            <h3>Hierarchy</h3>
+            <p>Clarify the order of page regions and reduce ambiguity in the first decision point.</p>
+          </article>
+          <article class="carbon-card">
+            <h3>Accessibility</h3>
+            <p>Confirm contrast, target size, and keyboard focus treatment before handoff.</p>
+          </article>
+          <article class="carbon-card">
+            <h3>Content</h3>
+            <p>Make labels concise, specific, and aligned with user intent.</p>
+          </article>
+        </section>
+      </div>
+      <input class="visually-hidden" id="designUploadCarbon" type="file" accept="image/*">
+    </section>
+
+    <section class="modal" id="dungeonCreditsModal" aria-modal="true" aria-label="Dungeon credits modal">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="d-modal-window" role="dialog">
+        <header class="d-modal-header">
+          <span>Guild Credits Scroll</span>
+          <button class="modal-close d-modal-close" data-modal-close onclick="closeCreditsModals()" type="button" aria-label="Close credits">X</button>
+        </header>
+        <div class="d-credits-roll" aria-label="Scrolling credits">
+          <div class="d-credits-track" id="dungeonCreditsTrack"></div>
         </div>
-    </div>
+      </div>
+    </section>
 
-    <!-- Floating Action Button for Settings -->
-    <button id="settingsBtn" style="position: fixed; bottom: 20px; right: 20px; width: 60px; height: 60px; border-radius: 50%; background: var(--dos-gold); border: 3px solid var(--dos-black); font-size: 1.5rem; cursor: pointer; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); z-index: 999; transition: all 0.3s ease;">
-        ⚙️
-    </button>
+    <section class="modal" id="dungeonRewardsModal" aria-modal="true" aria-label="Dungeon rewards modal">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="d-modal-window d-reward-window" role="dialog">
+        <header class="d-modal-header">
+          <span>Reward Collection</span>
+          <button class="modal-close d-modal-close" data-modal-close onclick="closeCreditsModals()" type="button" aria-label="Close rewards">X</button>
+        </header>
+        <div class="d-reward-body">
+          <div class="d-reward-summary">
+            <span id="rewardSummaryText">Analyze a design to unlock illustrated quest rewards.</span>
+            <strong class="d-reward-xp" id="rewardXpTotal">XP 0000</strong>
+          </div>
+          <div class="d-reward-grid" id="dungeonRewardGrid"></div>
+        </div>
+      </div>
+    </section>
 
-    <!-- Scripts -->
-    <script src="./js/config.js"></script>
-    <script src="./js/game-engine/xp-system.js"></script>
-    <script src="./js/game-engine/quest-system.js"></script>
-    <script src="./js/quest-integration.js"></script>
-    <script src="./js/dungeon-mode.js"></script>
-    <script src="./js/ai-analyzer-demo.js"></script>
-    
-    <script>
-        // Carbon Mode Button Handler
-        document.getElementById('carbonModeBtn').addEventListener('click', function() {
-            window.location.href = 'index-carbon.html';
-        });
-        
-        // Settings Button Handler
-        document.getElementById('settingsBtn').addEventListener('click', function() {
-            document.getElementById('settingsModal').style.display = 'block';
-        });
-        
-        // Hover effects
-        document.getElementById('carbonModeBtn').addEventListener('mouseenter', function() {
-            this.style.background = 'var(--dos-green)';
-            this.style.color = 'var(--dos-black)';
-            this.style.transform = 'scale(1.05)';
-        });
-        document.getElementById('carbonModeBtn').addEventListener('mouseleave', function() {
-            this.style.background = 'rgba(0, 0, 0, 0.8)';
-            this.style.color = 'var(--dos-green)';
-            this.style.transform = 'scale(1)';
-        });
-        
-        document.getElementById('settingsBtn').addEventListener('mouseenter', function() {
-            this.style.transform = 'scale(1.1) rotate(90deg)';
-        });
-        document.getElementById('settingsBtn').addEventListener('mouseleave', function() {
-            this.style.transform = 'scale(1) rotate(0deg)';
-        
-        // File Upload Handlers
-        let currentFile = null;
-        const fileInput = document.getElementById('fileInput');
-        const btnUpload = document.getElementById('btnUpload');
-        const uploadArea = document.getElementById('uploadArea');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImage = document.getElementById('previewImage');
-        const btnRemove = document.getElementById('btnRemove');
-        const btnAnalyze = document.getElementById('btnAnalyze');
-        const btnNewQuest = document.getElementById('btnNewQuest');
-        
-        // Click to upload
-        if (btnUpload) {
-            btnUpload.addEventListener('click', () => fileInput.click());
+    <section class="modal" id="carbonCreditsModal" aria-modal="true" aria-label="Carbon credits modal">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="carbon-modal-window" role="dialog">
+        <header class="carbon-modal-header">
+          <span>Credits</span>
+          <button class="modal-close carbon-modal-close" data-modal-close onclick="closeCreditsModals()" type="button" aria-label="Close credits">×</button>
+        </header>
+        <div class="carbon-modal-body">
+          <div class="carbon-credits-track" id="carbonCreditsTrack"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const dungeonSkin = document.querySelector("#dungeonSkin");
+    const carbonSkin = document.querySelector("#carbonSkin");
+    const dungeonUpload = document.querySelector("#designUploadDungeon");
+    const carbonUpload = document.querySelector("#designUploadCarbon");
+    const dungeonPreview = document.querySelector("#dungeonPreview");
+    const carbonPreview = document.querySelector("#carbonPreview");
+    const dungeonFileName = document.querySelector("#dungeonFileName");
+    const carbonFileName = document.querySelector("#carbonFileName");
+    const dungeonSubmit = document.querySelector("#dungeonSubmit");
+    const dungeonNarration = document.querySelector("#dungeonNarration");
+    const dungeonCritique = document.querySelector("#dungeonCritique");
+    const carbonAnalyze = document.querySelector("#carbonAnalyze");
+    const carbonExport = document.querySelector("#carbonExport");
+    const carbonReset = document.querySelector("#carbonReset");
+    const carbonSummary = document.querySelector("#carbonSummary");
+    const carbonFocusList = document.querySelector("#carbonFocusList");
+    const carbonClarity = document.querySelector("#carbonClarity");
+    const carbonAccessibility = document.querySelector("#carbonAccessibility");
+    const carbonRisk = document.querySelector("#carbonRisk");
+    const dungeonCreditsTrack = document.querySelector("#dungeonCreditsTrack");
+    const carbonCreditsTrack = document.querySelector("#carbonCreditsTrack");
+    const dungeonRewardGrid = document.querySelector("#dungeonRewardGrid");
+    const rewardSummaryText = document.querySelector("#rewardSummaryText");
+    const rewardXpTotal = document.querySelector("#rewardXpTotal");
+    const dungeonResultScene = document.querySelector("#dungeonResultScene");
+    const dHpFill = document.querySelector("#dHpFill");
+    const dXpFill = document.querySelector("#dXpFill");
+    const dRiskFill = document.querySelector("#dRiskFill");
+    const dHpValue = document.querySelector("#dHpValue");
+    const dXpValue = document.querySelector("#dXpValue");
+    const dRiskValue = document.querySelector("#dRiskValue");
+    const dHierarchyLevel = document.querySelector("#dHierarchyLevel");
+    const dContrastLevel = document.querySelector("#dContrastLevel");
+    const dFlowLevel = document.querySelector("#dFlowLevel");
+    const dCopyLevel = document.querySelector("#dCopyLevel");
+    const dMasterTitle = document.querySelector("#dMasterTitle");
+    const dMasterDescription = document.querySelector("#dMasterDescription");
+    let uploadedFileName = "";
+    let lastObjectUrl = "";
+    let carbonAnalyzed = false;
+    let uploadedAudit = null;
+    let dungeonTypingTimer = null;
+    let unlockedRewardIds = new Set();
+
+    const rewardScenes = [
+      { id: "typography-tavern", title: "Master Typographer", rarity: "Common", xp: 120, scene: "tavern", description: "A warm tavern where carved letterforms glow above scrolls and ink bottles." },
+      { id: "spacing-campfire", title: "Spacing Master", rarity: "Common", xp: 140, scene: "campfire", description: "A campsite where stones, lanterns, and supplies sit in perfect rhythm." },
+      { id: "contrast-forge", title: "Contrast Champion", rarity: "Rare", xp: 220, scene: "forge", description: "A glowing forge where accessible contrast is hammered into a shield." },
+      { id: "gridkeeper-observatory", title: "Grid Guardian", rarity: "Rare", xp: 240, scene: "observatory", description: "An ancient tower of maps, rulers, stars, and strict layout lines." },
+      { id: "component-vault", title: "Component Collector", rarity: "Rare", xp: 260, scene: "vault", description: "A treasure room overflowing with buttons, tags, cards, and Carbon controls." },
+      { id: "accessibility-lighthouse", title: "Accessibility Hero", rarity: "Epic", xp: 320, scene: "lighthouse", description: "A coastal beacon reveals safe paths, readable signs, and inclusive passage." },
+      { id: "token-alchemist-lab", title: "Token Alchemist", rarity: "Epic", xp: 340, scene: "lab", description: "Potion bottles bubble with spacing, type, color, and semantic tokens." },
+      { id: "color-crystal-cavern", title: "Palette Keeper", rarity: "Epic", xp: 360, scene: "cavern", description: "Underground crystals glow with semantic color and IBM palette magic." },
+      { id: "ux-library", title: "Research Scholar", rarity: "Common", xp: 160, scene: "library", description: "Ancient books, notes, candles, and maps preserve user research lore." },
+      { id: "prototype-workshop", title: "Prototype Builder", rarity: "Rare", xp: 260, scene: "workshop", description: "A workbench of wireframes, tools, and wooden mockups ready for testing." },
+      { id: "final-boss-room", title: "Dungeon Conqueror", rarity: "Legendary", xp: 500, scene: "boss", description: "Victory banners rise over a defeated Design Monster and glowing clean UI." },
+      { id: "ibm-carbon-shrine", title: "Carbon Champion", rarity: "Legendary", xp: 520, scene: "shrine", description: "A stone shrine where a grid is carved into ancient Carbon tablets." }
+    ];
+
+    const creditSections = [
+      ["Carbon Quest", "The Design Guild"],
+      ["Purpose", "Carbon Quest is an AI-powered design adventure that turns design reviews into guided quests inspired by IBM Design Thinking, the Carbon Design System, and IBM Design Language. Designers upload interfaces to receive feedback on hierarchy, typography, accessibility, spacing, component usage, and UX while earning XP, badges, and new ranks. The goal is to make IBM design principles engaging, memorable, and actionable."],
+      ["Inputs", "Design screenshots, mockups, UI exports, or presentation slides. Optional project goals and target audience context can improve the critique."],
+      ["Build Capabilities", "GitHub Pages for hosting. IBM Granite foundation models via watsonx or BAM where applicable. No additional third-party AI services required."],
+      ["Knowledge Systems", "IBM Design Language guidelines, Carbon Design System principles, IBM Design Thinking framework, and WCAG 2.1 accessibility standards."],
+      ["Paloma Campo", "Designer, IBM Blue Studio", "Guild Cartographer of Design Systems"],
+      ["Adam Ames", "Sr Production Designer, Imagery, IBM Blue Studio", "Master Image-Mage of the Blue Studio"],
+      ["Jennifer Quinton", "Senior Designer, IBM Blue Studio", "Senior Rune-Smith of Interface Craft"],
+      ["Jonah Schrogin", "Senior Production Designer, IBM Blue Studio", "Keeper of Production Scrolls"]
+    ];
+
+    const ibmPalette = [
+      { name: "Blue 100", hex: "#001141", rgb: [0, 17, 65] },
+      { name: "Blue 80", hex: "#002d9c", rgb: [0, 45, 156] },
+      { name: "Blue 60", hex: "#0f62fe", rgb: [15, 98, 254] },
+      { name: "Cyan 40", hex: "#33b1ff", rgb: [51, 177, 255] },
+      { name: "Cyan 20", hex: "#bae6ff", rgb: [186, 230, 255] },
+      { name: "Teal 40", hex: "#08bdba", rgb: [8, 189, 186] },
+      { name: "Green 40", hex: "#42be65", rgb: [66, 190, 101] },
+      { name: "Red 50", hex: "#fa4d56", rgb: [250, 77, 86] },
+      { name: "Red 40", hex: "#ff8389", rgb: [255, 131, 137] },
+      { name: "Purple 50", hex: "#a56eff", rgb: [165, 110, 255] },
+      { name: "Yellow 50", hex: "#b28600", rgb: [178, 134, 0] },
+      { name: "Yellow 20", hex: "#fddc69", rgb: [253, 220, 105] },
+      { name: "Gray 100", hex: "#161616", rgb: [22, 22, 22] },
+      { name: "Gray 80", hex: "#393939", rgb: [57, 57, 57] },
+      { name: "Gray 60", hex: "#6f6f6f", rgb: [111, 111, 111] },
+      { name: "Gray 30", hex: "#c6c6c6", rgb: [198, 198, 198] },
+      { name: "Gray 20", hex: "#e0e0e0", rgb: [224, 224, 224] },
+      { name: "Gray 10", hex: "#f4f4f4", rgb: [244, 244, 244] },
+      { name: "White", hex: "#ffffff", rgb: [255, 255, 255] }
+    ];
+
+    const commandCopy = {
+      analyze: {
+        narration: "<strong>Analyze:</strong> Equip an image, then press Submit for Analysis. The Dungeon Master will score hierarchy, contrast, flow, and copy.",
+        critique: ["Awaiting design artifact.", "Drop image in the scroll window.", "Submit when the scroll is equipped."]
+      },
+      quests: {
+        narration: "<strong>Quest Log:</strong> Current objectives focus the review party on the highest-impact fixes before polish work begins.",
+        critique: ["Quest 1: Find the primary action.", "Quest 2: Test contrast under torchlight.", "Quest 3: Remove one source of visual noise."]
+      },
+      rewards: {
+        narration: "<strong>Rewards:</strong> Strong design choices earn clarity points, accessibility gold, and release-readiness XP.",
+        critique: ["Reward: Clear hierarchy grants +20 XP.", "Reward: Accessible contrast grants +30 gold.", "Reward: Focused copy lowers risk."]
+      },
+      settings: {
+        narration: "<strong>Settings:</strong> Dungeon display mode is locked to DOS RPG styling so it stays visually separate from Carbon.",
+        critique: ["Mode: Pixel borders enabled.", "Tone: Dungeon Master critique.", "Skin switch: top right or command bar."]
+      }
+    };
+
+    function switchSkin(name) {
+      const showDungeon = name === "dungeon";
+      dungeonSkin.classList.toggle("is-active", showDungeon);
+      carbonSkin.classList.toggle("is-active", !showDungeon);
+    }
+
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      })[char]);
+    }
+
+    function colorDistance(a, b) {
+      return Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    }
+
+    function nearestIbmColor(rgb) {
+      return ibmPalette
+        .map((color) => ({ ...color, distance: colorDistance(rgb, color.rgb) }))
+        .sort((a, b) => a.distance - b.distance)[0];
+    }
+
+    function luminance(rgb) {
+      const channel = rgb.map((value) => {
+        const next = value / 255;
+        return next <= 0.03928 ? next / 12.92 : ((next + 0.055) / 1.055) ** 2.4;
+      });
+      return 0.2126 * channel[0] + 0.7152 * channel[1] + 0.0722 * channel[2];
+    }
+
+    function contrastRatio(a, b) {
+      const l1 = luminance(a);
+      const l2 = luminance(b);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    }
+
+    function clampScore(value) {
+      return Math.max(0, Math.min(100, Math.round(value)));
+    }
+
+    function twoDigitLevel(value) {
+      return `LV ${String(Math.max(1, Math.min(20, Math.round(value)))).padStart(2, "0")}`;
+    }
+
+    function dungeonOutcomeForAudit(audit, state = "idle") {
+      if (state === "loaded") {
+        return {
+          title: "Scroll Keeper Awaiting Judgment",
+          description: "The artifact is equipped. Submit it to reveal grid omens, palette runes, and accessibility wards.",
+          scene: "scroll"
+        };
+      }
+
+      if (!audit) {
+        return {
+          title: "Archmage of Usability",
+          description: "Watching hierarchy, contrast, spacing, and conversion traps from the torchlit review chamber.",
+          scene: "idle"
+        };
+      }
+
+      if (!audit.isIbmCandidate) {
+        if (audit.naturalPhotoSignal) {
+          return {
+            title: "Portrait Mimic at the Gate",
+            description: "This looks like a photo, not an IBM interface. The master rejects the disguise; bring a product UI scroll for judgment.",
+            scene: "danger"
+          };
         }
-        
-        // Drag and drop
-        if (uploadArea) {
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.style.borderColor = 'var(--dos-gold)';
-                uploadArea.style.background = 'rgba(255, 215, 0, 0.1)';
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.style.borderColor = 'var(--dos-silver)';
-                uploadArea.style.background = 'rgba(0, 0, 0, 0.5)';
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.style.borderColor = 'var(--dos-silver)';
-                uploadArea.style.background = 'rgba(0, 0, 0, 0.5)';
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleFileSelect(files[0]);
-                }
-            });
-        }
-        
-        // File input change
-        if (fileInput) {
-            fileInput.addEventListener('change', (e) => {
-                if (e.target.files.length > 0) {
-                    handleFileSelect(e.target.files[0]);
-                }
-            });
-        }
-        
-        function handleFileSelect(file) {
-            if (!file.type.startsWith('image/')) {
-                alert('Please select an image file');
-                return;
+
+        return {
+          title: "Mimic Detector of the False Scroll",
+          description: "This does not read as an IBM or Carbon interface. Do not try to trick the master with a tavern map, game screen, or rogue artifact.",
+          scene: "danger"
+        };
+      }
+
+      if (audit.risk > 60) {
+        return {
+          title: "Warden of Broken Patterns",
+          description: "High risk detected. The path is guarded by spacing traps, color hazards, or contrast beasts.",
+          scene: "danger"
+        };
+      }
+
+      if (!audit.gridPass) {
+        return {
+          title: "Gridkeeper of the Crooked Map",
+          description: "The design is promising, but its canvas has slipped from the Carbon grid. Realign the map before marching on.",
+          scene: "quest"
+        };
+      }
+
+      if (audit.paletteMatch < 60) {
+        return {
+          title: "Palette Seer of Strange Crystals",
+          description: "The layout holds, but several colors drift from the IBM palette. Tune the crystals before claiming the reward.",
+          scene: "quest"
+        };
+      }
+
+      if (audit.tonalContrast < 4.5) {
+        return {
+          title: "Contrast Cleric at the Dim Gate",
+          description: "The party can see the route, but the light is weak. Raise contrast before entering the next chamber.",
+          scene: "danger"
+        };
+      }
+
+      if (audit.clarity >= 85 && audit.accessibility >= 85 && audit.risk <= 25) {
+        return {
+          title: "Carbon Champion of the Blue Shrine",
+          description: "A strong quest result. Grid, palette, and contrast align like runes on an ancient IBM tablet.",
+          scene: "camp"
+        };
+      }
+
+      return {
+        title: "Quest Cartographer of Interface Paths",
+        description: "The design has a usable route. Tighten spacing, type, and component choices to unlock higher rewards.",
+        scene: "quest"
+      };
+    }
+
+    function drawPixelScene(audit, state = "idle") {
+      const canvas = document.createElement("canvas");
+      canvas.width = 180;
+      canvas.height = 130;
+      const ctx = canvas.getContext("2d");
+      ctx.imageSmoothingEnabled = false;
+
+      const rect = (x, y, w, h, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+      };
+
+      rect(0, 0, 180, 130, "#000000");
+      rect(6, 6, 168, 118, "#b28600");
+      rect(10, 10, 160, 110, "#000000");
+
+      const clarity = audit?.clarity ?? 45;
+      const access = audit?.accessibility ?? 45;
+      const risk = audit?.risk ?? 55;
+      const gridPass = audit?.gridPass ?? false;
+      const paletteMatch = audit?.paletteMatch ?? 0;
+      const contrast = audit?.tonalContrast ?? 0;
+      const scene = dungeonOutcomeForAudit(audit, state).scene;
+
+      if (scene === "scroll") {
+        rect(24, 26, 132, 76, "#f4f4f4");
+        rect(28, 30, 124, 68, "#e0e0e0");
+        for (let y = 38; y <= 82; y += 10) rect(40, y, 82, 3, "#33b1ff");
+        rect(126, 38, 12, 12, "#0f62fe");
+        rect(126, 58, 12, 12, "#42be65");
+        rect(126, 78, 12, 12, "#fa4d56");
+        rect(20, 22, 12, 84, "#fddc69");
+        rect(148, 22, 12, 84, "#fddc69");
+      } else if (scene === "camp") {
+        rect(16, 18, 148, 52, "#001141");
+        rect(16, 70, 148, 42, "#393939");
+        rect(52, 82, 76, 8, "#6f6f6f");
+        rect(78, 50, 24, 46, "#b28600");
+        rect(84, 32, 12, 52, "#fddc69");
+        rect(72, 52, 36, 28, "#fa4d56");
+        rect(82, 42, 18, 32, "#ff8389");
+        rect(58, 94, 64, 8, "#42be65");
+        rect(30, 30, 26, 20, "#33b1ff");
+        rect(126, 30, 24, 18, "#08bdba");
+      } else if (scene === "danger") {
+        rect(18, 18, 144, 94, "#161616");
+        for (let x = 22; x < 158; x += 16) rect(x, 22, 8, 86, "#393939");
+        rect(28, 84, 124, 10, "#fa4d56");
+        rect(40, 44, 100, 12, "#fa4d56");
+        rect(54, 60, 72, 10, "#fddc69");
+        rect(78, 30, 26, 66, "#33b1ff");
+        rect(44, 98, 92, 6, "#b28600");
+      } else {
+        rect(18, 18, 144, 94, "#f4f4f4");
+        rect(28, 28, 42, 28, gridPass ? "#42be65" : "#fa4d56");
+        rect(78, 28, 30, 28, paletteMatch >= 70 ? "#0f62fe" : "#b28600");
+        rect(116, 28, 32, 28, contrast >= 4.5 ? "#08bdba" : "#ff8389");
+        rect(28, 66, 120, 7, "#001141");
+        rect(28, 82, 92, 7, "#33b1ff");
+        rect(28, 98, 64, 7, "#42be65");
+      }
+
+      for (let x = 14; x < 166; x += 14) {
+        rect(x, 12, 8, 4, "#fa4d56");
+        rect(x, 114, 8, 4, "#fa4d56");
+      }
+      rect(10, 10, 10, 10, "#fddc69");
+      rect(160, 10, 10, 10, "#fddc69");
+      rect(10, 110, 10, 10, "#fddc69");
+      rect(160, 110, 10, 10, "#fddc69");
+
+      return canvas.toDataURL("image/png");
+    }
+
+    function setDungeonScene(audit, state = "idle") {
+      const outcome = dungeonOutcomeForAudit(audit, state);
+      dMasterTitle.textContent = outcome.title;
+      dMasterDescription.textContent = outcome.description;
+      const img = new Image();
+      img.alt = `${outcome.title} pixel-art analysis result`;
+      img.src = drawPixelScene(audit, state);
+      dungeonResultScene.replaceChildren(img);
+    }
+
+    function updateDungeonStats(audit) {
+      const hp = clampScore(audit?.accessibility ?? 84);
+      const xp = clampScore(audit?.clarity ?? 62);
+      const risk = clampScore(audit?.risk ?? 38);
+      dHpValue.textContent = hp;
+      dXpValue.textContent = xp;
+      dRiskValue.textContent = risk;
+      dHpFill.style.width = `${hp}%`;
+      dXpFill.style.width = `${xp}%`;
+      dRiskFill.style.width = `${risk}%`;
+      dHierarchyLevel.textContent = twoDigitLevel((audit?.clarity ?? 60) / 5);
+      dContrastLevel.textContent = twoDigitLevel((audit?.accessibility ?? 45) / 5);
+      dFlowLevel.textContent = twoDigitLevel((audit?.gridPass ? 90 : 48) / 5);
+      dCopyLevel.textContent = twoDigitLevel(Math.max(4, 18 - risk / 8));
+    }
+
+    function rewardsForAudit(audit) {
+      if (!audit) return [];
+      if (!audit.isIbmCandidate) return [];
+      const ids = new Set(["ux-library"]);
+      if (audit.clarity >= 50) ids.add("typography-tavern");
+      if (audit.gridPass) ids.add("spacing-campfire");
+      if (audit.gridPass) ids.add("gridkeeper-observatory");
+      if (audit.tonalContrast >= 4.5) ids.add("contrast-forge");
+      if (audit.accessibility >= 70) ids.add("accessibility-lighthouse");
+      if (audit.paletteMatch >= 60) ids.add("color-crystal-cavern");
+      if (audit.paletteMatch >= 75) ids.add("token-alchemist-lab");
+      if (audit.clarity >= 70) ids.add("component-vault");
+      if (audit.clarity >= 80) ids.add("prototype-workshop");
+      if (audit.clarity >= 85 && audit.accessibility >= 85 && audit.risk <= 25) ids.add("final-boss-room");
+      if (audit.gridPass && audit.paletteMatch >= 75 && audit.tonalContrast >= 7) ids.add("ibm-carbon-shrine");
+      return [...ids];
+    }
+
+    function renderRewardCards() {
+      const xp = rewardScenes
+        .filter((reward) => unlockedRewardIds.has(reward.id))
+        .reduce((total, reward) => total + reward.xp, 0);
+      const count = unlockedRewardIds.size;
+      rewardSummaryText.textContent = uploadedAudit
+        ? `${count} of ${rewardScenes.length} illustrated rewards unlocked from the latest Dungeon Master analysis.`
+        : "Analyze a design to unlock illustrated quest rewards.";
+      rewardXpTotal.textContent = `XP ${String(xp).padStart(4, "0")}`;
+      dungeonRewardGrid.innerHTML = rewardScenes.map((reward) => {
+        const unlocked = unlockedRewardIds.has(reward.id);
+        return `
+          <article class="reward-card ${unlocked ? "is-unlocked" : "is-locked"}" data-rarity="${reward.rarity}" aria-label="${escapeHtml(reward.title)} reward, ${unlocked ? "unlocked" : "locked"}">
+            <div class="reward-scene ${reward.scene}" aria-hidden="true"></div>
+            <strong class="reward-title">${escapeHtml(reward.title)}</strong>
+            <div class="reward-meta"><span>${reward.rarity}</span><span>XP ${reward.xp}</span></div>
+            <p class="reward-text">${escapeHtml(reward.description)}</p>
+            <span class="reward-lock">${unlocked ? "Unlocked by analysis" : "Locked: improve the quest"}</span>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function updateRewardsFromAudit(audit) {
+      unlockedRewardIds = new Set(rewardsForAudit(audit));
+      renderRewardCards();
+    }
+
+    function openRewardsModal() {
+      renderRewardCards();
+      openModal("dungeonRewardsModal");
+    }
+
+    function analyzeImageFromUrl(src) {
+      return new Promise((resolve) => {
+        const image = new Image();
+        image.onload = () => {
+          const canvas = document.createElement("canvas");
+          const sampleWidth = Math.min(320, image.naturalWidth);
+          const sampleHeight = Math.max(1, Math.round(image.naturalHeight * (sampleWidth / image.naturalWidth)));
+          canvas.width = sampleWidth;
+          canvas.height = sampleHeight;
+          const context = canvas.getContext("2d", { willReadFrequently: true });
+          context.drawImage(image, 0, 0, sampleWidth, sampleHeight);
+          const pixels = context.getImageData(0, 0, sampleWidth, sampleHeight).data;
+          const buckets = new Map();
+          const colorBins = new Set();
+          let paletteHits = 0;
+          let exactPaletteHits = 0;
+          let distanceTotal = 0;
+          let skinTone = 0;
+          let softOrganic = 0;
+          let dark = 0;
+          let light = 0;
+          let total = 0;
+          let darkest = [255, 255, 255];
+          let lightest = [0, 0, 0];
+
+          for (let i = 0; i < pixels.length; i += 16) {
+            const rgb = [pixels[i], pixels[i + 1], pixels[i + 2]];
+            const alpha = pixels[i + 3];
+            if (alpha < 20) continue;
+            colorBins.add(`${rgb[0] >> 4}-${rgb[1] >> 4}-${rgb[2] >> 4}`);
+            const maxChannel = Math.max(...rgb);
+            const minChannel = Math.min(...rgb);
+            if (rgb[0] > 95 && rgb[1] > 45 && rgb[2] > 25 && rgb[0] > rgb[1] && rgb[1] > rgb[2] && maxChannel - minChannel > 15) {
+              skinTone += 1;
             }
-            
-            currentFile = file;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                previewImage.src = e.target.result;
-                const uploadContent = document.querySelector('#uploadArea > div:first-child');
-                const uploadButton = document.querySelector('#uploadArea > button');
-                if (uploadContent) uploadContent.style.display = 'none';
-                if (uploadButton) uploadButton.style.display = 'none';
-                if (imagePreview) imagePreview.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
+            if (maxChannel - minChannel < 62 && maxChannel > 80 && minChannel > 35) {
+              softOrganic += 1;
+            }
+            const nearest = nearestIbmColor(rgb);
+            if (nearest.distance <= 42) paletteHits += 1;
+            if (nearest.distance <= 26) exactPaletteHits += 1;
+            distanceTotal += nearest.distance;
+            const key = nearest.name;
+            const current = buckets.get(key) || { ...nearest, count: 0 };
+            current.count += 1;
+            buckets.set(key, current);
+            const lum = luminance(rgb);
+            if (lum < 0.18) dark += 1;
+            if (lum > 0.78) light += 1;
+            if (lum < luminance(darkest)) darkest = rgb;
+            if (lum > luminance(lightest)) lightest = rgb;
+            total += 1;
+          }
+
+          const widthRemainder = image.naturalWidth % 16;
+          const heightRemainder = image.naturalHeight % 16;
+          const gridPass = widthRemainder === 0 && heightRemainder === 0;
+          const paletteMatch = total ? Math.round((paletteHits / total) * 100) : 0;
+          const exactPaletteMatch = total ? Math.round((exactPaletteHits / total) * 100) : 0;
+          const averagePaletteDistance = total ? Math.round(distanceTotal / total) : 999;
+          const colorDiversity = total ? Math.round((colorBins.size / total) * 100) : 0;
+          const skinTonePercent = total ? Math.round((skinTone / total) * 100) : 0;
+          const softOrganicPercent = total ? Math.round((softOrganic / total) * 100) : 0;
+          const tonalContrast = contrastRatio(darkest, lightest);
+          const bucketPercent = (test) => {
+            const count = [...buckets.values()]
+              .filter(test)
+              .reduce((sum, color) => sum + color.count, 0);
+            return total ? Math.round((count / total) * 100) : 0;
+          };
+          const carbonSurfacePercent = bucketPercent((color) => /^(Gray|White|Blue|Cyan|Teal)/.test(color.name));
+          const loudAccentPercent = bucketPercent((color) => /^(Red|Yellow|Green|Purple)/.test(color.name));
+          const greenTextSignal = bucketPercent((color) => /^Green/.test(color.name));
+          const vintageGameSignal = (dark > total * 0.34 && loudAccentPercent > 18 && greenTextSignal > 7) || averagePaletteDistance > 58;
+          const naturalPhotoSignal = colorDiversity > 34 || skinTonePercent > 9 || (softOrganicPercent > 45 && averagePaletteDistance > 32);
+          const carbonUiSignal = carbonSurfacePercent >= 55 && loudAccentPercent <= 38 && colorDiversity <= 30;
+          const ibmCompliance = clampScore(
+            exactPaletteMatch * 0.42 +
+            carbonSurfacePercent * 0.24 +
+            (carbonUiSignal ? 14 : 0) +
+            (gridPass ? 12 : 0) +
+            (tonalContrast >= 4.5 ? 10 : 0) -
+            (loudAccentPercent > 38 ? 12 : 0) -
+            (vintageGameSignal ? 26 : 0) -
+            (naturalPhotoSignal ? 34 : 0)
+          );
+          const isIbmCandidate = ibmCompliance >= 58 && exactPaletteMatch >= 34 && carbonUiSignal && !vintageGameSignal && !naturalPhotoSignal;
+          const dominant = [...buckets.values()]
+            .sort((a, b) => b.count - a.count)
+            .slice(0, 5)
+            .map((color) => ({
+              name: color.name,
+              hex: color.hex,
+              percent: total ? Math.round((color.count / total) * 100) : 0
+            }));
+          const clarity = isIbmCandidate
+            ? Math.max(35, Math.min(98, 58 + (gridPass ? 18 : -8) + Math.round(exactPaletteMatch / 8)))
+            : Math.max(10, Math.min(42, Math.round(ibmCompliance / 2)));
+          const accessibility = isIbmCandidate
+            ? Math.max(30, Math.min(98, Math.round(tonalContrast >= 7 ? 88 : tonalContrast >= 4.5 ? 74 : 48) + (light > total * 0.08 && dark > total * 0.08 ? 4 : -4)))
+            : Math.max(18, Math.min(58, Math.round(tonalContrast >= 4.5 ? 48 : 28)));
+          const risk = isIbmCandidate
+            ? Math.max(5, Math.min(95, 100 - Math.round((clarity + accessibility) / 2)))
+            : Math.max(76, 100 - ibmCompliance);
+
+          resolve({
+            width: image.naturalWidth,
+            height: image.naturalHeight,
+            gridPass,
+            widthRemainder,
+            heightRemainder,
+            paletteMatch,
+            exactPaletteMatch,
+            averagePaletteDistance,
+            colorDiversity,
+            skinTonePercent,
+            softOrganicPercent,
+            carbonSurfacePercent,
+            loudAccentPercent,
+            greenTextSignal,
+            vintageGameSignal,
+            naturalPhotoSignal,
+            carbonUiSignal,
+            ibmCompliance,
+            isIbmCandidate,
+            tonalContrast,
+            dominant,
+            clarity,
+            accessibility,
+            risk,
+            lightPercent: total ? Math.round((light / total) * 100) : 0,
+            darkPercent: total ? Math.round((dark / total) * 100) : 0
+          });
+        };
+        image.onerror = () => resolve(null);
+        image.src = src;
+      });
+    }
+
+    function buildAuditFindings() {
+      if (!uploadedAudit) {
+        if (uploadedFileName) {
+          return {
+            summary: `${uploadedFileName} is loaded, but the image audit is still reading pixel data. Try Analyze again in a moment.`,
+            scores: { clarity: 0, accessibility: 0, risk: 0 },
+            findings: [
+              ["", "Image file is present."],
+              ["teal", "Waiting for dimension, palette, and contrast sampling to finish."],
+              ["purple", "Typography still requires source-file verification for IBM Plex."]
+            ]
+          };
         }
-        
-        // Remove image
-        if (btnRemove) {
-            btnRemove.addEventListener('click', () => {
-                currentFile = null;
-                fileInput.value = '';
-                imagePreview.style.display = 'none';
-                const uploadContent = document.querySelector('#uploadArea > div:first-child');
-                const uploadButton = document.querySelector('#uploadArea > button');
-                if (uploadContent) uploadContent.style.display = 'block';
-                if (uploadButton) uploadButton.style.display = 'block';
-            });
+
+        return {
+          summary: "Upload or drop an image before running analysis.",
+          scores: { clarity: 0, accessibility: 0, risk: 0 },
+          findings: [
+            ["", "Drop an image into the preview area."],
+            ["teal", "The audit checks IBM 2x grid rhythm, Carbon palette proximity, and tonal contrast."],
+            ["red", "Typography cannot be verified from a flat screenshot; use the source design file to confirm IBM Plex."]
+          ]
+        };
+      }
+
+      const dominantNames = uploadedAudit.dominant.map((color) => `${color.name} ${color.percent}%`).join(", ");
+
+      if (!uploadedAudit.isIbmCandidate) {
+        const impostorReason = uploadedAudit.naturalPhotoSignal
+          ? `The artifact looks like a natural photo or non-interface image: color diversity ${uploadedAudit.colorDiversity}%, skin-tone/organic signal ${Math.max(uploadedAudit.skinTonePercent, uploadedAudit.softOrganicPercent)}%.`
+          : uploadedAudit.vintageGameSignal
+            ? "The artifact has a strong retro/game-art signal: dark canvas plus loud saturated accents and green/cyan text-like color usage."
+            : "The artifact does not show enough Carbon-like neutral surfaces, IBM blue/gray structure, or product UI evidence.";
+
+        return {
+          summary: `${uploadedFileName} does not appear to be an IBM Design Language or Carbon interface. The master sees a rogue artifact, not a compliant IBM design scroll.`,
+          scores: {
+            clarity: uploadedAudit.clarity,
+            accessibility: uploadedAudit.accessibility,
+            risk: uploadedAudit.risk
+          },
+          findings: [
+            ["red", `IBM compliance score is ${uploadedAudit.ibmCompliance}/100. This is below the threshold for Carbon/IBM critique.`],
+            ["red", `Strict IBM palette match is ${uploadedAudit.exactPaletteMatch}%; average color distance is ${uploadedAudit.averagePaletteDistance}. Dominant matches: ${dominantNames}.`],
+            ["red", impostorReason],
+            ["", "Dungeon Master verdict: this is not an IBM image. Do not try to trick the master; upload a product UI, Carbon mockup, IBM page, or design-system interface."],
+            ["purple", "If this is only a mood/reference image, keep it as inspiration, but do not score it as IBM Design Language compliance."]
+          ]
+        };
+      }
+
+      const gridText = uploadedAudit.gridPass
+        ? `Canvas dimensions are ${uploadedAudit.width} x ${uploadedAudit.height}, aligned to a 16px Carbon grid.`
+        : `Canvas dimensions are ${uploadedAudit.width} x ${uploadedAudit.height}; width is ${uploadedAudit.widthRemainder}px and height is ${uploadedAudit.heightRemainder}px off a 16px rhythm.`;
+      const paletteText = `${uploadedAudit.exactPaletteMatch}% of sampled pixels strictly match the IBM palette; ${uploadedAudit.paletteMatch}% are close. Dominant matches: ${dominantNames}.`;
+      const contrastText = `Approximate tonal contrast range is ${uploadedAudit.tonalContrast.toFixed(1)}:1, with ${uploadedAudit.darkPercent}% dark and ${uploadedAudit.lightPercent}% light samples.`;
+      const typographyText = "Typography check: a screenshot cannot prove Plex usage. Verify IBM Plex Sans/Mono in the source file, then use the screenshot audit for layout and color.";
+
+      return {
+        summary: `${uploadedFileName} was checked against IBM Design Language signals with an IBM compliance score of ${uploadedAudit.ibmCompliance}/100: 2x grid rhythm, IBM palette proximity, Carbon-like surfaces, tonal contrast, and source-verification needs for Plex typography.`,
+        scores: {
+          clarity: uploadedAudit.clarity,
+          accessibility: uploadedAudit.accessibility,
+          risk: uploadedAudit.risk
+        },
+        findings: [
+          [uploadedAudit.gridPass ? "teal" : "red", gridText],
+          [uploadedAudit.exactPaletteMatch >= 55 ? "" : "red", paletteText],
+          [uploadedAudit.carbonSurfacePercent >= 55 ? "teal" : "red", `Carbon surface signal is ${uploadedAudit.carbonSurfacePercent}% neutral/blue/cyan/teal. Loud accent use is ${uploadedAudit.loudAccentPercent}%.`],
+          [uploadedAudit.tonalContrast >= 4.5 ? "teal" : "red", contrastText],
+          ["purple", typographyText],
+          ["", "Next step: align spacing, gutters, and type positions to Carbon's 2x grid before judging visual polish."]
+        ]
+      };
+    }
+
+    function typeDungeonText(html, items) {
+      clearInterval(dungeonTypingTimer);
+      const plain = html.replace(/<[^>]+>/g, "");
+      let index = 0;
+      dungeonNarration.innerHTML = "<strong>Dungeon Master writes:</strong> <span id=\"dTyping\"></span><span class=\"d-cursor\">_</span>";
+      dungeonCritique.innerHTML = "<div>Reading IBM grid runes...</div>";
+      dungeonTypingTimer = setInterval(() => {
+        index += 2;
+        const visible = plain.slice(0, index);
+        dungeonNarration.innerHTML = `<strong>Dungeon Master writes:</strong> ${escapeHtml(visible)}<span class="d-cursor">_</span>`;
+        if (index >= plain.length) {
+          clearInterval(dungeonTypingTimer);
+          dungeonNarration.innerHTML = html;
+          dungeonCritique.innerHTML = items.map((item) => `<div>${escapeHtml(item)}</div>`).join("");
         }
-        
-        // Analyze button
-        if (btnAnalyze) {
-            btnAnalyze.addEventListener('click', () => {
-                if (!currentFile) return;
-                
-                // Hide upload area, show loading
-                document.getElementById('uploadArea').style.display = 'none';
-                document.getElementById('loadingState').style.display = 'block';
-                
-                // Simulate analysis (3 seconds)
-                setTimeout(() => {
-                    document.getElementById('loadingState').style.display = 'none';
-                    document.getElementById('resultsArea').style.display = 'block';
-                    
-                    // Show demo results
-                    const resultsDiv = document.getElementById('critiqueResults');
-                    resultsDiv.innerHTML = `
-                        <div style="margin-bottom: 1.5rem;">
-                            <span style="color: var(--dos-gold); font-weight: bold;">[DUNGEON MASTER]:</span> Your design scroll has been examined!
-                        </div>
-                        <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0, 255, 0, 0.1); border-left: 3px solid var(--dos-green);">
-                            <strong style="color: var(--dos-green);">✓ STRENGTHS:</strong><br>
-                            • Good use of spacing and hierarchy<br>
-                            • Clear visual structure<br>
-                            • Readable typography
-                        </div>
-                        <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(255, 215, 0, 0.1); border-left: 3px solid var(--dos-gold);">
-                            <strong style="color: var(--dos-gold);">⚠ AREAS FOR IMPROVEMENT:</strong><br>
-                            • Consider IBM Carbon Design System components<br>
-                            • Verify WCAG 2.1 AA color contrast<br>
-                            • Align to 2x Grid system
-                        </div>
-                        <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 215, 0, 0.2); border: 2px solid var(--dos-gold);">
-                            <div style="font-size: 2rem; color: var(--dos-gold); margin-bottom: 0.5rem;">⚡ +150 XP ⚡</div>
-                            <div style="color: var(--dos-text-gray);">Quest completed! Experience gained!</div>
-                        </div>
-                    `;
-                }, 3000);
-            });
+      }, 18);
+    }
+
+    function setDungeonMessage(command) {
+      const copy = commandCopy[command];
+      if (!copy) return;
+      dungeonNarration.innerHTML = copy.narration;
+      dungeonCritique.innerHTML = copy.critique.map((item) => `<div>${item}</div>`).join("");
+      document.querySelectorAll(".d-command[data-command]").forEach((button) => {
+        button.classList.toggle("is-selected", button.dataset.command === command);
+      });
+    }
+
+    function runAnalysis() {
+      if (!uploadedFileName) {
+        setDungeonMessage("analyze");
+        dungeonNarration.innerHTML = "<strong>The Dungeon Master blocks the gate:</strong> No design scroll is equipped. Drop an image into the left panel or use Upload Scroll first.";
+        return;
+      }
+
+      const audit = buildAuditFindings();
+      const narration = `<strong>IBM IDL analysis complete:</strong> ${audit.summary}`;
+      const critique = audit.findings.map((finding) => finding[1]);
+      if (uploadedAudit) {
+        updateDungeonStats(uploadedAudit);
+        setDungeonScene(uploadedAudit, "analyzed");
+        updateRewardsFromAudit(uploadedAudit);
+      }
+      typeDungeonText(narration, critique);
+      document.querySelectorAll(".d-command[data-command]").forEach((button) => {
+        button.classList.toggle("is-selected", button.dataset.command === "analyze");
+      });
+    }
+
+    function runCarbonAnalysis() {
+      if (!uploadedFileName) {
+        carbonSummary.textContent = "Upload or drop an image before running analysis.";
+        carbonFocusList.innerHTML = [
+          ["", "Drop an image into the preview area."],
+          ["teal", "Use Upload image if dragging is not convenient."],
+          ["red", "Analysis starts after a design file is selected."]
+        ].map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+        carbonPreview.scrollIntoView({ behavior: "smooth", block: "center" });
+        return;
+      }
+
+      const audit = buildAuditFindings();
+      carbonAnalyzed = true;
+      carbonSummary.textContent = audit.summary;
+      carbonClarity.textContent = audit.scores.clarity;
+      carbonAccessibility.textContent = audit.scores.accessibility;
+      carbonRisk.textContent = audit.scores.risk;
+      carbonFocusList.innerHTML = audit.findings.map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+      carbonExport.disabled = false;
+      carbonReset.classList.add("is-visible");
+      document.querySelector(".carbon-sidebar").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function exportCarbonFindings() {
+      if (!carbonAnalyzed) {
+        runCarbonAnalysis();
+        return;
+      }
+
+      const lines = [
+        "Design Critique Findings",
+        `File: ${uploadedFileName}`,
+        "",
+        `Clarity: ${carbonClarity.textContent}`,
+        `Accessibility: ${carbonAccessibility.textContent}`,
+        `Risk: ${carbonRisk.textContent}`,
+        "",
+        "Recommended focus:",
+        ...[...carbonFocusList.querySelectorAll("span:last-child")].map((item) => `- ${item.textContent}`)
+      ];
+      const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "design-critique-findings.txt";
+      document.body.append(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function resetCarbonUpload() {
+      uploadedFileName = "";
+      carbonAnalyzed = false;
+      uploadedAudit = null;
+      carbonUpload.value = "";
+      dungeonUpload.value = "";
+      if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
+      lastObjectUrl = "";
+      carbonPreview.innerHTML = `<div class="carbon-empty"><strong>Drop an image here</strong>or upload an image to preview the design and prepare a structured critique.</div>`;
+      dungeonPreview.innerHTML = `<div class="d-placeholder"><span class="d-placeholder-mark" aria-hidden="true"></span><span>Drop image here<br>or click to upload</span></div>`;
+      carbonFileName.textContent = "No file selected";
+      dungeonFileName.textContent = "No artifact equipped";
+      carbonSummary.textContent = "Calm product framing with measurable signals for design quality and implementation readiness.";
+      carbonClarity.textContent = "84";
+      carbonAccessibility.textContent = "62";
+      carbonRisk.textContent = "38";
+      carbonFocusList.innerHTML = [
+        ["", "Strengthen visual hierarchy for the primary user task."],
+        ["teal", "Maintain accessible contrast across dense content areas."],
+        ["red", "Reduce competing calls to action before launch review."]
+      ].map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+      carbonExport.disabled = true;
+      carbonReset.classList.remove("is-visible");
+      dungeonSubmit.classList.remove("is-visible");
+      dungeonNarration.innerHTML = "<strong>The Dungeon Master speaks:</strong> Your design enters the chamber. The first test is legibility under pressure; the second is whether the user can find the next action before the torch burns low.";
+      dungeonCritique.innerHTML = [
+        "Primary action must read before secondary loot.",
+        "Panel divisions should guide the eye like a map grid.",
+        "Reward clarity with color; punish noise with restraint."
+      ].map((item) => `<div>${item}</div>`).join("");
+      updateDungeonStats(null);
+      setDungeonScene(null, "idle");
+      updateRewardsFromAudit(null);
+      carbonPreview.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    async function renderPreview(file) {
+      if (!file) return;
+      if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
+      const src = URL.createObjectURL(file);
+      lastObjectUrl = src;
+      const safeName = file.name || "uploaded-design.png";
+      uploadedFileName = safeName;
+      carbonAnalyzed = false;
+      uploadedAudit = null;
+      dungeonPreview.innerHTML = `<img src="${src}" alt="Uploaded design preview in Dungeon skin">`;
+      carbonPreview.innerHTML = `<img src="${src}" alt="Uploaded design preview in Carbon skin">`;
+      dungeonFileName.textContent = `Equipped: ${safeName}`;
+      carbonFileName.textContent = safeName;
+      dungeonSubmit.classList.add("is-visible");
+      setDungeonScene(null, "loaded");
+      updateDungeonStats(null);
+      updateRewardsFromAudit(null);
+      carbonExport.disabled = true;
+      carbonReset.classList.remove("is-visible");
+      carbonSummary.textContent = `${safeName} is ready. Reading image dimensions and sampling pixels for IBM grid, palette, and contrast checks.`;
+      carbonClarity.textContent = "84";
+      carbonAccessibility.textContent = "62";
+      carbonRisk.textContent = "38";
+      carbonFocusList.innerHTML = [
+        ["", "Image loaded into the critique workspace."],
+        ["teal", "Analysis is ready to run."],
+        ["purple", "Export becomes available after analysis."]
+      ].map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+      dungeonNarration.innerHTML = `<strong>Scroll equipped:</strong> ${safeName} is ready. Press Submit for Analysis to begin the critique encounter.`;
+      dungeonCritique.innerHTML = [
+        "Artifact loaded into viewport.",
+        "Dungeon Master is ready.",
+        "Submit for Analysis is now available."
+      ].map((item) => `<div>${item}</div>`).join("");
+      uploadedAudit = await analyzeImageFromUrl(src);
+      if (uploadedAudit) {
+        carbonSummary.textContent = `${safeName} is ready for IDL analysis. Detected ${uploadedAudit.width} x ${uploadedAudit.height}px, IBM compliance ${uploadedAudit.ibmCompliance}/100, and ${uploadedAudit.exactPaletteMatch}% strict IBM palette match.`;
+        dungeonCritique.innerHTML = [
+          `Detected ${uploadedAudit.width} x ${uploadedAudit.height}px artifact.`,
+          `${uploadedAudit.isIbmCandidate ? "IBM/Carbon signal detected." : "Warning: this may be a rogue non-IBM artifact."}`,
+          `IBM compliance: ${uploadedAudit.ibmCompliance}/100. Strict palette match: ${uploadedAudit.exactPaletteMatch}%.`
+        ].map((item) => `<div>${item}</div>`).join("");
+      } else {
+        carbonSummary.textContent = `${safeName} is loaded, but the browser could not inspect its pixels. Analysis will use file-level checks only.`;
+      }
+    }
+
+    function setCarbonNav(section) {
+      document.querySelectorAll("[data-carbon-nav]").forEach((button) => {
+        button.classList.toggle("is-active", button.dataset.carbonNav === section);
+      });
+
+      if (section === "overview") {
+        document.querySelector(".carbon-heading").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+      if (section === "analysis") {
+        runCarbonAnalysis();
+      }
+      if (section === "actions") {
+        document.querySelector(".carbon-actions").scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      if (section === "settings") {
+        carbonSummary.textContent = "Standards in use: IBM Plex font stack, IBM color palette proximity, Carbon 2x grid rhythm, and WCAG-oriented contrast checks.";
+        carbonFocusList.innerHTML = [
+          ["", "Grid rule: favor Carbon 2x spacing and 16px layout rhythm."],
+          ["teal", "Color rule: prefer IBM palette values and accessible contrast pairings."],
+          ["purple", "Typography rule: verify IBM Plex in the source design file, not only in screenshots."]
+        ].map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+        document.querySelector(".carbon-sidebar").scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function renderCredits() {
+      dungeonCreditsTrack.innerHTML = creditSections.map(([title, body, dungeonTitle]) => `<section class="d-credit-section"><strong>${escapeHtml(title)}</strong>${dungeonTitle ? `<span>${escapeHtml(dungeonTitle)}</span>` : ""}<p>${escapeHtml(body)}</p></section>`).join("");
+      carbonCreditsTrack.innerHTML = creditSections.map(([title, body], index) => `
+        <section class="carbon-credit-block ${index >= 5 ? "is-credit" : ""}">
+          <span class="carbon-credit-kicker">${index >= 5 ? "Credits" : escapeHtml(title)}</span>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(body)}</p>
+        </section>
+      `).join("");
+    }
+
+    function tuneDungeonCreditsRoll() {
+      const roll = document.querySelector("#dungeonCreditsModal .d-credits-roll");
+      if (!roll) return;
+      const viewportHeight = roll.clientHeight || 520;
+      const contentHeight = dungeonCreditsTrack.scrollHeight || 900;
+      const distance = contentHeight + viewportHeight + 48;
+      const duration = Math.max(34, Math.round(distance / 34));
+      dungeonCreditsTrack.style.setProperty("--credits-start", `${viewportHeight + 36}px`);
+      dungeonCreditsTrack.style.setProperty("--credits-distance", `${distance}px`);
+      dungeonCreditsTrack.style.setProperty("--credits-duration", `${duration}s`);
+      dungeonCreditsTrack.style.animation = "none";
+      dungeonCreditsTrack.offsetHeight;
+      dungeonCreditsTrack.style.animation = "";
+    }
+
+    function openModal(id) {
+      renderCredits();
+      const modal = document.querySelector(`#${id}`);
+      if (!modal) return;
+      modal.classList.add("is-open");
+      if (id === "dungeonCreditsModal") {
+        requestAnimationFrame(tuneDungeonCreditsRoll);
+      }
+      const closeButton = modal.querySelector("[data-modal-close].modal-close");
+      if (closeButton) closeButton.focus();
+    }
+
+    function closeModals() {
+      document.querySelectorAll(".modal.is-open").forEach((modal) => {
+        modal.classList.remove("is-open");
+      });
+    }
+
+    window.openCreditsModal = openModal;
+    window.closeCreditsModals = closeModals;
+
+    document.querySelectorAll("[data-switch]").forEach((button) => {
+      button.addEventListener("click", () => switchSkin(button.dataset.switch));
+    });
+
+    document.querySelectorAll("[data-carbon-nav]").forEach((button) => {
+      button.addEventListener("click", () => setCarbonNav(button.dataset.carbonNav));
+    });
+
+    document.addEventListener("click", (event) => {
+      const openButton = event.target.closest("[data-modal-open]");
+      if (openButton) {
+        openModal(openButton.dataset.modalOpen);
+        return;
+      }
+
+      if (event.target.closest("[data-rewards-open]")) {
+        openRewardsModal();
+        return;
+      }
+
+      if (event.target.closest("[data-modal-close]")) {
+        closeModals();
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") closeModals();
+    });
+
+    document.querySelectorAll("[data-upload-trigger]").forEach((button) => {
+      button.addEventListener("click", () => dungeonUpload.click());
+    });
+
+    document.querySelectorAll(".d-command[data-command]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (button.dataset.command === "analyze" && uploadedFileName) {
+          runAnalysis();
+          return;
         }
-        
-        // New quest button
-        if (btnNewQuest) {
-            btnNewQuest.addEventListener('click', () => {
-                location.reload();
-            });
-        }
-        });
-    </script>
+        setDungeonMessage(button.dataset.command);
+      });
+    });
+
+    dungeonPreview.addEventListener("click", () => dungeonUpload.click());
+    dungeonPreview.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        dungeonUpload.click();
+      }
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dungeonPreview.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dungeonPreview.classList.add("is-dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dungeonPreview.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dungeonPreview.classList.remove("is-dragover");
+      });
+    });
+
+    dungeonPreview.addEventListener("drop", (event) => {
+      const file = [...event.dataTransfer.files].find((item) => item.type.startsWith("image/"));
+      if (file) renderPreview(file);
+    });
+
+    dungeonSubmit.addEventListener("click", runAnalysis);
+    carbonAnalyze.addEventListener("click", runCarbonAnalysis);
+    carbonExport.addEventListener("click", exportCarbonFindings);
+    carbonReset.addEventListener("click", resetCarbonUpload);
+
+    carbonPreview.addEventListener("click", () => carbonUpload.click());
+    carbonPreview.addEventListener("keydown", (event) => {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        carbonUpload.click();
+      }
+    });
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      carbonPreview.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        carbonPreview.classList.add("is-dragover");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      carbonPreview.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        carbonPreview.classList.remove("is-dragover");
+      });
+    });
+
+    carbonPreview.addEventListener("drop", (event) => {
+      const file = [...event.dataTransfer.files].find((item) => item.type.startsWith("image/"));
+      if (file) renderPreview(file);
+    });
+
+    dungeonUpload.addEventListener("change", () => renderPreview(dungeonUpload.files[0]));
+    carbonUpload.addEventListener("change", () => renderPreview(carbonUpload.files[0]));
+    updateDungeonStats(null);
+    setDungeonScene(null, "idle");
+    renderRewardCards();
+  </script>
 </body>
 </html>

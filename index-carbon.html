@@ -14,70 +14,423 @@
     <!-- IBM Carbon Icons -->
     <link rel="stylesheet" href="https://unpkg.com/@carbon/icons@11.32.1/css/icons.min.css">
     
-    <!-- Styles -->
-    <link rel="stylesheet" href="./css/mobile-main.css">
-    <link rel="stylesheet" href="./css/mobile-carbon.css">
-    <link rel="stylesheet" href="./css/quest-system.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #ffffff;
+            color: #161616;
+            line-height: 1.5;
+        }
+        
+        .app-header {
+            background: #161616;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 1rem 0;
+        }
+        
+        .header-content {
+            max-width: 1584px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo-icon {
+            font-size: 1.5rem;
+        }
+        
+        .app-name {
+            color: #f4f4f4;
+            font-weight: 400;
+            font-size: 1.25rem;
+        }
+        
+        .dungeon-mode-btn {
+            position: fixed;
+            top: 1rem;
+            right: 2rem;
+            z-index: 1000;
+            padding: 0.875rem 1rem;
+            background: #0f62fe;
+            border: none;
+            color: #ffffff;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: background 110ms;
+        }
+        
+        .dungeon-mode-btn:hover {
+            background: #0353e9;
+        }
+        
+        .app-main {
+            max-width: 1584px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+        
+        .hero-section {
+            text-align: center;
+            padding: 3rem 0 4rem;
+        }
+        
+        .hero-title {
+            font-size: 3.375rem;
+            font-weight: 300;
+            color: #161616;
+            margin-bottom: 1rem;
+            letter-spacing: 0;
+        }
+        
+        .hero-description {
+            font-size: 1.25rem;
+            color: #525252;
+            max-width: 672px;
+            margin: 0 auto;
+            line-height: 1.625;
+        }
+        
+        .upload-section {
+            max-width: 672px;
+            margin: 0 auto 3rem;
+        }
+        
+        .upload-card {
+            background: #f4f4f4;
+            padding: 2rem;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #8d8d8d;
+            padding: 4rem 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 110ms;
+            background: #ffffff;
+        }
+        
+        .upload-zone:hover {
+            border-color: #0f62fe;
+            background: #e8f4ff;
+        }
+        
+        .upload-icon {
+            margin: 0 auto 1.5rem;
+            display: block;
+        }
+        
+        .upload-title {
+            color: #161616;
+            font-size: 1.75rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-hint {
+            color: #525252;
+            font-size: 1rem;
+        }
+        
+        .image-preview {
+            margin-top: 2rem;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            border: 1px solid #e0e0e0;
+            display: block;
+        }
+        
+        .preview-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            justify-content: flex-end;
+        }
+        
+        .btn-secondary {
+            padding: 0.875rem 1rem;
+            background: #ffffff;
+            color: #161616;
+            border: 1px solid #161616;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            transition: background 110ms;
+        }
+        
+        .btn-secondary:hover {
+            background: #e8e8e8;
+        }
+        
+        .btn-primary {
+            padding: 0.875rem 1rem;
+            background: #0f62fe;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            font-family: 'IBM Plex Sans', sans-serif;
+            font-size: 0.875rem;
+            font-weight: 400;
+            transition: background 110ms;
+        }
+        
+        .btn-primary:hover {
+            background: #0353e9;
+        }
+        
+        .loading-section {
+            max-width: 672px;
+            margin: 0 auto;
+        }
+        
+        .loading-card {
+            background: #f4f4f4;
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #0f62fe;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 2rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .loading-text {
+            color: #161616;
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            font-weight: 400;
+        }
+        
+        .loading-steps {
+            color: #525252;
+            font-size: 0.875rem;
+            line-height: 2;
+        }
+        
+        .results-section {
+            max-width: 1056px;
+            margin: 0 auto;
+        }
+        
+        .score-overview {
+            background: #f4f4f4;
+            padding: 3rem 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .score-number {
+            font-size: 5.75rem;
+            font-weight: 300;
+            color: #0f62fe;
+            margin-bottom: 1rem;
+            line-height: 1;
+        }
+        
+        .score-stars {
+            font-size: 2rem;
+            color: #f1c21b;
+            margin-bottom: 1rem;
+        }
+        
+        .score-label {
+            color: #161616;
+            font-size: 1.25rem;
+            font-weight: 400;
+        }
+        
+        .critique-cards {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .critique-card {
+            background: #f4f4f4;
+            padding: 1.5rem;
+            border-left: 4px solid #0f62fe;
+        }
+        
+        .card-title {
+            color: #161616;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+        
+        .card-content {
+            color: #525252;
+            font-size: 1rem;
+            line-height: 1.625;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .progress-section {
+            max-width: 1056px;
+            margin: 4rem auto 0;
+        }
+        
+        .section-title {
+            color: #161616;
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-card {
+            background: #f4f4f4;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-label {
+            display: block;
+            color: #525252;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16px;
+        }
+        
+        .stat-value {
+            display: block;
+            color: #161616;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+        
+        .stat-value.highlight {
+            color: #0f62fe;
+        }
+        
+        .xp-bar {
+            height: 8px;
+            background: #e0e0e0;
+            overflow: hidden;
+        }
+        
+        .xp-fill {
+            height: 100%;
+            background: #0f62fe;
+            transition: width 0.5s ease;
+        }
+        
+        .quest-log-section {
+            background: #f4f4f4;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .subsection-title {
+            color: #161616;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: #525252;
+            font-size: 1rem;
+        }
+    </style>
 </head>
-<body class="carbon-theme">
+<body>
     
     <!-- Dungeon Mode Button (Top Right) -->
-    <button class="dungeon-mode-btn" id="dungeonModeBtn" style="position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 0.75rem 1.5rem; background: #0f62fe; border: none; color: white; font-family: 'IBM Plex Sans', sans-serif; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; border-radius: 0;">
+    <button class="dungeon-mode-btn" id="dungeonModeBtn">
         ⚔️ Dungeon Mode
     </button>
     
     <!-- Compact Header -->
-    <header class="app-header" style="background: #161616; border-bottom: 1px solid #393939;">
-        <div class="header-content" style="max-width: 1600px; margin: 0 auto; padding: 0 2rem;">
+    <header class="app-header">
+        <div class="header-content">
             <div class="logo-section">
                 <span class="logo-icon">💎</span>
-                <h1 class="app-name" style="color: #f4f4f4; font-weight: 400;">Carbon Quest</h1>
+                <h1 class="app-name">Carbon Quest</h1>
             </div>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="app-main" style="max-width: 1600px; margin: 0 auto; padding: 2rem;">
+    <main class="app-main">
         
         <!-- Hero Section -->
-        <section class="hero-section" style="text-align: center; padding: 3rem 0;">
-            <h2 class="hero-title" style="font-size: 2.5rem; font-weight: 300; color: #f4f4f4; margin-bottom: 1rem;">
-                AI Design Critique for IBM Carbon & IDL
-            </h2>
-            <p class="hero-description" style="font-size: 1.125rem; color: #c6c6c6; max-width: 800px; margin: 0 auto;">
-                Upload a screenshot. Get instant feedback on Carbon compliance, accessibility, and IBM Design Language principles.
-            </p>
+        <section class="hero-section">
+            <h2 class="hero-title">AI Design Critique for IBM Carbon & IDL</h2>
+            <p class="hero-description">Upload a screenshot. Get instant feedback on Carbon compliance, accessibility, and IBM Design Language principles.</p>
         </section>
 
         <!-- Upload Section -->
-        <section class="upload-section" id="uploadSection" style="max-width: 800px; margin: 2rem auto;">
-            <div class="upload-card" style="background: #262626; border: 1px solid #393939; padding: 2rem;">
-                <div class="upload-zone" id="uploadZone" style="border: 2px dashed #525252; padding: 3rem; text-align: center; cursor: pointer; transition: all 0.3s ease;">
-                    <svg class="upload-icon" width="48" height="48" viewBox="0 0 32 32" fill="none" stroke="#0f62fe" stroke-width="2" style="margin: 0 auto 1rem;">
+        <section class="upload-section" id="uploadSection">
+            <div class="upload-card">
+                <div class="upload-zone" id="uploadZone">
+                    <svg class="upload-icon" width="48" height="48" viewBox="0 0 32 32" fill="none" stroke="#0f62fe" stroke-width="2">
                         <path d="M26 15v10H6V15M16 21V5M11 10l5-5 5 5"/>
                     </svg>
-                    <h3 class="upload-title" style="color: #f4f4f4; font-size: 1.25rem; margin-bottom: 0.5rem;">Upload Screenshot</h3>
-                    <p class="upload-hint" style="color: #c6c6c6;">Drag & drop or click to select</p>
+                    <h3 class="upload-title">Upload Screenshot</h3>
+                    <p class="upload-hint">Drag & drop or click to select</p>
                     <input type="file" id="fileInput" accept="image/*" hidden>
                 </div>
                 
                 <!-- Image Preview (hidden initially) -->
-                <div class="image-preview" id="imagePreview" style="display: none; margin-top: 2rem;">
-                    <img id="previewImage" alt="Uploaded screenshot" style="max-width: 100%; border: 1px solid #393939;">
-                    <div class="preview-actions" style="display: flex; gap: 1rem; margin-top: 1rem; justify-content: center;">
-                        <button class="btn-secondary" id="removeImage" style="padding: 0.75rem 1.5rem; background: #393939; color: #f4f4f4; border: none; cursor: pointer;">Remove</button>
-                        <button class="btn-primary" id="analyzeButton" style="padding: 0.75rem 2rem; background: #0f62fe; color: white; border: none; cursor: pointer; font-weight: 600;">Analyze Design</button>
+                <div class="image-preview" id="imagePreview" style="display: none;">
+                    <img id="previewImage" alt="Uploaded screenshot">
+                    <div class="preview-actions">
+                        <button class="btn-secondary" id="removeImage">Remove</button>
+                        <button class="btn-primary" id="analyzeButton">Analyze Design</button>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Loading State -->
-        <section class="loading-section" id="loadingSection" style="display: none; max-width: 800px; margin: 2rem auto;">
-            <div class="loading-card" style="background: #262626; border: 1px solid #393939; padding: 3rem; text-align: center;">
-                <div class="loading-spinner" style="width: 48px; height: 48px; border: 4px solid #393939; border-top-color: #0f62fe; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1.5rem;"></div>
-                <p class="loading-text" style="color: #f4f4f4; font-size: 1.125rem; margin-bottom: 1.5rem;">Analyzing your design...</p>
-                <div class="loading-steps" style="color: #c6c6c6; font-size: 0.875rem; line-height: 2;">
+        <section class="loading-section" id="loadingSection" style="display: none;">
+            <div class="loading-card">
+                <div class="loading-spinner"></div>
+                <p class="loading-text">Analyzing your design...</p>
+                <div class="loading-steps">
                     <div class="step">Extracting visual elements</div>
                     <div class="step">Checking Carbon compliance</div>
                     <div class="step">Evaluating accessibility</div>
@@ -87,58 +440,58 @@
         </section>
 
         <!-- Results Section -->
-        <section class="results-section" id="resultsSection" style="display: none; max-width: 1200px; margin: 2rem auto;">
+        <section class="results-section" id="resultsSection" style="display: none;">
             
             <!-- Overall Score -->
-            <div class="score-overview" style="background: #262626; border: 1px solid #393939; padding: 2rem; margin-bottom: 2rem; text-align: center;">
+            <div class="score-overview">
                 <div class="score-main">
-                    <div class="score-number" id="overallScore" style="font-size: 4rem; font-weight: 300; color: #0f62fe; margin-bottom: 0.5rem;">--</div>
-                    <div class="score-stars" id="scoreStars" style="font-size: 2rem; color: #ffd500; margin-bottom: 1rem;">★★★★★</div>
-                    <div class="score-label" id="scoreLabel" style="color: #c6c6c6; font-size: 1.125rem;">Analyzing...</div>
+                    <div class="score-number" id="overallScore">--</div>
+                    <div class="score-stars" id="scoreStars">★★★★★</div>
+                    <div class="score-label" id="scoreLabel">Analyzing...</div>
                 </div>
             </div>
 
             <!-- Critique Cards -->
-            <div class="critique-cards" id="critiqueCards" style="display: grid; gap: 1.5rem;">
+            <div class="critique-cards" id="critiqueCards">
                 <!-- Cards will be dynamically inserted here -->
             </div>
 
             <!-- Actions -->
-            <div class="result-actions" style="display: flex; gap: 1rem; justify-content: center; margin-top: 2rem;">
-                <button class="btn-secondary" id="newAnalysis" style="padding: 0.75rem 1.5rem; background: #393939; color: #f4f4f4; border: none; cursor: pointer;">New Analysis</button>
-                <button class="btn-secondary" id="exportReport" style="padding: 0.75rem 1.5rem; background: #393939; color: #f4f4f4; border: none; cursor: pointer;">Export Report</button>
+            <div class="result-actions">
+                <button class="btn-secondary" id="newAnalysis">New Analysis</button>
+                <button class="btn-secondary" id="exportReport">Export Report</button>
             </div>
         </section>
 
         <!-- Progress Section -->
-        <section class="progress-section" id="progressSection" style="max-width: 1200px; margin: 3rem auto;">
-            <h3 class="section-title" style="color: #f4f4f4; font-size: 1.5rem; font-weight: 400; margin-bottom: 1.5rem;">Your Progress</h3>
+        <section class="progress-section" id="progressSection">
+            <h3 class="section-title">Your Progress</h3>
             
-            <div class="progress-card" style="background: #262626; border: 1px solid #393939; padding: 2rem; margin-bottom: 2rem;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem;">
+            <div class="progress-card">
+                <div class="progress-stats">
                     <div class="progress-stat">
-                        <span class="stat-label" style="display: block; color: #c6c6c6; font-size: 0.875rem; margin-bottom: 0.5rem;">Level</span>
-                        <span class="stat-value" style="display: block; color: #0f62fe; font-size: 2rem; font-weight: 300;" id="playerLevel">1</span>
+                        <span class="stat-label">Level</span>
+                        <span class="stat-value highlight" id="playerLevel">1</span>
                     </div>
                     <div class="progress-stat">
-                        <span class="stat-label" style="display: block; color: #c6c6c6; font-size: 0.875rem; margin-bottom: 0.5rem;">Title</span>
-                        <span class="stat-value" style="display: block; color: #f4f4f4; font-size: 1.25rem;" id="playerTitle">Apprentice Designer</span>
+                        <span class="stat-label">Title</span>
+                        <span class="stat-value" id="playerTitle">Apprentice Designer</span>
                     </div>
                     <div class="progress-stat">
-                        <span class="stat-label" style="display: block; color: #c6c6c6; font-size: 0.875rem; margin-bottom: 0.5rem;">XP</span>
-                        <span class="stat-value" style="display: block; color: #f4f4f4; font-size: 1.25rem;"><span id="currentXP">0</span> / <span id="nextLevelXP">100</span></span>
+                        <span class="stat-label">XP</span>
+                        <span class="stat-value"><span id="currentXP">0</span> / <span id="nextLevelXP">100</span></span>
                     </div>
                 </div>
-                <div class="xp-bar" style="height: 8px; background: #393939; margin-top: 1.5rem; border-radius: 4px; overflow: hidden;">
-                    <div class="xp-fill" id="xpFill" style="width: 0%; height: 100%; background: #0f62fe; transition: width 0.5s ease;"></div>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xpFill" style="width: 0%;"></div>
                 </div>
             </div>
 
             <!-- Quest Log -->
-            <div class="quest-log-section" style="background: #262626; border: 1px solid #393939; padding: 2rem; margin-bottom: 2rem;">
-                <h4 class="subsection-title" style="color: #f4f4f4; font-size: 1.25rem; font-weight: 400; margin-bottom: 1rem;">Active Quests</h4>
+            <div class="quest-log-section">
+                <h4 class="subsection-title">Active Quests</h4>
                 <div class="quest-log" id="questLog">
-                    <div class="empty-state" style="text-align: center; padding: 2rem; color: #c6c6c6;">
+                    <div class="empty-state">
                         Complete an analysis to unlock quests
                     </div>
                 </div>
@@ -161,14 +514,6 @@
             window.location.href = 'index.html';
         });
         
-        // Hover effects
-        document.getElementById('dungeonModeBtn').addEventListener('mouseenter', function() {
-            this.style.background = '#0353e9';
-        });
-        document.getElementById('dungeonModeBtn').addEventListener('mouseleave', function() {
-            this.style.background = '#0f62fe';
-        });
-        
         // Drag and drop functionality
         const uploadZone = document.getElementById('uploadZone');
         const fileInput = document.getElementById('fileInput');
@@ -178,18 +523,18 @@
         uploadZone.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadZone.style.borderColor = '#0f62fe';
-            uploadZone.style.background = 'rgba(15, 98, 254, 0.1)';
+            uploadZone.style.background = '#e8f4ff';
         });
         
         uploadZone.addEventListener('dragleave', () => {
-            uploadZone.style.borderColor = '#525252';
-            uploadZone.style.background = 'transparent';
+            uploadZone.style.borderColor = '#8d8d8d';
+            uploadZone.style.background = '#ffffff';
         });
         
         uploadZone.addEventListener('drop', (e) => {
             e.preventDefault();
-            uploadZone.style.borderColor = '#525252';
-            uploadZone.style.background = 'transparent';
+            uploadZone.style.borderColor = '#8d8d8d';
+            uploadZone.style.background = '#ffffff';
             
             const files = e.dataTransfer.files;
             if (files.length > 0) {
@@ -234,21 +579,33 @@
                 document.getElementById('resultsSection').style.display = 'block';
                 document.getElementById('overallScore').textContent = '85';
                 document.getElementById('scoreLabel').textContent = 'Good Design';
+                
+                // Add sample critique cards
+                const critiqueCards = document.getElementById('critiqueCards');
+                critiqueCards.innerHTML = `
+                    <div class="critique-card">
+                        <h4 class="card-title">✓ Strengths</h4>
+                        <div class="card-content">
+                            • Good use of spacing and hierarchy<br>
+                            • Clear visual structure<br>
+                            • Readable typography
+                        </div>
+                    </div>
+                    <div class="critique-card">
+                        <h4 class="card-title">⚠ Areas for Improvement</h4>
+                        <div class="card-content">
+                            • Consider IBM Carbon Design System components<br>
+                            • Verify WCAG 2.1 AA color contrast<br>
+                            • Align to 2x Grid system
+                        </div>
+                    </div>
+                `;
             }, 3000);
         });
         
         document.getElementById('newAnalysis').addEventListener('click', () => {
             location.reload();
         });
-        
-        // Animation for spinner
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes spin {
-                to { transform: rotate(360deg); }
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

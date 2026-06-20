@@ -1,0 +1,8 @@
+{
+  "appType": "static-html",
+  "entry": "index.html",
+  "canonicalSource": "source/index.html",
+  "requiresBuildStep": false,
+  "recommendedLocalPort": 4173,
+  "notes": "The app is intentionally preserved as a single static HTML file with inline CSS and JavaScript for exact replication."
+}
