@@ -3231,6 +3231,14 @@
     setDungeonScene(null, "idle");
     renderRewardCards();
 
+    window.addEventListener('DOMContentLoaded', () => {
+      window.scrollTo(0, 0);
+    });
+
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+    }, 100);
+
     let dungeonMusic = null;
     let audioContext = null;
     let isMuted = false;
