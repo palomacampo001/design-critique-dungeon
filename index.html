@@ -2509,19 +2509,23 @@
 
     function rewardsForAudit(audit) {
       if (!audit) return [];
-      if (!audit.isIbmCandidate) return [];
+      const paletteScore = audit.paletteMatch ?? audit.colorAffinity ?? audit.ibmCompliance ?? 0;
+      const contrastScore = audit.tonalContrast ?? audit.contrast ?? 0;
+      const gridPass = audit.gridPass ?? (audit.gridFit != null && audit.gridFit >= 60) ?? false;
+      const ibmCandidate = audit.isIbmCandidate ?? (audit.ibmCompliance >= 60) ?? (paletteScore >= 50);
+      if (!ibmCandidate) return [];
       const ids = new Set(["ux-library"]);
       if (audit.clarity >= 50) ids.add("typography-tavern");
-      if (audit.gridPass) ids.add("spacing-campfire");
-      if (audit.gridPass) ids.add("gridkeeper-observatory");
-      if (audit.tonalContrast >= 4.5) ids.add("contrast-forge");
+      if (gridPass) ids.add("spacing-campfire");
+      if (gridPass) ids.add("gridkeeper-observatory");
+      if (contrastScore >= 4.5) ids.add("contrast-forge");
       if (audit.accessibility >= 70) ids.add("accessibility-lighthouse");
-      if (audit.paletteMatch >= 60) ids.add("color-crystal-cavern");
-      if (audit.paletteMatch >= 75) ids.add("token-alchemist-lab");
+      if (paletteScore >= 60) ids.add("color-crystal-cavern");
+      if (paletteScore >= 75) ids.add("token-alchemist-lab");
       if (audit.clarity >= 70) ids.add("component-vault");
       if (audit.clarity >= 80) ids.add("prototype-workshop");
       if (audit.clarity >= 85 && audit.accessibility >= 85 && audit.risk <= 25) ids.add("final-boss-room");
-      if (audit.gridPass && audit.paletteMatch >= 75 && audit.tonalContrast >= 7) ids.add("ibm-carbon-shrine");
+      if (gridPass && paletteScore >= 75 && contrastScore >= 7) ids.add("ibm-carbon-shrine");
       return [...ids];
     }
 
@@ -3115,7 +3119,7 @@
 
     function closeRewardPopup() {
       const rewardPopup = document.querySelector("#rewardPopup");
-      rewardPopup.classList.remove("is-open");
+      if (rewardPopup) rewardPopup.classList.remove("is-open");
     }
 
     window.closeRewardPopup = closeRewardPopup;
