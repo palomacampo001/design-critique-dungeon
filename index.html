@@ -1907,12 +1907,16 @@
       <div class="dungeon-screen">
         <header class="d-topbar">
           <div class="d-title"><span class="d-title-badge" aria-hidden="true"></span><span>Carbon Quest: Master the IBM Design System</span></div>
-          <button class="d-mini-stat" style="border-color: var(--d-yellow); color: var(--d-yellow); cursor: pointer; background: #020202;" data-modal-open="demoInfoModal" onclick="openCreditsModal('demoInfoModal')" title="Click for Demo Mode info">⚡ Demo Mode</button>
-          <button class="d-mini-stat" id="musicToggle" onclick="toggleMusic()" style="border-color: var(--d-green); color: var(--d-green); cursor: pointer; background: #020202;" title="Toggle 8-bit music">🔊 Music On</button>
-          <div class="d-mini-stat">Score 08740</div>
-          <div style="display: flex; gap: 8px; align-items: center; margin-left: auto;">
-            <div class="d-mini-stat">Skin: Dungeon</div>
-            <button class="d-button d-skin-switch" data-switch="carbon">Switch to Carbon</button>
+          <div style="display: flex; flex-direction: column; gap: 6px; margin-left: auto; align-items: flex-end;">
+            <div style="display: flex; gap: 6px;">
+              <button class="d-mini-stat" style="border-color: var(--d-yellow); color: var(--d-yellow); cursor: pointer; background: #020202; padding: 4px 10px; font-size: 13px; min-height: 32px;" data-modal-open="demoInfoModal" onclick="openCreditsModal('demoInfoModal')" title="Click for Demo Mode info">⚡ Demo Mode</button>
+              <button class="d-mini-stat" id="musicToggle" onclick="toggleMusic()" style="border-color: var(--d-green); color: var(--d-green); cursor: pointer; background: #020202; padding: 4px 10px; font-size: 13px; min-height: 32px;" title="Toggle 8-bit music">🔊 Music On</button>
+              <div class="d-mini-stat" style="padding: 4px 10px; font-size: 13px; min-height: 32px;">Score 08740</div>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <div class="d-mini-stat" style="padding: 4px 10px; font-size: 13px; min-height: 32px;">Skin: Dungeon</div>
+              <button class="d-button d-skin-switch" data-switch="carbon" style="padding: 4px 12px; font-size: 13px; min-height: 32px;">Switch to Carbon</button>
+            </div>
           </div>
         </header>
 
