@@ -303,6 +303,136 @@
         });
         document.getElementById('settingsBtn').addEventListener('mouseleave', function() {
             this.style.transform = 'scale(1) rotate(0deg)';
+        
+        // File Upload Handlers
+        let currentFile = null;
+        const fileInput = document.getElementById('fileInput');
+        const btnUpload = document.getElementById('btnUpload');
+        const uploadArea = document.getElementById('uploadArea');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImage = document.getElementById('previewImage');
+        const btnRemove = document.getElementById('btnRemove');
+        const btnAnalyze = document.getElementById('btnAnalyze');
+        const btnNewQuest = document.getElementById('btnNewQuest');
+        
+        // Click to upload
+        if (btnUpload) {
+            btnUpload.addEventListener('click', () => fileInput.click());
+        }
+        
+        // Drag and drop
+        if (uploadArea) {
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--dos-gold)';
+                uploadArea.style.background = 'rgba(255, 215, 0, 0.1)';
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--dos-silver)';
+                uploadArea.style.background = 'rgba(0, 0, 0, 0.5)';
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--dos-silver)';
+                uploadArea.style.background = 'rgba(0, 0, 0, 0.5)';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFileSelect(files[0]);
+                }
+            });
+        }
+        
+        // File input change
+        if (fileInput) {
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+        }
+        
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            currentFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                const uploadContent = document.querySelector('#uploadArea > div:first-child');
+                const uploadButton = document.querySelector('#uploadArea > button');
+                if (uploadContent) uploadContent.style.display = 'none';
+                if (uploadButton) uploadButton.style.display = 'none';
+                if (imagePreview) imagePreview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Remove image
+        if (btnRemove) {
+            btnRemove.addEventListener('click', () => {
+                currentFile = null;
+                fileInput.value = '';
+                imagePreview.style.display = 'none';
+                const uploadContent = document.querySelector('#uploadArea > div:first-child');
+                const uploadButton = document.querySelector('#uploadArea > button');
+                if (uploadContent) uploadContent.style.display = 'block';
+                if (uploadButton) uploadButton.style.display = 'block';
+            });
+        }
+        
+        // Analyze button
+        if (btnAnalyze) {
+            btnAnalyze.addEventListener('click', () => {
+                if (!currentFile) return;
+                
+                // Hide upload area, show loading
+                document.getElementById('uploadArea').style.display = 'none';
+                document.getElementById('loadingState').style.display = 'block';
+                
+                // Simulate analysis (3 seconds)
+                setTimeout(() => {
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('resultsArea').style.display = 'block';
+                    
+                    // Show demo results
+                    const resultsDiv = document.getElementById('critiqueResults');
+                    resultsDiv.innerHTML = `
+                        <div style="margin-bottom: 1.5rem;">
+                            <span style="color: var(--dos-gold); font-weight: bold;">[DUNGEON MASTER]:</span> Your design scroll has been examined!
+                        </div>
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(0, 255, 0, 0.1); border-left: 3px solid var(--dos-green);">
+                            <strong style="color: var(--dos-green);">✓ STRENGTHS:</strong><br>
+                            • Good use of spacing and hierarchy<br>
+                            • Clear visual structure<br>
+                            • Readable typography
+                        </div>
+                        <div style="margin-bottom: 1rem; padding: 1rem; background: rgba(255, 215, 0, 0.1); border-left: 3px solid var(--dos-gold);">
+                            <strong style="color: var(--dos-gold);">⚠ AREAS FOR IMPROVEMENT:</strong><br>
+                            • Consider IBM Carbon Design System components<br>
+                            • Verify WCAG 2.1 AA color contrast<br>
+                            • Align to 2x Grid system
+                        </div>
+                        <div style="text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(255, 215, 0, 0.2); border: 2px solid var(--dos-gold);">
+                            <div style="font-size: 2rem; color: var(--dos-gold); margin-bottom: 0.5rem;">⚡ +150 XP ⚡</div>
+                            <div style="color: var(--dos-text-gray);">Quest completed! Experience gained!</div>
+                        </div>
+                    `;
+                }, 3000);
+            });
+        }
+        
+        // New quest button
+        if (btnNewQuest) {
+            btnNewQuest.addEventListener('click', () => {
+                location.reload();
+            });
+        }
         });
     </script>
 </body>
