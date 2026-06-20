@@ -1515,6 +1515,8 @@
 
       .d-preview {
         order: 1;
+        max-height: 50vh;
+        overflow: hidden;
       }
 
       .d-narration {
@@ -1666,6 +1668,7 @@
       <div class="dungeon-screen">
         <header class="d-topbar">
           <div class="d-title"><span class="d-title-badge" aria-hidden="true"></span><span>Carbon Quest: Master the IBM Design System</span></div>
+          <button class="d-mini-stat" style="border-color: var(--d-yellow); color: var(--d-yellow); cursor: pointer; background: #020202;" data-modal-open="demoInfoModal" onclick="openCreditsModal('demoInfoModal')" title="Click for Demo Mode info">⚡ Demo Mode</button>
           <div class="d-mini-stat">Score 08740</div>
           <div class="d-mini-stat">Skin: Dungeon</div>
           <button class="d-button d-skin-switch" data-switch="carbon">Switch to Carbon</button>
@@ -1716,7 +1719,7 @@
         <section class="d-panel d-narration" aria-label="Dungeon Master narration and critique">
           <div class="d-panel-title"><span>Dungeon Master Narration</span><span>Round 03</span></div>
           <div class="d-narration-grid">
-            <div class="d-textbox" id="dungeonNarration"><strong>The Dungeon Master speaks:</strong> Your design enters the chamber. The first test is legibility under pressure; the second is whether the user can find the next action before the torch burns low.</div>
+            <div class="d-textbox" id="dungeonNarration"><strong>The Dungeon Master speaks:</strong> Welcome to Demo Mode. This chamber analyzes your designs using real IBM Design Language checks—color palette, Carbon grid, WCAG contrast, and compliance scoring. Upload a design scroll to begin your quest.</div>
             <div class="d-critique-list" id="dungeonCritique">
               <div>Primary action must read before secondary loot.</div>
               <div>Panel divisions should guide the eye like a map grid.</div>
@@ -1740,7 +1743,7 @@
 
     <section class="skin carbon" id="carbonSkin" aria-label="Carbon skin">
       <header class="carbon-header">
-        <div class="carbon-brand"><span class="ibm-mark">IBM</span><span>Carbon Quest</span></div>
+        <div class="carbon-brand"><span class="ibm-mark">IBM</span><span>Carbon Quest</span><button style="margin-left: 12px; padding: 4px 8px; background: var(--ibm-blue); color: white; font-size: 12px; border-radius: 2px; border: 1px solid var(--ibm-blue-hover); cursor: pointer;" data-modal-open="demoInfoModal" onclick="openCreditsModal('demoInfoModal')" title="Click for Demo Mode info">⚡ Demo Mode</button></div>
         <nav class="carbon-nav" aria-label="Primary">
           <button class="is-active" data-carbon-nav="overview">Overview</button>
           <button data-carbon-nav="analysis">Analysis</button>
@@ -1775,7 +1778,7 @@
         <aside class="carbon-sidebar" aria-label="Analysis summary">
           <section class="carbon-card">
             <h2>Evaluation summary</h2>
-            <p id="carbonSummary">Calm product framing with measurable signals for design quality and implementation readiness.</p>
+            <p id="carbonSummary">Demo Mode: Client-side analysis using IBM Design Language color palette, Carbon 16px grid validation, WCAG contrast measurement, and compliance scoring. Click ⚡ Demo Mode above for details.</p>
             <div class="carbon-score">
               <div><strong id="carbonClarity">84</strong><span class="carbon-meta">Clarity</span></div>
               <div><strong id="carbonAccessibility">62</strong><span class="carbon-meta">Accessibility</span></div>
@@ -1837,6 +1840,44 @@
             <strong class="d-reward-xp" id="rewardXpTotal">XP 0000</strong>
           </div>
           <div class="d-reward-grid" id="dungeonRewardGrid"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="modal" id="demoInfoModal" aria-modal="true" aria-label="Demo mode information">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="d-modal-window" role="dialog" style="max-width: 680px;">
+        <header class="d-modal-header">
+          <span>⚡ Demo Mode Information</span>
+          <button class="modal-close d-modal-close" data-modal-close onclick="closeCreditsModals()" type="button" aria-label="Close demo info">X</button>
+        </header>
+        <div style="padding: 20px; color: var(--d-white); font-size: 15px; line-height: 1.6; max-height: 60vh; overflow-y: auto;">
+          <p style="margin: 0 0 16px 0;"><strong style="color: var(--d-yellow);">What is Demo Mode?</strong></p>
+          <p style="margin: 0 0 16px 0;">Carbon Quest currently runs in <strong style="color: var(--d-cyan);">Demo Mode</strong> with sophisticated client-side analysis. This means the app analyzes your designs entirely in your browser—no server required, no data sent anywhere.</p>
+          
+          <p style="margin: 0 0 16px 0;"><strong style="color: var(--d-yellow);">What It Analyzes Right Now:</strong></p>
+          <ul style="margin: 0 0 16px 0; padding-left: 20px;">
+            <li style="margin-bottom: 8px;"><strong style="color: var(--d-green);">IBM Color Palette</strong> - Compares pixels to 19 IBM Design Language colors</li>
+            <li style="margin-bottom: 8px;"><strong style="color: var(--d-green);">Carbon 16px Grid</strong> - Validates alignment with Carbon's 2x grid system</li>
+            <li style="margin-bottom: 8px;"><strong style="color: var(--d-green);">WCAG Contrast</strong> - Measures accessibility using luminance ratios</li>
+            <li style="margin-bottom: 8px;"><strong style="color: var(--d-green);">Design Type Detection</strong> - Identifies IBM UI vs photos vs games</li>
+            <li style="margin-bottom: 8px;"><strong style="color: var(--d-green);">Compliance Scoring</strong> - Calculates clarity, accessibility, and risk scores</li>
+          </ul>
+
+          <p style="margin: 0 0 16px 0;"><strong style="color: var(--d-yellow);">This Is NOT a Mock Demo:</strong></p>
+          <p style="margin: 0 0 16px 0;">The analysis is <strong style="color: var(--d-cyan);">real and functional</strong>. It samples pixels, measures distances, validates grids, and calculates scores using actual algorithms based on IBM Design Language, Carbon Design System, and WCAG standards.</p>
+
+          <p style="margin: 0 0 16px 0;"><strong style="color: var(--d-yellow);">Future: AI-Enhanced Analysis</strong></p>
+          <p style="margin: 0 0 16px 0;">Production mode could add AI-powered features like:</p>
+          <ul style="margin: 0 0 16px 0; padding-left: 20px;">
+            <li style="margin-bottom: 8px;">Natural language critiques (IBM watsonx.ai / Granite models)</li>
+            <li style="margin-bottom: 8px;">Component identification and validation</li>
+            <li style="margin-bottom: 8px;">Typography verification (IBM Plex detection)</li>
+            <li style="margin-bottom: 8px;">Advanced layout analysis</li>
+          </ul>
+
+          <p style="margin: 0 0 16px 0;"><strong style="color: var(--d-yellow);">Why Demo Mode?</strong></p>
+          <p style="margin: 0;">Demo Mode lets stakeholders experience the complete workflow—upload, analyze, get feedback, unlock rewards, export findings—without requiring API keys, backend services, or paid AI models. The current analysis is already sophisticated enough for real design reviews.</p>
         </div>
       </div>
     </section>
