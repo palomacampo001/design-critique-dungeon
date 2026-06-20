@@ -1910,7 +1910,7 @@
           <button class="d-mini-stat" style="border-color: var(--d-yellow); color: var(--d-yellow); cursor: pointer; background: #020202;" data-modal-open="demoInfoModal" onclick="openCreditsModal('demoInfoModal')" title="Click for Demo Mode info">⚡ Demo Mode</button>
           <button class="d-mini-stat" id="musicToggle" onclick="toggleMusic()" style="border-color: var(--d-green); color: var(--d-green); cursor: pointer; background: #020202;" title="Toggle 8-bit music">🔊 Music On</button>
           <div class="d-mini-stat">Score 08740</div>
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center; margin-left: auto;">
             <div class="d-mini-stat">Skin: Dungeon</div>
             <button class="d-button d-skin-switch" data-switch="carbon">Switch to Carbon</button>
           </div>
@@ -3264,13 +3264,50 @@
     function playDungeonTheme() {
       if (!audioContext || isMuted) return;
       const now = audioContext.currentTime;
-      const melody = [[262,0.2],[311,0.2],[349,0.2],[392,0.2],[466,0.4],[392,0.2],[349,0.2],[311,0.2],[262,0.2],[233,0.4],[262,0.8]];
-      const bass = [[131,0.4],[0,0.2],[131,0.2],[156,0.4],[0,0.2],[156,0.2],[147,0.4],[0,0.2],[147,0.2],[131,0.8]];
+      
+      const melody = [
+        [392,0.3],[440,0.3],[494,0.3],[523,0.6],[494,0.3],[440,0.3],
+        [392,0.6],[330,0.3],[349,0.3],[392,0.6],[349,0.3],[330,0.3],
+        [294,0.6],[330,0.3],[349,0.3],[392,0.3],[440,0.3],[494,0.6],
+        [523,0.3],[587,0.3],[659,0.6],[587,0.3],[523,0.3],[494,0.6],
+        [440,0.3],[392,0.3],[440,0.6],[392,0.3],[349,0.3],[330,0.9],
+        [294,0.3],[330,0.3],[349,0.3],[392,0.6],[349,0.3],[330,0.3],
+        [294,0.6],[262,0.3],[294,0.3],[330,0.6],[349,0.3],[392,0.3],
+        [440,0.9],[392,0.3],[349,0.3],[330,0.6],[294,0.3],[262,0.3],[294,1.2]
+      ];
+      
+      const harmony = [
+        [294,0.3],[330,0.3],[349,0.3],[392,0.6],[349,0.3],[330,0.3],
+        [294,0.6],[247,0.3],[262,0.3],[294,0.6],[262,0.3],[247,0.3],
+        [220,0.6],[247,0.3],[262,0.3],[294,0.3],[330,0.3],[349,0.6],
+        [392,0.3],[440,0.3],[494,0.6],[440,0.3],[392,0.3],[349,0.6],
+        [330,0.3],[294,0.3],[330,0.6],[294,0.3],[262,0.3],[247,0.9],
+        [220,0.3],[247,0.3],[262,0.3],[294,0.6],[262,0.3],[247,0.3],
+        [220,0.6],[196,0.3],[220,0.3],[247,0.6],[262,0.3],[294,0.3],
+        [330,0.9],[294,0.3],[262,0.3],[247,0.6],[220,0.3],[196,0.3],[220,1.2]
+      ];
+      
+      const bass = [
+        [131,0.6],[0,0.3],[131,0.3],[147,0.6],[0,0.3],[147,0.3],
+        [131,0.6],[0,0.3],[131,0.3],[117,0.6],[0,0.3],[117,0.3],
+        [98,0.6],[0,0.3],[98,0.3],[110,0.6],[0,0.3],[110,0.3],
+        [131,0.6],[0,0.3],[131,0.3],[147,0.6],[0,0.3],[147,0.3],
+        [131,0.6],[0,0.3],[131,0.3],[117,0.6],[0,0.3],[117,0.3],
+        [98,0.6],[0,0.3],[98,0.3],[110,0.6],[0,0.3],[110,0.3],
+        [98,0.6],[0,0.3],[98,0.3],[110,0.6],[0,0.3],[110,0.3],
+        [117,0.9],[0,0.3],[110,0.6],[0,0.3],[98,0.6],[0,0.3],[98,1.2]
+      ];
+      
       let time = now;
       melody.forEach(([freq, dur]) => { if (freq > 0) playNote(freq, dur, time, 'square'); time += dur; });
+      
+      time = now;
+      harmony.forEach(([freq, dur]) => { if (freq > 0) playNote(freq * 0.75, dur, time + 0.01, 'square'); time += dur; });
+      
       time = now;
       bass.forEach(([freq, dur]) => { if (freq > 0) playNote(freq * 0.5, dur, time, 'triangle'); time += dur; });
-      if (isMusicPlaying && !isMuted) setTimeout(() => playDungeonTheme(), 3200);
+      
+      if (isMusicPlaying && !isMuted) setTimeout(() => playDungeonTheme(), 14400);
     }
 
     function playRewardSound() {
