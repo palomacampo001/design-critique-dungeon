@@ -3231,77 +3231,49 @@
     setDungeonScene(null, "idle");
     renderRewardCards();
 
+    let dungeonMusic = null;
     let audioContext = null;
-    let dungeonMusicGain = null;
-    let dungeonMusicOscillators = [];
-    let isMusicPlaying = false;
     let isMuted = false;
 
-    function initAudioContext() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        dungeonMusicGain = audioContext.createGain();
-        dungeonMusicGain.connect(audioContext.destination);
-        dungeonMusicGain.gain.value = 0.15;
+    function initDungeonMusic() {
+      if (!dungeonMusic) {
+        dungeonMusic = new Audio('dungeon-theme.mp3');
+        dungeonMusic.loop = true;
+        dungeonMusic.volume = 0.3;
       }
     }
 
-    function playNote(frequency, duration, startTime, waveType) {
-      if (!audioContext || isMuted) return;
+    function playRewardSound() {
+      if (isMuted) return;
+      if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioContext.currentTime;
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
-      oscillator.type = waveType || 'square';
-      oscillator.frequency.value = frequency;
-      gainNode.gain.setValueAtTime(0.3, startTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration);
+      oscillator.type = 'square';
+      oscillator.frequency.setValueAtTime(523, now);
+      oscillator.frequency.setValueAtTime(659, now + 0.15);
+      oscillator.frequency.setValueAtTime(784, now + 0.3);
+      oscillator.frequency.setValueAtTime(1047, now + 0.45);
+      gainNode.gain.setValueAtTime(0.3, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, now + 0.85);
       oscillator.connect(gainNode);
-      gainNode.connect(dungeonMusicGain);
-      oscillator.start(startTime);
-      oscillator.stop(startTime + duration);
-      dungeonMusicOscillators.push(oscillator);
-      setTimeout(() => {
-        const index = dungeonMusicOscillators.indexOf(oscillator);
-        if (index > -1) dungeonMusicOscillators.splice(index, 1);
-      }, (duration + 0.1) * 1000);
-    }
-
-    function playDungeonTheme() {
-      if (!audioContext || isMuted) return;
-      const now = audioContext.currentTime;
-      const melody = [[392,0.3],[440,0.3],[494,0.3],[523,0.6],[494,0.3],[440,0.3],[392,0.6],[330,0.3],[349,0.3],[392,0.6],[349,0.3],[330,0.3],[294,0.6],[330,0.3],[349,0.3],[392,0.3],[440,0.3],[494,0.6],[523,0.3],[587,0.3],[659,0.6],[587,0.3],[523,0.3],[494,0.6],[440,0.3],[392,0.3],[440,0.6],[392,0.3],[349,0.3],[330,0.9],[294,0.3],[330,0.3],[349,0.3],[392,0.6],[349,0.3],[330,0.3],[294,0.6],[262,0.3],[294,0.3],[330,0.6],[349,0.3],[392,0.3],[440,0.9],[392,0.3],[349,0.3],[330,0.6],[294,0.3],[262,0.3],[294,1.2]];
-      const harmony = [[294,0.3],[330,0.3],[349,0.3],[392,0.6],[349,0.3],[330,0.3],[294,0.6],[247,0.3],[262,0.3],[294,0.6],[262,0.3],[247,0.3],[220,0.6],[247,0.3],[262,0.3],[294,0.3],[330,0.3],[349,0.6],[392,0.3],[440,0.3],[494,0.6],[440,0.3],[392,0.3],[349,0.6],[330,0.3],[294,0.3],[330,0.6],[294,0.3],[262,0.3],[247,0.9],[220,0.3],[247,0.3],[262,0.3],[294,0.6],[262,0.3],[247,0.3],[220,0.6],[196,0.3],[220,0.3],[247,0.6],[262,0.3],[294,0.3],[330,0.9],[294,0.3],[262,0.3],[247,0.6],[220,0.3],[196,0.3],[220,1.2]];
-      const bass = [[131,0.6],[0,0.3],[131,0.3],[147,0.6],[0,0.3],[147,0.3],[131,0.6],[0,0.3],[131,0.3],[117,0.6],[0,0.3],[117,0.3],[98,0.6],[0,0.3],[98,0.3],[110,0.6],[0,0.3],[110,0.3],[131,0.6],[0,0.3],[131,0.3],[147,0.6],[0,0.3],[147,0.3],[131,0.6],[0,0.3],[131,0.3],[117,0.6],[0,0.3],[117,0.3],[98,0.6],[0,0.3],[98,0.3],[110,0.6],[0,0.3],[110,0.3],[98,0.6],[0,0.3],[98,0.3],[110,0.6],[0,0.3],[110,0.3],[117,0.9],[0,0.3],[110,0.6],[0,0.3],[98,0.6],[0,0.3],[98,1.2]];
-      let time = now;
-      melody.forEach(([freq, dur]) => { if (freq > 0) playNote(freq, dur, time, 'square'); time += dur; });
-      time = now;
-      harmony.forEach(([freq, dur]) => { if (freq > 0) playNote(freq * 0.75, dur, time + 0.01, 'square'); time += dur; });
-      time = now;
-      bass.forEach(([freq, dur]) => { if (freq > 0) playNote(freq * 0.5, dur, time, 'triangle'); time += dur; });
-      if (isMusicPlaying && !isMuted) setTimeout(() => playDungeonTheme(), 14400);
-    }
-
-    function playRewardSound() {
-      if (!audioContext || isMuted) return;
-      const now = audioContext.currentTime;
-      const notes = [[523,0.15],[659,0.15],[784,0.15],[1047,0.4]];
-      let time = now;
-      notes.forEach(([freq, dur]) => {
-        playNote(freq, dur, time, 'square');
-        playNote(freq * 1.5, dur, time + 0.02, 'square');
-        time += dur;
-      });
+      gainNode.connect(audioContext.destination);
+      oscillator.start(now);
+      oscillator.stop(now + 0.85);
     }
 
     function startDungeonMusic() {
-      initAudioContext();
-      if (audioContext.state === 'suspended') audioContext.resume();
-      if (!isMusicPlaying && !isMuted) { isMusicPlaying = true; playDungeonTheme(); }
+      initDungeonMusic();
+      if (!isMuted && dungeonMusic) {
+        dungeonMusic.play().catch(e => console.log('Music autoplay blocked:', e));
+      }
     }
 
     function stopDungeonMusic() {
-      isMusicPlaying = false;
-      dungeonMusicOscillators.forEach(osc => { try { osc.stop(); } catch (e) {} });
-      dungeonMusicOscillators = [];
+      if (dungeonMusic) {
+        dungeonMusic.pause();
+        dungeonMusic.currentTime = 0;
+      }
     }
 
     function toggleMusic() {
