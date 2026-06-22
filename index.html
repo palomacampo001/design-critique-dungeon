@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Carbon Quest</title>
   <link rel="icon" href="data:,">
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <style>
     @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap");
 
@@ -100,10 +101,10 @@
     }
 
     .dungeon-screen {
-      height: calc(100vh - 28px);
-      max-height: calc(100vh - 28px);
-      display: grid;
-      grid-template-rows: auto minmax(0, 1fr) minmax(100px, 20vh) auto;
+      height: 100vh;
+      max-height: 100vh;
+      display: flex;
+      flex-direction: column;
       border: 8px solid var(--d-red);
       outline: 4px solid var(--d-gold);
       background: var(--d-black);
@@ -139,6 +140,7 @@
 
     .d-topbar,
     .d-command-bar {
+      flex: 0 0 auto;
       display: grid;
       align-items: center;
       gap: 8px;
@@ -155,6 +157,14 @@
       grid-template-columns: repeat(7, minmax(0, 1fr));
       border-top: 4px solid var(--d-red);
       border-bottom: 0;
+    }
+    
+    .d-content-wrapper {
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
     }
 
     .d-title {
@@ -202,11 +212,19 @@
     }
 
     .d-main {
+      flex: 0 1 auto;
       display: grid;
-      grid-template-columns: minmax(390px, 1.45fr) minmax(310px, .85fr);
+      grid-template-columns: minmax(min(100%, 420px), 2.6fr) minmax(min(100%, 240px), 0.8fr);
       gap: 0;
       min-height: 0;
-      overflow: auto;
+      overflow: visible;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .d-main {
+        grid-template-columns: 1fr;
+      }
     }
 
     .d-panel {
@@ -216,7 +234,7 @@
       box-shadow:
         inset 0 0 0 3px #000,
         inset 0 0 0 6px var(--d-blue);
-      margin: 8px;
+      margin: clamp(4px, 0.5vw, 8px);
       min-width: 0;
     }
 
@@ -250,7 +268,7 @@
       background: var(--d-blue);
       border-bottom: 4px solid var(--d-cyan);
       color: var(--d-yellow);
-      padding: 6px 10px;
+      padding: 6px 16px;
       font-size: 18px;
       line-height: 1;
     }
@@ -261,35 +279,61 @@
     }
 
     .d-preview {
-      display: grid;
-      grid-template-rows: 1fr auto;
-      min-height: 100%;
+      display: flex;
+      flex-direction: column;
+      flex: 0 0 auto;
+      min-height: 0;
+      overflow: visible;
     }
 
     .d-scroll-window {
-      display: grid;
-      place-items: center;
+      flex: 1 1 auto;
+      display: flex;
+      flex-direction: column;
       min-height: 0;
-      padding: 18px;
+      padding: clamp(8px, 1vw, 12px);
+      overflow: visible;
+      position: relative;
     }
 
     .d-scroll {
-      width: min(100%, 760px);
-      min-height: clamp(190px, 34vh, 300px);
-      border: 6px solid var(--d-gold);
-      outline: 4px solid var(--d-red);
+      flex: 1 1 auto;
+      width: 100%;
+      min-height: clamp(160px, 28vh, 320px);
+      max-height: none;
+      border: clamp(4px, 0.4vw, 6px) solid var(--d-gold);
+      outline: clamp(3px, 0.3vw, 4px) solid var(--d-red);
       background:
         repeating-linear-gradient(0deg, rgba(255, 240, 90, .12) 0 2px, transparent 2px 16px),
         #111;
-      display: grid;
-      place-items: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       color: var(--d-cyan);
-      text-align: center;
-      padding: 16px;
-      box-shadow: 10px 10px 0 #000;
+      box-shadow: clamp(6px, 0.6vw, 10px) clamp(6px, 0.6vw, 10px) 0 #000;
       overflow: hidden;
       cursor: pointer;
       transition: none;
+    }
+
+    @media (max-width: 768px) {
+      .d-scroll {
+        min-height: clamp(140px, 24vh, 240px);
+      }
+    }
+
+    .d-scroll-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(12px, 2vw, 16px);
+      width: 100%;
+      height: 100%;
+    }
+
+    .d-scroll-content > * {
+      max-width: 100%;
+      max-height: 100%;
     }
 
     .d-scroll.is-dragover {
@@ -300,22 +344,26 @@
       color: var(--d-yellow);
     }
 
-    .d-scroll img {
+    .d-scroll-content img {
       display: block;
       max-width: 100%;
-      max-height: 36vh;
+      max-height: 100%;
+      width: auto;
+      height: auto;
       object-fit: contain;
       border: 4px solid var(--d-white);
       filter: contrast(1.08) saturate(1.05);
     }
 
     .d-placeholder {
-      display: grid;
-      gap: 14px;
-      justify-items: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: clamp(10px, 2vw, 14px);
       color: var(--d-white);
-      font-size: clamp(16px, 2vw, 26px);
+      font-size: clamp(14px, 2vw, 22px);
       line-height: 1.25;
+      text-align: center;
     }
 
     .d-placeholder-mark {
@@ -329,15 +377,77 @@
       box-shadow: 8px 8px 0 #000;
     }
 
+    .d-clear-x {
+      position: absolute;
+      top: clamp(16px, 2vw, 20px);
+      right: clamp(16px, 2vw, 20px);
+      z-index: 10;
+      width: 28px;
+      height: 28px;
+      padding: 0;
+      border: 3px solid var(--d-red);
+      background: var(--d-black);
+      color: var(--d-red);
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+      transition: all 0.15s ease;
+      pointer-events: auto;
+    }
+
+    .d-clear-x:hover {
+      background: var(--d-red);
+      color: var(--d-black);
+      border-color: var(--d-yellow);
+      box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.7);
+      transform: translate(-1px, -1px);
+    }
+
+    .d-clear-x:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+    }
+
     .d-upload-row {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto;
-      gap: 12px;
+      flex: 0 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(8px, 1vw, 12px);
       align-items: center;
-      border-top: 4px solid var(--d-cyan);
-      padding: 10px;
+      border-bottom: 4px solid var(--d-cyan);
+      padding: clamp(8px, 1vw, 10px);
       color: var(--d-green);
-      font-size: 14px;
+      font-size: clamp(13px, 1.2vw, 14px);
+      position: static !important;
+      z-index: auto;
+    }
+
+    .d-upload-row > label:first-child {
+      flex: 0 0 auto;
+    }
+
+    .d-upload-row > span {
+      flex: 1 1 auto;
+      min-width: 0;
+    }
+
+    .d-upload-row > button {
+      flex: 0 0 auto;
+    }
+
+    @media (max-width: 640px) {
+      .d-upload-row {
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .d-upload-row > * {
+        width: 100%;
+        flex: 1 1 auto;
+        text-align: center;
+      }
     }
 
     .d-button,
@@ -390,21 +500,28 @@
     .d-status {
       display: grid;
       grid-template-rows: auto auto 1fr;
+      align-self: start;
+      position: relative;
+      min-height: 0;
+      max-height: 100%;
+      overflow: visible;
     }
 
     .d-portrait-row {
       display: grid;
-      grid-template-columns: 104px 1fr;
-      gap: 12px;
-      padding: 14px;
+      grid-template-columns: clamp(72px, 8vw, 88px) 1fr;
+      gap: 10px;
+      padding: 10px 12px;
       border-bottom: 4px solid var(--d-cyan);
     }
 
     .d-portrait {
-      min-height: 104px;
-      border: 5px solid var(--d-gold);
+      width: clamp(72px, 8vw, 88px);
+      height: clamp(72px, 8vw, 88px);
+      min-height: 0;
+      border: 4px solid var(--d-gold);
       background: #000;
-      box-shadow: 5px 5px 0 #000;
+      box-shadow: 4px 4px 0 #000;
       overflow: hidden;
       image-rendering: pixelated;
       display: grid;
@@ -416,7 +533,6 @@
       display: block;
       width: 100%;
       height: 100%;
-      min-height: 104px;
       object-fit: cover;
       image-rendering: pixelated;
     }
@@ -428,35 +544,39 @@
 
     .d-master h2 {
       color: var(--d-yellow);
-      font-size: 19px;
-      line-height: 1;
+      font-size: clamp(15px, 1.6vw, 18px);
+      line-height: 1.1;
     }
 
     .d-master p {
-      margin-top: 8px;
+      margin-top: 6px;
       color: var(--d-cyan);
-      font-size: 14px;
-      line-height: 1.35;
+      font-size: clamp(12px, 1.2vw, 13px);
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
 
     .d-bars {
       display: grid;
-      gap: 9px;
-      padding: 12px 14px;
+      gap: 7px;
+      padding: 10px 12px;
       border-bottom: 4px solid var(--d-cyan);
     }
 
     .d-meter {
       display: grid;
-      grid-template-columns: 44px 1fr 42px;
-      gap: 8px;
+      grid-template-columns: 40px 1fr 38px;
+      gap: 6px;
       align-items: center;
-      font-size: 13px;
+      font-size: 12px;
       color: var(--d-white);
     }
 
     .d-meter-track {
-      height: 16px;
+      height: 14px;
       border: 3px solid var(--d-white);
       background: #000;
     }
@@ -477,26 +597,30 @@
     }
 
     .d-party {
-      padding: 12px 14px 16px;
+      padding: 10px 12px 12px;
       display: grid;
       align-content: start;
-      gap: 10px;
+      gap: 7px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      min-height: 0;
     }
 
     .d-party-title {
       color: var(--d-yellow);
-      font-size: 16px;
+      font-size: clamp(14px, 1.4vw, 15px);
     }
 
     .d-character {
       display: grid;
       grid-template-columns: 1fr auto;
-      gap: 8px;
+      gap: 6px;
       border: 3px solid var(--d-green);
-      padding: 7px;
+      padding: 5px 7px;
       color: var(--d-white);
       background: #000;
       min-width: 0;
+      min-height: 32px;
     }
 
     .d-character strong {
@@ -510,22 +634,36 @@
     }
 
     .d-narration {
-      margin: 0 8px 8px;
+      flex: 1 1 auto;
+      margin: 0 clamp(4px, 0.5vw, 8px) clamp(4px, 0.5vw, 8px);
       border-color: var(--d-red);
       box-shadow:
         inset 0 0 0 3px #000,
         inset 0 0 0 6px var(--d-gold);
       min-height: 0;
-      max-height: 22vh;
-      overflow: auto;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
     }
 
     .d-narration-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 0;
-      height: calc(100% - 36px);
       min-height: 0;
+      flex: 1 1 auto;
+    }
+
+    @media (max-width: 768px) {
+      .d-narration-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+      }
+      
+      .d-textbox {
+        border-right: none;
+        border-bottom: 4px solid var(--d-red);
+      }
     }
 
     .d-textbox {
@@ -535,7 +673,9 @@
       font-size: clamp(14px, 1.2vw, 17px);
       line-height: 1.45;
       min-height: 0;
-      overflow: auto;
+      max-height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
     }
 
     .d-textbox strong {
@@ -550,7 +690,9 @@
       font-size: 14px;
       line-height: 1.3;
       min-height: 0;
-      overflow: auto;
+      max-height: 100%;
+      overflow-y: auto;
+      overflow-x: hidden;
       align-content: start;
     }
 
@@ -1373,17 +1515,19 @@
 
     .carbon-main {
       display: grid;
-      grid-template-columns: minmax(0, 1.25fr) minmax(320px, .75fr);
-      gap: 32px;
+      grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+      gap: 24px;
       padding: 32px;
       max-width: 1440px;
       margin: 0 auto;
+      align-items: start;
     }
 
     .carbon-hero {
       display: grid;
       gap: 24px;
       align-content: start;
+      grid-column: 1;
     }
 
     .carbon-heading {
@@ -1538,12 +1682,14 @@
       display: grid;
       gap: 16px;
       align-content: start;
+      grid-column: 2;
+      grid-row: 1;
     }
 
     .carbon-card {
-      padding: 20px;
+      padding: 16px 18px;
       display: grid;
-      gap: 16px;
+      gap: 12px;
     }
 
     .carbon-card h2,
@@ -1586,21 +1732,24 @@
 
     .carbon-list {
       display: grid;
-      gap: 12px;
+      gap: 8px;
     }
 
     .carbon-list div {
       display: grid;
-      grid-template-columns: 12px 1fr;
-      gap: 12px;
+      grid-template-columns: 8px 1fr;
+      gap: 10px;
       align-items: start;
+      font-size: 14px;
+      line-height: 1.4;
     }
 
     .carbon-dot {
-      width: 12px;
-      height: 12px;
-      margin-top: 3px;
+      width: 8px;
+      height: 8px;
+      margin-top: 5px;
       background: var(--ibm-blue);
+      border-radius: 50%;
     }
 
     .carbon-dot.green {
@@ -1617,6 +1766,62 @@
 
     .carbon-dot.purple {
       background: var(--ibm-purple);
+    }
+
+    .carbon-detailed-analysis {
+      grid-column: 1 / -1;
+      max-height: 400px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .carbon-detailed-content {
+      flex: 1 1 auto;
+      max-height: 350px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .carbon-detailed-content h4 {
+      margin: 16px 0 8px 0;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ibm-text);
+      border-bottom: 1px solid var(--ibm-border);
+      padding-bottom: 6px;
+    }
+
+    .carbon-detailed-content h4:first-child {
+      margin-top: 0;
+    }
+
+    .carbon-detailed-content p {
+      margin: 8px 0;
+      color: var(--ibm-muted);
+    }
+
+    .carbon-detailed-content .detail-item {
+      margin: 6px 0;
+      padding-left: 12px;
+      border-left: 3px solid var(--ibm-border);
+    }
+
+    .carbon-detailed-content .detail-item.teal {
+      border-left-color: var(--ibm-teal);
+      color: var(--ibm-text);
+    }
+
+    .carbon-detailed-content .detail-item.red {
+      border-left-color: var(--ibm-danger);
+      color: var(--ibm-text);
+    }
+
+    .carbon-detailed-content .detail-item.purple {
+      border-left-color: var(--ibm-purple);
+      color: var(--ibm-text);
     }
 
     .carbon-results {
@@ -1922,19 +2127,25 @@
 
         <div class="d-main">
           <section class="d-panel d-preview" aria-label="Uploaded design scroll">
-            <div class="d-panel-title"><span>Uploaded Design Scroll</span><span>Viewport I</span></div>
-            <div class="d-scroll-window">
-              <div class="d-scroll" id="dungeonPreview" role="button" aria-label="Drop an image here or click to upload">
-                <div class="d-placeholder">
-                  <span class="d-placeholder-mark" aria-hidden="true"></span>
-                  <span>Drop image here<br>or click to upload</span>
-                </div>
-              </div>
+            <div class="d-panel-title">
+              <span>Uploaded Design Scroll</span>
+              <span>Viewport I</span>
             </div>
             <div class="d-upload-row">
               <label class="d-button" for="designUploadDungeon">Upload Scroll</label>
               <span id="dungeonFileName">No artifact equipped</span>
               <button class="d-button d-submit" id="dungeonSubmit" type="button">Submit for Analysis</button>
+            </div>
+            <div class="d-scroll-window">
+              <button class="d-clear-x" id="dungeonClear" type="button" style="display: none;" aria-label="Clear uploaded design" title="Clear uploaded design">×</button>
+              <div class="d-scroll" id="dungeonPreview" role="button" aria-label="Drop an image here or click to upload">
+                <div class="d-scroll-content">
+                  <div class="d-placeholder">
+                    <span class="d-placeholder-mark" aria-hidden="true"></span>
+                    <span>Drop image here<br>or click to upload</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
 
@@ -2041,6 +2252,13 @@
             </div>
           </section>
         </aside>
+
+        <section class="carbon-card carbon-detailed-analysis" id="carbonDetailedAnalysis" style="display: none;">
+          <h3>Expert Analysis</h3>
+          <div class="carbon-detailed-content" id="carbonDetailedContent">
+            <p class="carbon-meta">Run analysis to see detailed design review.</p>
+          </div>
+        </section>
 
         <section class="carbon-results">
           <article class="carbon-card">
@@ -2210,6 +2428,8 @@
     let uploadedAudit = null;
     let dungeonTypingTimer = null;
     let unlockedRewardIds = new Set();
+    let extractedText = "";
+    let ocrConfidence = 0;
 
     const rewardScenes = [
       { id: "typography-tavern", title: "Master Typographer", rarity: "Common", xp: 120, scene: "tavern", description: "A warm tavern where carved letterforms glow above scrolls and ink bottles." },
@@ -2701,6 +2921,296 @@
       });
     }
 
+    async function extractTextFromImage(src) {
+      try {
+        const result = await Tesseract.recognize(src, 'eng', {
+          logger: info => console.log('OCR Progress:', info)
+        });
+        
+        extractedText = result.data.text.trim();
+        ocrConfidence = result.data.confidence;
+        
+        console.log('OCR Complete:', {
+          text: extractedText,
+          confidence: ocrConfidence,
+          wordCount: extractedText.split(/\s+/).filter(w => w.length > 0).length
+        });
+        
+        return {
+          text: extractedText,
+          confidence: ocrConfidence,
+          wordCount: extractedText.split(/\s+/).filter(w => w.length > 0).length
+        };
+      } catch (error) {
+        console.error('OCR Error:', error);
+        extractedText = "";
+        ocrConfidence = 0;
+        return { text: "", confidence: 0, wordCount: 0 };
+      }
+    }
+
+    function estimateIBMPlexUsage(text, audit, ocrConf) {
+      // Gate: Typography can only be assessed when readable text exists
+      const hasReadableText = text && text.trim().length >= 10 && ocrConf >= 60;
+      
+      if (!hasReadableText) {
+        return {
+          confidence: 0,
+          confidenceLevel: "N/A",
+          assessment: "No readable text detected in this design.",
+          recommendation: "Typography cannot be assessed from this image. If this is an IBM communication, verify that any text in source files uses IBM Plex Sans or IBM Plex Mono.",
+          reasons: ["No readable text detected (OCR confidence too low or insufficient text)"],
+          warnings: ["Typography analysis requires visible, readable text"],
+          isNotApplicable: true
+        };
+      }
+
+      // IBM Plex detection is based on design context, not font recognition
+      // This provides an educated estimate, not a definitive identification
+      let confidence = 40; // Start conservative
+      const reasons = [];
+      const warnings = [];
+
+      // Strong indicator: IBM/Carbon design patterns
+      if (audit && audit.isIbmCandidate) {
+        confidence += 25;
+        reasons.push("Design exhibits IBM/Carbon visual patterns");
+        reasons.push(`IBM compliance score: ${audit.ibmCompliance}/100`);
+      } else {
+        confidence -= 10;
+        warnings.push("Design does not show typical IBM/Carbon characteristics");
+      }
+
+      // Check text characteristics
+      if (text && text.length > 20) {
+        const lines = text.split('\n').filter(l => l.trim().length > 0);
+        const words = text.split(/\s+/).filter(w => w.length > 0);
+        const avgLineLength = lines.reduce((sum, l) => sum + l.length, 0) / Math.max(lines.length, 1);
+        
+        // Professional typography indicators
+        if (avgLineLength > 30 && avgLineLength < 80) {
+          confidence += 5;
+          reasons.push("Professional line length (optimal readability)");
+        }
+
+        // IBM Plex typically uses sentence case, not excessive caps
+        const allCapsWords = words.filter(w => w.length > 3 && w === w.toUpperCase());
+        if (allCapsWords.length < words.length * 0.15) {
+          confidence += 5;
+          reasons.push("Appropriate capitalization style");
+        } else if (allCapsWords.length > words.length * 0.3) {
+          confidence -= 5;
+          warnings.push("Excessive ALL CAPS (uncommon in IBM Plex usage)");
+        }
+      } else {
+        warnings.push("Limited text available for typography analysis");
+      }
+
+      // Color palette is a strong indicator for IBM designs
+      if (audit && audit.exactPaletteMatch >= 70) {
+        confidence += 15;
+        reasons.push(`Strong IBM palette match (${audit.exactPaletteMatch}%)`);
+      } else if (audit && audit.exactPaletteMatch >= 50) {
+        confidence += 8;
+        reasons.push(`Moderate IBM palette match (${audit.exactPaletteMatch}%)`);
+      }
+
+      // Grid alignment (IBM Plex is designed for Carbon's 2x grid)
+      if (audit && audit.gridPass) {
+        confidence += 12;
+        reasons.push("Aligned to Carbon 16px grid");
+      } else {
+        confidence -= 5;
+        warnings.push("Not aligned to Carbon grid");
+      }
+
+      // Carbon surface signals
+      if (audit && audit.carbonSurfacePercent >= 60) {
+        confidence += 8;
+        reasons.push("Carbon-like neutral surfaces detected");
+      }
+
+      // Confidence bounds
+      confidence = Math.max(0, Math.min(100, confidence));
+
+      let assessment = "";
+      let recommendation = "";
+      let confidenceLevel = "";
+
+      if (confidence >= 80) {
+        confidenceLevel = "High";
+        assessment = "Typography appears highly consistent with IBM Plex Sans based on design context.";
+        recommendation = "Verify IBM Plex Sans/Mono in source files to confirm. Check font weights and ensure proper usage across all text elements.";
+      } else if (confidence >= 65) {
+        confidenceLevel = "Medium-High";
+        assessment = "Typography shows characteristics consistent with IBM Plex, but confirmation is needed.";
+        recommendation = "Manually verify IBM Plex Sans/Mono in source files. If using a different typeface, consider switching to IBM Plex for brand consistency.";
+      } else if (confidence >= 45) {
+        confidenceLevel = "Medium";
+        assessment = "Typography cannot be confidently identified from this screenshot. Some IBM design patterns present, but font family is uncertain.";
+        recommendation = "Manual verification required. Check source files for IBM Plex Sans/Mono. If not present, IBM Design Language strongly recommends IBM Plex for all IBM communications.";
+      } else {
+        confidenceLevel = "Low";
+        assessment = "Typography does not appear to use IBM Plex based on available design signals. The typeface may be Helvetica, Arial, Inter, Aptos, or another sans-serif family.";
+        recommendation = "IBM Design Language requires IBM Plex for IBM communications. Replace current typeface with IBM Plex Sans for body copy and IBM Plex Mono for code. This is critical for brand consistency.";
+      }
+
+      return {
+        confidence,
+        confidenceLevel,
+        assessment,
+        recommendation,
+        reasons,
+        warnings,
+        isNotApplicable: false
+      };
+    }
+
+    function analyzeTextQuality(text) {
+      if (!text || text.length < 3) {
+        return {
+          hasText: false,
+          issues: [],
+          score: 0,
+          details: {}
+        };
+      }
+
+      const issues = [];
+      let score = 100;
+      const details = {};
+
+      // Parse text structure
+      const words = text.split(/\s+/).filter(w => w.length > 0);
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0);
+      const lines = text.split('\n').filter(l => l.trim().length > 0);
+      
+      details.wordCount = words.length;
+      details.sentenceCount = sentences.length;
+      details.lineCount = lines.length;
+
+      // Identify text regions (headlines vs body)
+      const firstLine = lines[0] || "";
+      const firstLineWords = firstLine.split(/\s+/).filter(w => w.length > 0);
+      const isLikelyHeadline = firstLineWords.length <= 8 && firstLineWords.length > 0;
+      
+      // Check for ALL CAPS (location-specific)
+      const allCapsWords = words.filter(w => w.length > 3 && w === w.toUpperCase());
+      if (allCapsWords.length > words.length * 0.3) {
+        const location = isLikelyHeadline ? "headline" : "body copy";
+        issues.push({
+          issue: "Excessive ALL CAPS text reduces readability",
+          location: location,
+          recommendation: `Use sentence case or title case in ${location}. Reserve ALL CAPS for acronyms only.`,
+          severity: "medium"
+        });
+        score -= 15;
+      }
+
+      // Check line length with specific feedback
+      const longLines = lines.filter(l => l.length > 80);
+      if (longLines.length > 0) {
+        const avgLength = lines.reduce((sum, l) => sum + l.length, 0) / lines.length;
+        issues.push({
+          issue: `Text lines average ${Math.round(avgLength)} characters`,
+          location: longLines.length === lines.length ? "all text" : "some paragraphs",
+          recommendation: `Aim for 50-75 characters per line for optimal readability. ${longLines.length > 1 ? 'Consider increasing container width or breaking into columns.' : 'Adjust container width or shorten copy.'}`,
+          severity: "medium"
+        });
+        score -= 10;
+      }
+
+      // Check for orphans and widows
+      const lastWords = sentences.map(s => {
+        const sentenceWords = s.trim().split(/\s+/);
+        return sentenceWords[sentenceWords.length - 1];
+      }).filter(w => w && w.length > 0);
+      
+      const shortOrphans = lastWords.filter(w => w.length <= 3);
+      if (shortOrphans.length > 0 && sentences.length > 1) {
+        issues.push({
+          issue: `Text wraps awkwardly, creating orphans`,
+          location: "paragraph endings",
+          recommendation: `Adjust copy length or container width to prevent single short words on final lines. Consider rewording to eliminate "${shortOrphans[0]}".`,
+          severity: "low"
+        });
+        score -= 8;
+      }
+
+      // Check punctuation with specific location
+      const hasProperPunctuation = sentences.length > 0 && sentences.some(s => /[.!?]$/.test(s.trim()));
+      if (!hasProperPunctuation && words.length > 10) {
+        issues.push({
+          issue: "Missing proper punctuation",
+          location: "body copy",
+          recommendation: "Add periods, commas, or appropriate sentence endings to improve readability and professionalism.",
+          severity: "high"
+        });
+        score -= 12;
+      }
+
+      // Check for repeated words with examples
+      const wordCounts = {};
+      words.forEach(w => {
+        const lower = w.toLowerCase();
+        wordCounts[lower] = (wordCounts[lower] || 0) + 1;
+      });
+      const repeated = Object.entries(wordCounts).filter(([w, count]) => count > 3 && w.length > 4);
+      if (repeated.length > 0) {
+        const topRepeated = repeated.slice(0, 2).map(([w, count]) => `"${w}" (${count}×)`).join(', ');
+        issues.push({
+          issue: "Repetitive vocabulary detected",
+          location: "throughout copy",
+          recommendation: `Words like ${topRepeated} appear frequently. Vary vocabulary to maintain reader engagement.`,
+          severity: "low"
+        });
+        score -= 8;
+      }
+
+      // Check sentence structure
+      const shortSentences = sentences.filter(s => s.trim().split(/\s+/).length < 3);
+      if (shortSentences.length > sentences.length * 0.5 && sentences.length > 2) {
+        issues.push({
+          issue: "Fragmented sentence structure",
+          location: "body copy",
+          recommendation: "Combine related short sentences for better flow. Example: Instead of 'Fast. Reliable. Secure.' try 'Fast, reliable, and secure.'",
+          severity: "medium"
+        });
+        score -= 10;
+      }
+
+      // Check spacing issues
+      if (/\s{2,}/.test(text)) {
+        issues.push({
+          issue: "Multiple consecutive spaces detected",
+          location: "various locations",
+          recommendation: "Use single spaces between words. Check for copy-paste artifacts.",
+          severity: "low"
+        });
+        score -= 5;
+      }
+
+      // Check for camelCase in body text
+      if (/[a-z][A-Z]/.test(text)) {
+        issues.push({
+          issue: "Inconsistent capitalization (camelCase in body text)",
+          location: "body copy",
+          recommendation: "Use proper spacing between words. Avoid camelCase outside of code examples.",
+          severity: "medium"
+        });
+        score -= 7;
+      }
+
+      return {
+        hasText: true,
+        issues: issues.slice(0, 6), // Top 6 most important issues
+        score: Math.max(0, score),
+        wordCount: words.length,
+        sentenceCount: sentences.length,
+        details
+      };
+    }
+
     function buildAuditFindings() {
       if (!uploadedAudit) {
         if (uploadedFileName) {
@@ -2757,23 +3267,195 @@
         : `Canvas dimensions are ${uploadedAudit.width} x ${uploadedAudit.height}; width is ${uploadedAudit.widthRemainder}px and height is ${uploadedAudit.heightRemainder}px off a 16px rhythm.`;
       const paletteText = `${uploadedAudit.exactPaletteMatch}% of sampled pixels strictly match the IBM palette; ${uploadedAudit.paletteMatch}% are close. Dominant matches: ${dominantNames}.`;
       const contrastText = `Approximate tonal contrast range is ${uploadedAudit.tonalContrast.toFixed(1)}:1, with ${uploadedAudit.darkPercent}% dark and ${uploadedAudit.lightPercent}% light samples.`;
-      const typographyText = "Typography check: a screenshot cannot prove Plex usage. Verify IBM Plex Sans/Mono in the source file, then use the screenshot audit for layout and color.";
+      // IBM Plex detection (with OCR confidence gate)
+      const plexAnalysis = estimateIBMPlexUsage(extractedText, uploadedAudit, ocrConfidence);
+      
+      // Add text analysis findings
+      const textAnalysis = analyzeTextQuality(extractedText);
+      
+      // Build IBM Compliance Report with transparent scoring
+      const complianceChecks = [
+        {
+          name: "Typography",
+          score: plexAnalysis.isNotApplicable ? 0 : Math.round(plexAnalysis.confidence * 0.2),
+          maxScore: plexAnalysis.isNotApplicable ? 0 : 20,
+          pass: plexAnalysis.isNotApplicable ? null : plexAnalysis.confidence >= 65,
+          icon: plexAnalysis.isNotApplicable ? "—" : (plexAnalysis.confidence >= 75 ? "✅" : plexAnalysis.confidence >= 55 ? "⚠" : "❌"),
+          detail: plexAnalysis.isNotApplicable ? "N/A — No readable text" : `${plexAnalysis.confidence}% confidence`,
+          isNotApplicable: plexAnalysis.isNotApplicable
+        },
+        {
+          name: "Color Palette",
+          score: Math.round(Math.min(uploadedAudit.exactPaletteMatch, 100) * 0.2),
+          maxScore: 20,
+          pass: uploadedAudit.exactPaletteMatch >= 55,
+          icon: uploadedAudit.exactPaletteMatch >= 55 ? "✅" : "❌",
+          detail: `${uploadedAudit.exactPaletteMatch}% IBM palette match`
+        },
+        {
+          name: "Grid & Alignment",
+          score: uploadedAudit.gridPass ? 20 : Math.max(0, 20 - Math.max(uploadedAudit.widthRemainder, uploadedAudit.heightRemainder)),
+          maxScore: 20,
+          pass: uploadedAudit.gridPass,
+          icon: uploadedAudit.gridPass ? "✅" : "❌",
+          detail: uploadedAudit.gridPass ? "Aligned to 16px grid" : `Off by ${Math.max(uploadedAudit.widthRemainder, uploadedAudit.heightRemainder)}px`
+        },
+        {
+          name: "Carbon Components",
+          score: Math.round(Math.min(uploadedAudit.carbonSurfacePercent, 100) * 0.2),
+          maxScore: 20,
+          pass: uploadedAudit.carbonSurfacePercent >= 55,
+          icon: uploadedAudit.carbonSurfacePercent >= 55 ? "✅" : uploadedAudit.carbonSurfacePercent >= 40 ? "⚠" : "❌",
+          detail: `${uploadedAudit.carbonSurfacePercent}% Carbon-like surfaces`
+        },
+        {
+          name: "Accessibility",
+          score: Math.round(Math.min(uploadedAudit.tonalContrast / 7, 1) * 20),
+          maxScore: 20,
+          pass: uploadedAudit.tonalContrast >= 4.5,
+          icon: uploadedAudit.tonalContrast >= 4.5 ? "✅" : "❌",
+          detail: `${uploadedAudit.tonalContrast.toFixed(1)}:1 contrast ratio`
+        }
+      ];
+      
+      const totalScore = complianceChecks.reduce((sum, check) => sum + check.score, 0);
+      const maxTotalScore = complianceChecks.reduce((sum, check) => sum + check.maxScore, 0);
+      
+      // Build top 3 priorities for executive summary
+      const priorities = [];
+      if (!uploadedAudit.gridPass) {
+        priorities.push("Align canvas to Carbon 16px grid");
+      }
+      if (plexAnalysis.confidence < 65) {
+        priorities.push("Verify IBM Plex Sans/Mono typography");
+      }
+      if (uploadedAudit.exactPaletteMatch < 55) {
+        priorities.push("Increase IBM Design Language color usage");
+      }
+      if (uploadedAudit.tonalContrast < 4.5) {
+        priorities.push("Improve contrast for WCAG compliance");
+      }
+      if (textAnalysis.hasText && textAnalysis.issues.length > 0) {
+        priorities.push(textAnalysis.issues[0].issue);
+      }
+      if (uploadedAudit.carbonSurfacePercent < 55) {
+        priorities.push("Strengthen Carbon surface patterns");
+      }
+      
+      // LEVEL 1: Executive Summary (compact sidebar)
+      const findings = [
+        ["", `IBM Compliance: ${uploadedAudit.ibmCompliance}/100`],
+        ["", ""]
+      ];
+      
+      // Add compliance breakdown
+      complianceChecks.forEach(check => {
+        if (check.isNotApplicable) {
+          findings.push(["purple", `${check.name}: N/A`]);
+        } else {
+          const color = check.pass ? "teal" : "red";
+          findings.push([color, `${check.name}: ${check.score}/${check.maxScore}`]);
+        }
+      });
+      
+      findings.push(["", ""]);
+      
+      // Add top 3 priorities
+      priorities.slice(0, 3).forEach((priority, index) => {
+        findings.push(["", `${index + 1}. ${priority}`]);
+      });
+      
+      // LEVEL 2: Detailed Expert Analysis (for detailed panel)
+      const detailedAnalysis = [];
+      
+      detailedAnalysis.push(["header", "IBM Compliance Report"]);
+      const applicableScore = complianceChecks.filter(c => !c.isNotApplicable).reduce((sum, c) => sum + c.maxScore, 0);
+      detailedAnalysis.push(["", `Overall Score: ${totalScore}/${maxTotalScore}`]);
+      if (applicableScore < maxTotalScore) {
+        detailedAnalysis.push(["purple", `(${applicableScore} points applicable — Typography excluded due to no readable text)`]);
+      }
+      detailedAnalysis.push(["", ""]);
+      
+      complianceChecks.forEach(check => {
+        if (check.isNotApplicable) {
+          detailedAnalysis.push(["purple", `${check.icon} ${check.name}: N/A`]);
+          detailedAnalysis.push(["", `   ${check.detail}`]);
+        } else {
+          const color = check.pass ? "teal" : "red";
+          detailedAnalysis.push([color, `${check.icon} ${check.name}: ${check.score}/${check.maxScore} — ${check.detail}`]);
+        }
+      });
+      
+      detailedAnalysis.push(["", ""]);
+      detailedAnalysis.push(["header", "Design Analysis"]);
+      detailedAnalysis.push([uploadedAudit.gridPass ? "teal" : "red", gridText]);
+      detailedAnalysis.push([uploadedAudit.exactPaletteMatch >= 55 ? "teal" : "red", paletteText]);
+      detailedAnalysis.push([uploadedAudit.carbonSurfacePercent >= 55 ? "teal" : "red", `Carbon surface signal is ${uploadedAudit.carbonSurfacePercent}% neutral/blue/cyan/teal. Loud accent use is ${uploadedAudit.loudAccentPercent}%.`]);
+      detailedAnalysis.push([uploadedAudit.tonalContrast >= 4.5 ? "teal" : "red", contrastText]);
+      
+      detailedAnalysis.push(["", ""]);
+      detailedAnalysis.push(["header", "IBM Plex Typography"]);
+      detailedAnalysis.push(["", `Confidence: ${plexAnalysis.confidence}% (${plexAnalysis.confidenceLevel})`]);
+      detailedAnalysis.push([plexAnalysis.confidence >= 65 ? "teal" : plexAnalysis.confidence >= 45 ? "purple" : "red", plexAnalysis.assessment]);
+      
+      if (plexAnalysis.reasons.length > 0) {
+        detailedAnalysis.push(["", ""]);
+        plexAnalysis.reasons.forEach(reason => {
+          detailedAnalysis.push(["teal", reason]);
+        });
+      }
+      
+      if (plexAnalysis.warnings.length > 0) {
+        detailedAnalysis.push(["", ""]);
+        plexAnalysis.warnings.forEach(warning => {
+          detailedAnalysis.push(["red", warning]);
+        });
+      }
+      
+      detailedAnalysis.push(["", ""]);
+      detailedAnalysis.push(["purple", plexAnalysis.recommendation]);
+      
+      detailedAnalysis.push(["", ""]);
+      detailedAnalysis.push(["header", "Text & Content"]);
+      
+      if (ocrConfidence > 0) {
+        if (ocrConfidence < 60) {
+          detailedAnalysis.push(["purple", `OCR Confidence: ${Math.round(ocrConfidence)}% (Low) — Limited text detected`]);
+        } else if (textAnalysis.hasText) {
+          detailedAnalysis.push(["teal", `OCR Confidence: ${Math.round(ocrConfidence)}% — ${textAnalysis.wordCount} words, ${textAnalysis.sentenceCount} sentences`]);
+          detailedAnalysis.push(["", `Text Quality Score: ${textAnalysis.score}/100`]);
+          
+          if (textAnalysis.issues.length > 0) {
+            detailedAnalysis.push(["", ""]);
+            textAnalysis.issues.forEach(issue => {
+              const severityColor = issue.severity === "high" ? "red" : issue.severity === "medium" ? "purple" : "teal";
+              detailedAnalysis.push([severityColor, `${issue.issue} (${issue.location})`]);
+              detailedAnalysis.push(["", `→ ${issue.recommendation}`]);
+            });
+          } else {
+            detailedAnalysis.push(["teal", "No major text quality issues detected"]);
+          }
+        }
+      } else {
+        detailedAnalysis.push(["purple", "No readable text detected"]);
+      }
+      
+      detailedAnalysis.push(["", ""]);
+      detailedAnalysis.push(["header", "Next Steps"]);
+      detailedAnalysis.push(["", "1. Verify IBM Plex Sans/Mono in source files"]);
+      detailedAnalysis.push(["", "2. Align spacing to Carbon's 2x grid"]);
+      detailedAnalysis.push(["", "3. Test accessibility with screen readers"]);
+      detailedAnalysis.push(["", "4. Review components against Carbon Design System"]);
 
       return {
-        summary: `${uploadedFileName} was checked against IBM Design Language signals with an IBM compliance score of ${uploadedAudit.ibmCompliance}/100: 2x grid rhythm, IBM palette proximity, Carbon-like surfaces, tonal contrast, and source-verification needs for Plex typography.`,
+        summary: `Analysis complete. IBM compliance: ${uploadedAudit.ibmCompliance}/100. ${priorities.length > 0 ? 'Focus on ' + priorities.slice(0, 2).join(' and ').toLowerCase() + '.' : 'Design meets IBM Design Language standards.'}`,
         scores: {
           clarity: uploadedAudit.clarity,
           accessibility: uploadedAudit.accessibility,
           risk: uploadedAudit.risk
         },
-        findings: [
-          [uploadedAudit.gridPass ? "teal" : "red", gridText],
-          [uploadedAudit.exactPaletteMatch >= 55 ? "" : "red", paletteText],
-          [uploadedAudit.carbonSurfacePercent >= 55 ? "teal" : "red", `Carbon surface signal is ${uploadedAudit.carbonSurfacePercent}% neutral/blue/cyan/teal. Loud accent use is ${uploadedAudit.loudAccentPercent}%.`],
-          [uploadedAudit.tonalContrast >= 4.5 ? "teal" : "red", contrastText],
-          ["purple", typographyText],
-          ["", "Next step: align spacing, gutters, and type positions to Carbon's 2x grid before judging visual polish."]
-        ]
+        findings,
+        detailedAnalysis
       };
     }
 
@@ -2861,6 +3543,7 @@
           ["teal", "Use Upload image if dragging is not convenient."],
           ["red", "Analysis starts after a design file is selected."]
         ].map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+        document.getElementById("carbonDetailedAnalysis").style.display = "none";
         carbonPreview.scrollIntoView({ behavior: "smooth", block: "center" });
         return;
       }
@@ -2871,7 +3554,33 @@
       carbonClarity.textContent = audit.scores.clarity;
       carbonAccessibility.textContent = audit.scores.accessibility;
       carbonRisk.textContent = audit.scores.risk;
-      carbonFocusList.innerHTML = audit.findings.map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`).join("");
+      
+      // Remove empty dots - only show findings with text
+      carbonFocusList.innerHTML = audit.findings
+        .filter(([tone, text]) => text && text.trim())
+        .map(([tone, text]) => `<div><span class="carbon-dot ${tone}"></span><span>${text}</span></div>`)
+        .join("");
+      
+      // Populate detailed analysis
+      if (audit.detailedAnalysis && audit.detailedAnalysis.length > 0) {
+        let detailedHTML = "";
+        
+        audit.detailedAnalysis.forEach(([tone, text]) => {
+          if (!text || !text.trim()) return; // Skip empty entries
+          
+          if (tone === "header") {
+            detailedHTML += `<h4>${text}</h4>`;
+          } else if (tone) {
+            detailedHTML += `<div class="detail-item ${tone}">${text}</div>`;
+          } else {
+            detailedHTML += `<p>${text}</p>`;
+          }
+        });
+        
+        document.getElementById("carbonDetailedContent").innerHTML = detailedHTML;
+        document.getElementById("carbonDetailedAnalysis").style.display = "block";
+      }
+      
       carbonExport.disabled = false;
       carbonReset.classList.add("is-visible");
       document.querySelector(".carbon-sidebar").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -2909,12 +3618,21 @@
       uploadedFileName = "";
       carbonAnalyzed = false;
       uploadedAudit = null;
+      extractedText = "";
+      ocrConfidence = 0;
       carbonUpload.value = "";
       dungeonUpload.value = "";
       if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
       lastObjectUrl = "";
       carbonPreview.innerHTML = `<div class="carbon-empty"><strong>Drop an image here</strong>or upload an image to preview the design and prepare a structured critique.</div>`;
-      dungeonPreview.innerHTML = `<div class="d-placeholder"><span class="d-placeholder-mark" aria-hidden="true"></span><span>Drop image here<br>or click to upload</span></div>`;
+      dungeonPreview.innerHTML = `
+        <div class="d-scroll-content">
+          <div class="d-placeholder">
+            <span class="d-placeholder-mark" aria-hidden="true"></span>
+            <span>Drop image here<br>or click to upload</span>
+          </div>
+        </div>
+      `;
       carbonFileName.textContent = "No file selected";
       dungeonFileName.textContent = "No artifact equipped";
       carbonSummary.textContent = "Calm product framing with measurable signals for design quality and implementation readiness.";
@@ -2929,6 +3647,7 @@
       carbonExport.disabled = true;
       carbonReset.classList.remove("is-visible");
       dungeonSubmit.classList.remove("is-visible");
+      document.getElementById("dungeonClear").style.display = "none";
       dungeonNarration.innerHTML = "<strong>The Dungeon Master speaks:</strong> Your design enters the chamber. The first test is legibility under pressure; the second is whether the user can find the next action before the torch burns low.";
       dungeonCritique.innerHTML = [
         "Primary action must read before secondary loot.",
@@ -2941,6 +3660,11 @@
       carbonPreview.scrollIntoView({ behavior: "smooth", block: "center" });
     }
 
+    function clearDungeonDesign() {
+      resetCarbonUpload();
+      dungeonPreview.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
     async function renderPreview(file) {
       if (!file) return;
       if (lastObjectUrl) URL.revokeObjectURL(lastObjectUrl);
@@ -2950,9 +3674,14 @@
       uploadedFileName = safeName;
       carbonAnalyzed = false;
       uploadedAudit = null;
-      dungeonPreview.innerHTML = `<img src="${src}" alt="Uploaded design preview in Dungeon skin">`;
+      dungeonPreview.innerHTML = `
+        <div class="d-scroll-content">
+          <img src="${src}" alt="Uploaded design preview in Dungeon skin">
+        </div>
+      `;
+      document.getElementById("dungeonClear").style.display = "block";
       carbonPreview.innerHTML = `<img src="${src}" alt="Uploaded design preview in Carbon skin">`;
-      dungeonFileName.textContent = `Equipped: ${safeName}`;
+      dungeonFileName.textContent = safeName;
       carbonFileName.textContent = safeName;
       dungeonSubmit.classList.add("is-visible");
       setDungeonScene(null, "loaded");
@@ -2976,12 +3705,26 @@
         "Submit for Analysis is now available."
       ].map((item) => `<div>${item}</div>`).join("");
       uploadedAudit = await analyzeImageFromUrl(src);
+      
+      // Extract text with OCR
+      dungeonCritique.innerHTML = [
+        `Analyzing image dimensions and colors...`,
+        `Extracting text with OCR...`,
+        `Please wait...`
+      ].map((item) => `<div>${item}</div>`).join("");
+      
+      const ocrResult = await extractTextFromImage(src);
+      
       if (uploadedAudit) {
-        carbonSummary.textContent = `${safeName} is ready for IDL analysis. Detected ${uploadedAudit.width} x ${uploadedAudit.height}px, IBM compliance ${uploadedAudit.ibmCompliance}/100, and ${uploadedAudit.exactPaletteMatch}% strict IBM palette match.`;
+        const textInfo = ocrResult.wordCount > 0
+          ? ` ${ocrResult.wordCount} words detected.`
+          : ' Limited text detected.';
+        carbonSummary.textContent = `${safeName} is ready for IDL analysis. Detected ${uploadedAudit.width} x ${uploadedAudit.height}px, IBM compliance ${uploadedAudit.ibmCompliance}/100, and ${uploadedAudit.exactPaletteMatch}% strict IBM palette match.${textInfo}`;
         dungeonCritique.innerHTML = [
           `Detected ${uploadedAudit.width} x ${uploadedAudit.height}px artifact.`,
           `${uploadedAudit.isIbmCandidate ? "IBM/Carbon signal detected." : "Warning: this may be a rogue non-IBM artifact."}`,
-          `IBM compliance: ${uploadedAudit.ibmCompliance}/100. Strict palette match: ${uploadedAudit.exactPaletteMatch}%.`
+          `IBM compliance: ${uploadedAudit.ibmCompliance}/100. Strict palette match: ${uploadedAudit.exactPaletteMatch}%.`,
+          ocrResult.wordCount > 0 ? `Text extracted: ${ocrResult.wordCount} words (confidence: ${Math.round(ocrResult.confidence)}%).` : 'Limited or no text detected.'
         ].map((item) => `<div>${item}</div>`).join("");
       } else {
         carbonSummary.textContent = `${safeName} is loaded, but the browser could not inspect its pixels. Analysis will use file-level checks only.`;
@@ -3198,6 +3941,10 @@
     });
 
     dungeonSubmit.addEventListener("click", runAnalysis);
+    document.getElementById("dungeonClear").addEventListener("click", (e) => {
+      e.stopPropagation();
+      clearDungeonDesign();
+    });
     carbonAnalyze.addEventListener("click", runCarbonAnalysis);
     carbonExport.addEventListener("click", exportCarbonFindings);
     carbonReset.addEventListener("click", resetCarbonUpload);
