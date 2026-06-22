@@ -299,8 +299,9 @@
     .d-scroll {
       flex: 1 1 auto;
       width: 100%;
+      height: clamp(240px, 42vh, 480px);
+      max-height: 42vh;
       min-height: clamp(160px, 28vh, 320px);
-      max-height: none;
       border: clamp(4px, 0.4vw, 6px) solid var(--d-gold);
       outline: clamp(3px, 0.3vw, 4px) solid var(--d-red);
       background:
@@ -319,16 +320,17 @@
     @media (max-width: 768px) {
       .d-scroll {
         min-height: clamp(140px, 24vh, 240px);
+        max-height: 38vh;
       }
     }
 
     .d-scroll-content {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: clamp(12px, 2vw, 16px);
       width: 100%;
       height: 100%;
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      padding: clamp(12px, 2vw, 16px);
     }
 
     .d-scroll-content > * {
@@ -345,12 +347,12 @@
     }
 
     .d-scroll-content img {
-      display: block;
-      max-width: 100%;
-      max-height: 100%;
       width: auto;
       height: auto;
+      max-width: 100%;
+      max-height: 100%;
       object-fit: contain;
+      display: block;
       border: 4px solid var(--d-white);
       filter: contrast(1.08) saturate(1.05);
     }
@@ -1921,6 +1923,519 @@
       background: var(--ibm-layer-2);
     }
 
+    /* Knowledge Base Modal Styles */
+    .kb-modal-window {
+      position: relative;
+      width: min(1200px, calc(100vw - 32px));
+      max-height: min(85vh, 900px);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    /* Carbon theme for knowledge base */
+    .carbon.is-active ~ .modal .kb-modal-window {
+      background: #ffffff;
+      color: var(--ibm-text);
+      border: 1px solid var(--ibm-border);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, .35);
+    }
+
+    .carbon.is-active ~ .modal .kb-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 56px;
+      padding: 0 0 0 20px;
+      border-bottom: 1px solid var(--ibm-border);
+      background: #ffffff;
+    }
+
+    .carbon.is-active ~ .modal .kb-modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--ibm-text);
+    }
+
+    .carbon.is-active ~ .modal .kb-modal-close {
+      width: 56px;
+      height: 56px;
+      border: 0;
+      border-left: 1px solid var(--ibm-border);
+      background: #ffffff;
+      color: var(--ibm-text);
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .carbon.is-active ~ .modal .kb-modal-close:hover {
+      background: var(--ibm-layer);
+    }
+
+    .carbon.is-active ~ .modal .kb-modal-body {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--ibm-layer-2);
+    }
+
+    .carbon.is-active ~ .modal .kb-search-bar {
+      padding: 20px 20px 16px;
+      border-bottom: 1px solid var(--ibm-border);
+      background: #ffffff;
+    }
+
+    .carbon.is-active ~ .modal .kb-search-bar input {
+      width: 100%;
+      height: 48px;
+      padding: 0 16px;
+      border: 0;
+      border-bottom: 1px solid var(--ibm-text);
+      background: transparent;
+      font-family: inherit;
+      font-size: 16px;
+      color: var(--ibm-text);
+      outline: none;
+    }
+
+    .carbon.is-active ~ .modal .kb-search-bar input:focus {
+      border-bottom-color: var(--ibm-blue);
+      border-bottom-width: 2px;
+    }
+
+    .carbon.is-active ~ .modal .kb-search-bar input::placeholder {
+      color: var(--ibm-muted);
+    }
+
+    .carbon.is-active ~ .modal .kb-filters {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .carbon.is-active ~ .modal .kb-filter-btn {
+      appearance: none;
+      height: 32px;
+      padding: 0 16px;
+      border: 1px solid var(--ibm-border);
+      background: #ffffff;
+      color: var(--ibm-text);
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.11s;
+    }
+
+    .carbon.is-active ~ .modal .kb-filter-btn:hover {
+      background: var(--ibm-layer);
+    }
+
+    .carbon.is-active ~ .modal .kb-filter-btn.is-active {
+      background: var(--ibm-blue);
+      color: #ffffff;
+      border-color: var(--ibm-blue);
+    }
+
+    .carbon.is-active ~ .modal .kb-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+    }
+
+    .carbon.is-active ~ .modal .kb-topic {
+      margin-bottom: 24px;
+      border: 1px solid var(--ibm-border);
+      background: #ffffff;
+    }
+
+    .carbon.is-active ~ .modal .kb-topic-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 1px solid transparent;
+      transition: background 0.11s;
+    }
+
+    .carbon.is-active ~ .modal .kb-topic-header:hover {
+      background: var(--ibm-layer);
+    }
+
+    .carbon.is-active ~ .modal .kb-topic.is-expanded .kb-topic-header {
+      border-bottom-color: var(--ibm-border);
+    }
+
+    .carbon.is-active ~ .modal .kb-topic-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+
+    .carbon.is-active ~ .modal .kb-topic-title {
+      flex: 1;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ibm-text);
+    }
+
+    .carbon.is-active ~ .modal .kb-topic-toggle {
+      font-size: 20px;
+      color: var(--ibm-muted);
+      transition: transform 0.2s;
+    }
+
+    .carbon.is-active ~ .modal .kb-topic.is-expanded .kb-topic-toggle {
+      transform: rotate(180deg);
+    }
+
+    .carbon.is-active ~ .modal .kb-topic-body {
+      display: none;
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .carbon.is-active ~ .modal .kb-topic.is-expanded .kb-topic-body {
+      display: block;
+    }
+
+    .carbon.is-active ~ .modal .kb-section {
+      margin-bottom: 24px;
+    }
+
+    .carbon.is-active ~ .modal .kb-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .carbon.is-active ~ .modal .kb-section-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ibm-text);
+      margin: 0 0 12px 0;
+    }
+
+    .carbon.is-active ~ .modal .kb-section-content {
+      color: var(--ibm-text);
+      font-size: 14px;
+    }
+
+    .carbon.is-active ~ .modal .kb-section-content ul {
+      margin: 8px 0;
+      padding-left: 20px;
+    }
+
+    .carbon.is-active ~ .modal .kb-section-content li {
+      margin-bottom: 8px;
+    }
+
+    .carbon.is-active ~ .modal .kb-section-content strong {
+      font-weight: 600;
+    }
+
+    .carbon.is-active ~ .modal .kb-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .carbon.is-active ~ .modal .kb-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border: 1px solid var(--ibm-border);
+      background: var(--ibm-layer);
+      color: var(--ibm-blue);
+      text-decoration: none;
+      font-size: 14px;
+      transition: all 0.11s;
+    }
+
+    .carbon.is-active ~ .modal .kb-link:hover {
+      background: var(--ibm-blue);
+      color: #ffffff;
+      border-color: var(--ibm-blue);
+    }
+
+    .carbon.is-active ~ .modal .kb-link-title {
+      font-weight: 600;
+    }
+
+    .carbon.is-active ~ .modal .kb-link-desc {
+      font-size: 12px;
+      opacity: 0.8;
+    }
+
+    /* Dungeon theme for knowledge base */
+    .dungeon.is-active ~ .modal .kb-modal-window {
+      background: var(--d-black);
+      border: 8px solid var(--d-red);
+      outline: 4px solid var(--d-gold);
+      box-shadow: 0 0 0 4px #000, inset 0 0 0 4px var(--d-blue);
+      color: var(--d-white);
+      font-family: "DungeonPixel", "Courier New", monospace;
+      text-transform: uppercase;
+    }
+
+    .dungeon.is-active ~ .modal .kb-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 52px;
+      padding: 8px 12px;
+      background: var(--d-blue);
+      border-bottom: 4px solid var(--d-cyan);
+    }
+
+    .dungeon.is-active ~ .modal .kb-modal-title {
+      color: var(--d-yellow);
+      font-size: 18px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-modal-close {
+      min-width: 42px;
+      min-height: 36px;
+      border: 4px solid var(--d-yellow);
+      background: #000;
+      color: var(--d-yellow);
+      box-shadow: inset 0 0 0 3px var(--d-red);
+      font-weight: 700;
+    }
+
+    .dungeon.is-active ~ .modal .kb-modal-body {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background:
+        linear-gradient(90deg, rgba(255, 255, 255, .04) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, .04) 1px, transparent 1px),
+        #050505;
+      background-size: 10px 10px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-search-bar {
+      padding: 16px;
+      border-bottom: 4px solid var(--d-cyan);
+      background: var(--d-black);
+    }
+
+    .dungeon.is-active ~ .modal .kb-search-bar input {
+      width: 100%;
+      height: 44px;
+      padding: 0 12px;
+      border: 4px solid var(--d-cyan);
+      background: #000;
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--d-white);
+      outline: none;
+      text-transform: uppercase;
+    }
+
+    .dungeon.is-active ~ .modal .kb-search-bar input:focus {
+      border-color: var(--d-yellow);
+      box-shadow: inset 0 0 0 2px var(--d-red);
+    }
+
+    .dungeon.is-active ~ .modal .kb-search-bar input::placeholder {
+      color: var(--d-cyan);
+      opacity: 0.6;
+    }
+
+    .dungeon.is-active ~ .modal .kb-filters {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .dungeon.is-active ~ .modal .kb-filter-btn {
+      appearance: none;
+      height: 36px;
+      padding: 0 12px;
+      border: 3px solid var(--d-cyan);
+      background: #000;
+      color: var(--d-cyan);
+      font-family: inherit;
+      font-size: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .dungeon.is-active ~ .modal .kb-filter-btn:hover {
+      background: var(--d-blue);
+      color: var(--d-yellow);
+    }
+
+    .dungeon.is-active ~ .modal .kb-filter-btn.is-active {
+      background: var(--d-yellow);
+      color: var(--d-black);
+      border-color: var(--d-gold);
+      box-shadow: inset 0 0 0 2px var(--d-red);
+    }
+
+    .dungeon.is-active ~ .modal .kb-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic {
+      margin-bottom: 16px;
+      border: 4px solid var(--d-cyan);
+      background: #000;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      cursor: pointer;
+      user-select: none;
+      border-bottom: 4px solid transparent;
+      background: var(--d-blue);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic-header:hover {
+      background: var(--d-shadow);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic.is-expanded .kb-topic-header {
+      border-bottom-color: var(--d-cyan);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic-icon {
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic-title {
+      flex: 1;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--d-yellow);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic-toggle {
+      font-size: 18px;
+      color: var(--d-cyan);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic.is-expanded .kb-topic-toggle {
+      color: var(--d-yellow);
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic-body {
+      display: none;
+      padding: 14px;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-topic.is-expanded .kb-topic-body {
+      display: block;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section {
+      margin-bottom: 18px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--d-yellow);
+      margin: 0 0 10px 0;
+      border-bottom: 2px solid var(--d-red);
+      padding-bottom: 4px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section-content {
+      color: var(--d-white);
+      font-size: 12px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section-content ul {
+      margin: 6px 0;
+      padding-left: 16px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section-content li {
+      margin-bottom: 6px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-section-content strong {
+      color: var(--d-cyan);
+      font-weight: 700;
+    }
+
+    .dungeon.is-active ~ .modal .kb-links {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-link {
+      display: block;
+      padding: 10px 12px;
+      border: 3px solid var(--d-gold);
+      background: var(--d-blue);
+      color: var(--d-yellow);
+      text-decoration: none;
+      font-size: 12px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-link:hover {
+      background: var(--d-red);
+      color: var(--d-white);
+      border-color: var(--d-yellow);
+    }
+
+    .dungeon.is-active ~ .modal .kb-link-title {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .dungeon.is-active ~ .modal .kb-link-desc {
+      font-size: 11px;
+      opacity: 0.9;
+    }
+
+    /* Learn why link styles */
+    .learn-why-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 8px;
+      font-size: 12px;
+      text-decoration: none;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+
+    .learn-why-link:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    .carbon .learn-why-link {
+      color: var(--ibm-blue);
+    }
+
+    .dungeon .learn-why-link {
+      color: var(--d-cyan);
+    }
+
     @media (max-width: 900px) {
       .dungeon {
         padding: 8px;
@@ -2190,7 +2705,7 @@
           <button class="d-command is-selected" data-command="analyze">Analyze</button>
           <button class="d-command" data-command="quests">Quests</button>
           <button class="d-command" data-rewards-open>Rewards</button>
-          <button class="d-command" data-command="settings">Settings</button>
+          <button class="d-command" data-modal-open="designStandardsModal">Ancient Design Laws</button>
           <button class="d-command" data-modal-open="dungeonCreditsModal" onclick="openCreditsModal('dungeonCreditsModal')">Credits</button>
           <button class="d-command" data-switch="carbon">Switch to Carbon</button>
         </nav>
@@ -2205,7 +2720,7 @@
           <button class="is-active" data-carbon-nav="overview">Overview</button>
           <button data-carbon-nav="analysis">Analysis</button>
           <button data-carbon-nav="actions">Actions</button>
-          <button data-carbon-nav="settings">Settings</button>
+          <button data-modal-open="designStandardsModal">Design Standards</button>
           <button data-modal-open="carbonCreditsModal" onclick="openCreditsModal('carbonCreditsModal')">Credits</button>
         </nav>
         <button class="carbon-switch" data-switch="dungeon">Switch to Dungeon</button>
@@ -2357,6 +2872,37 @@
           <div class="carbon-credits-track" id="carbonCreditsTrack"></div>
         </div>
       </div>
+
+    </section>
+
+    <!-- Design Standards / Ancient Design Laws Modal -->
+    <section class="modal" id="designStandardsModal" aria-modal="true" aria-label="Design standards reference">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="carbon-modal-window kb-modal-window" role="dialog" aria-labelledby="designStandardsTitle">
+        <header class="carbon-modal-header kb-modal-header">
+          <h2 id="designStandardsTitle">Design Standards Reference</h2>
+          <button type="button" class="carbon-modal-close kb-modal-close" data-modal-close aria-label="Close">×</button>
+        </header>
+        <div class="carbon-modal-body kb-modal-body">
+          <div class="kb-search-bar">
+            <input type="text" id="kbSearchInput" placeholder="Search design standards..." aria-label="Search design standards">
+            <div class="kb-filters">
+              <button class="kb-filter-btn is-active" data-filter="all">All Topics</button>
+              <button class="kb-filter-btn" data-filter="verified">Verified Checks</button>
+              <button class="kb-filter-btn" data-filter="estimated">Estimated Checks</button>
+              <button class="kb-filter-btn" data-filter="manual">Manual Review</button>
+            </div>
+          </div>
+          <div id="kbResultsLabel" class="kb-results-label" style="padding: 12px 16px; color: var(--ibm-muted); font-size: 14px;">Showing all design standards</div>
+          <div id="kbNoResults" class="kb-no-results" hidden style="padding: 32px 16px; text-align: center; color: var(--ibm-muted);">
+            No matching standards found. Try typography, color, grid, accessibility, or components.
+          </div>
+          <div class="kb-content" id="kbContent">
+            <!-- Content will be dynamically generated -->
+          </div>
+        </div>
+      </div>
+    </section>
     </section>
 
     <section class="d-reward-popup" id="rewardPopup" aria-modal="true" aria-label="Quest reward unlocked">
@@ -2949,6 +3495,27 @@
       }
     }
 
+    // Content type detection helpers
+    function detectContentType(audit, ocrConf, text) {
+      const hasReadableText = text && text.trim().length >= 10 && ocrConf >= 60;
+      const hasUIComponents = audit.carbonUiSignal && audit.carbonSurfacePercent >= 55;
+      const hasIllustration = audit.softOrganicPercent > 30 || audit.colorDiversity > 25;
+      const hasPhotography = audit.naturalPhotoSignal || audit.skinTonePercent > 8;
+      const isMarketingGraphic = !hasUIComponents && (hasIllustration || audit.exactPaletteMatch >= 40);
+      
+      return {
+        hasReadableText,
+        hasUIComponents,
+        hasIllustration,
+        hasPhotography,
+        isMarketingGraphic,
+        contentDescription: hasUIComponents ? "UI/Application" :
+                           hasPhotography ? "Photography" :
+                           hasIllustration ? "Illustration/Graphic" :
+                           "Mixed Content"
+      };
+    }
+
     function estimateIBMPlexUsage(text, audit, ocrConf) {
       // Gate: Typography can only be assessed when readable text exists
       const hasReadableText = text && text.trim().length >= 10 && ocrConf >= 60;
@@ -3038,21 +3605,21 @@
       let confidenceLevel = "";
 
       if (confidence >= 80) {
-        confidenceLevel = "High";
-        assessment = "Typography appears highly consistent with IBM Plex Sans based on design context.";
-        recommendation = "Verify IBM Plex Sans/Mono in source files to confirm. Check font weights and ensure proper usage across all text elements.";
+        confidenceLevel = "Estimated (High)";
+        assessment = "Typography appears highly consistent with IBM Plex Sans based on design context and text characteristics.";
+        recommendation = "Manual verification required: Check source files to confirm IBM Plex Sans/Mono is used. Verify font weights and proper usage across all text elements.";
       } else if (confidence >= 65) {
-        confidenceLevel = "Medium-High";
-        assessment = "Typography shows characteristics consistent with IBM Plex, but confirmation is needed.";
-        recommendation = "Manually verify IBM Plex Sans/Mono in source files. If using a different typeface, consider switching to IBM Plex for brand consistency.";
+        confidenceLevel = "Estimated (Medium-High)";
+        assessment = "Typography shows characteristics that may be consistent with IBM Plex, but cannot be confirmed from screenshot alone.";
+        recommendation = "Manual verification required: Check source files for IBM Plex Sans/Mono. If using a different typeface, IBM Design Language requires IBM Plex for all IBM communications.";
       } else if (confidence >= 45) {
-        confidenceLevel = "Medium";
-        assessment = "Typography cannot be confidently identified from this screenshot. Some IBM design patterns present, but font family is uncertain.";
-        recommendation = "Manual verification required. Check source files for IBM Plex Sans/Mono. If not present, IBM Design Language strongly recommends IBM Plex for all IBM communications.";
+        confidenceLevel = "Estimated (Medium)";
+        assessment = "Typography cannot be confidently identified from this screenshot. Font family is uncertain.";
+        recommendation = "Manual verification required: Check source files for IBM Plex Sans/Mono. IBM Design Language requires IBM Plex for IBM communications.";
       } else {
-        confidenceLevel = "Low";
-        assessment = "Typography does not appear to use IBM Plex based on available design signals. The typeface may be Helvetica, Arial, Inter, Aptos, or another sans-serif family.";
-        recommendation = "IBM Design Language requires IBM Plex for IBM communications. Replace current typeface with IBM Plex Sans for body copy and IBM Plex Mono for code. This is critical for brand consistency.";
+        confidenceLevel = "Estimated (Low)";
+        assessment = "Typography does not appear to use IBM Plex based on available design signals. The typeface may be Helvetica, Arial, Inter, or another sans-serif family.";
+        recommendation = "IBM Design Language requires IBM Plex for IBM communications. Replace current typeface with IBM Plex Sans for body copy and IBM Plex Mono for code.";
       }
 
       return {
@@ -3267,11 +3834,21 @@
         : `Canvas dimensions are ${uploadedAudit.width} x ${uploadedAudit.height}; width is ${uploadedAudit.widthRemainder}px and height is ${uploadedAudit.heightRemainder}px off a 16px rhythm.`;
       const paletteText = `${uploadedAudit.exactPaletteMatch}% of sampled pixels strictly match the IBM palette; ${uploadedAudit.paletteMatch}% are close. Dominant matches: ${dominantNames}.`;
       const contrastText = `Approximate tonal contrast range is ${uploadedAudit.tonalContrast.toFixed(1)}:1, with ${uploadedAudit.darkPercent}% dark and ${uploadedAudit.lightPercent}% light samples.`;
+      // Detect content type for smart N/A logic
+      const contentType = detectContentType(uploadedAudit, ocrConfidence, extractedText);
+      
       // IBM Plex detection (with OCR confidence gate)
       const plexAnalysis = estimateIBMPlexUsage(extractedText, uploadedAudit, ocrConfidence);
       
       // Add text analysis findings
       const textAnalysis = analyzeTextQuality(extractedText);
+      
+      // Carbon Components N/A logic
+      const hasCarbonComponents = uploadedAudit.carbonUiSignal && uploadedAudit.carbonSurfacePercent >= 55;
+      const carbonComponentsNA = !hasCarbonComponents && (contentType.isMarketingGraphic || contentType.hasIllustration);
+      
+      // Accessibility N/A logic for non-text images
+      const accessibilityLimited = !contentType.hasReadableText && !contentType.hasUIComponents;
       
       // Build IBM Compliance Report with transparent scoring
       const complianceChecks = [
@@ -3281,8 +3858,9 @@
           maxScore: plexAnalysis.isNotApplicable ? 0 : 20,
           pass: plexAnalysis.isNotApplicable ? null : plexAnalysis.confidence >= 65,
           icon: plexAnalysis.isNotApplicable ? "—" : (plexAnalysis.confidence >= 75 ? "✅" : plexAnalysis.confidence >= 55 ? "⚠" : "❌"),
-          detail: plexAnalysis.isNotApplicable ? "N/A — No readable text" : `${plexAnalysis.confidence}% confidence`,
-          isNotApplicable: plexAnalysis.isNotApplicable
+          detail: plexAnalysis.isNotApplicable ? "N/A — No readable text" : `${plexAnalysis.confidenceLevel}`,
+          isNotApplicable: plexAnalysis.isNotApplicable,
+          confidenceLevel: plexAnalysis.isNotApplicable ? "Not assessable" : plexAnalysis.confidenceLevel
         },
         {
           name: "Color Palette",
@@ -3290,7 +3868,8 @@
           maxScore: 20,
           pass: uploadedAudit.exactPaletteMatch >= 55,
           icon: uploadedAudit.exactPaletteMatch >= 55 ? "✅" : "❌",
-          detail: `${uploadedAudit.exactPaletteMatch}% IBM palette match`
+          detail: `${uploadedAudit.exactPaletteMatch}% strict match (Verified from sampled pixels)`,
+          confidenceLevel: "Verified"
         },
         {
           name: "Grid & Alignment",
@@ -3298,15 +3877,18 @@
           maxScore: 20,
           pass: uploadedAudit.gridPass,
           icon: uploadedAudit.gridPass ? "✅" : "❌",
-          detail: uploadedAudit.gridPass ? "Aligned to 16px grid" : `Off by ${Math.max(uploadedAudit.widthRemainder, uploadedAudit.heightRemainder)}px`
+          detail: uploadedAudit.gridPass ? "Aligned to 16px grid (Verified)" : `Off by ${Math.max(uploadedAudit.widthRemainder, uploadedAudit.heightRemainder)}px (Estimated)`,
+          confidenceLevel: uploadedAudit.gridPass ? "Verified" : "Estimated"
         },
         {
           name: "Carbon Components",
-          score: Math.round(Math.min(uploadedAudit.carbonSurfacePercent, 100) * 0.2),
-          maxScore: 20,
-          pass: uploadedAudit.carbonSurfacePercent >= 55,
-          icon: uploadedAudit.carbonSurfacePercent >= 55 ? "✅" : uploadedAudit.carbonSurfacePercent >= 40 ? "⚠" : "❌",
-          detail: `${uploadedAudit.carbonSurfacePercent}% Carbon-like surfaces`
+          score: carbonComponentsNA ? 0 : Math.round(Math.min(uploadedAudit.carbonSurfacePercent, 100) * 0.2),
+          maxScore: carbonComponentsNA ? 0 : 20,
+          pass: carbonComponentsNA ? null : uploadedAudit.carbonSurfacePercent >= 55,
+          icon: carbonComponentsNA ? "—" : (uploadedAudit.carbonSurfacePercent >= 55 ? "✅" : uploadedAudit.carbonSurfacePercent >= 40 ? "⚠" : "❌"),
+          detail: carbonComponentsNA ? "N/A — No UI components detected" : `${uploadedAudit.carbonSurfacePercent}% Carbon-like surfaces (Estimated)`,
+          isNotApplicable: carbonComponentsNA,
+          confidenceLevel: carbonComponentsNA ? "Not assessable" : "Estimated"
         },
         {
           name: "Accessibility",
@@ -3314,31 +3896,35 @@
           maxScore: 20,
           pass: uploadedAudit.tonalContrast >= 4.5,
           icon: uploadedAudit.tonalContrast >= 4.5 ? "✅" : "❌",
-          detail: `${uploadedAudit.tonalContrast.toFixed(1)}:1 contrast ratio`
+          detail: accessibilityLimited
+            ? `${uploadedAudit.tonalContrast.toFixed(1)}:1 contrast (Limited — no text/UI to test)`
+            : `${uploadedAudit.tonalContrast.toFixed(1)}:1 contrast ratio (Estimated)`,
+          confidenceLevel: accessibilityLimited ? "Limited" : "Estimated",
+          isLimited: accessibilityLimited
         }
       ];
       
       const totalScore = complianceChecks.reduce((sum, check) => sum + check.score, 0);
       const maxTotalScore = complianceChecks.reduce((sum, check) => sum + check.maxScore, 0);
       
-      // Build top 3 priorities for executive summary
+      // Build top 3 priorities for executive summary (skip N/A categories)
       const priorities = [];
       if (!uploadedAudit.gridPass) {
         priorities.push("Align canvas to Carbon 16px grid");
       }
-      if (plexAnalysis.confidence < 65) {
+      if (!plexAnalysis.isNotApplicable && plexAnalysis.confidence < 65) {
         priorities.push("Verify IBM Plex Sans/Mono typography");
       }
       if (uploadedAudit.exactPaletteMatch < 55) {
         priorities.push("Increase IBM Design Language color usage");
       }
-      if (uploadedAudit.tonalContrast < 4.5) {
+      if (uploadedAudit.tonalContrast < 4.5 && !accessibilityLimited) {
         priorities.push("Improve contrast for WCAG compliance");
       }
       if (textAnalysis.hasText && textAnalysis.issues.length > 0) {
         priorities.push(textAnalysis.issues[0].issue);
       }
-      if (uploadedAudit.carbonSurfacePercent < 55) {
+      if (!carbonComponentsNA && uploadedAudit.carbonSurfacePercent < 55) {
         priorities.push("Strengthen Carbon surface patterns");
       }
       
@@ -3370,19 +3956,23 @@
       
       detailedAnalysis.push(["header", "IBM Compliance Report"]);
       const applicableScore = complianceChecks.filter(c => !c.isNotApplicable).reduce((sum, c) => sum + c.maxScore, 0);
-      detailedAnalysis.push(["", `Overall Score: ${totalScore}/${maxTotalScore}`]);
-      if (applicableScore < maxTotalScore) {
-        detailedAnalysis.push(["purple", `(${applicableScore} points applicable — Typography excluded due to no readable text)`]);
+      const excludedCategories = complianceChecks.filter(c => c.isNotApplicable).map(c => c.name);
+      
+      detailedAnalysis.push(["", `Overall Score: ${totalScore}/${applicableScore} applicable points`]);
+      if (excludedCategories.length > 0) {
+        detailedAnalysis.push(["purple", `Excluded: ${excludedCategories.join(", ")} — Not applicable to this content type`]);
       }
+      detailedAnalysis.push(["", `Content Type: ${contentType.contentDescription}`]);
       detailedAnalysis.push(["", ""]);
       
       complianceChecks.forEach(check => {
         if (check.isNotApplicable) {
-          detailedAnalysis.push(["purple", `${check.icon} ${check.name}: N/A`]);
+          detailedAnalysis.push(["purple", `${check.icon} ${check.name}: N/A (${check.confidenceLevel})`]);
           detailedAnalysis.push(["", `   ${check.detail}`]);
         } else {
-          const color = check.pass ? "teal" : "red";
-          detailedAnalysis.push([color, `${check.icon} ${check.name}: ${check.score}/${check.maxScore} — ${check.detail}`]);
+          const color = check.isLimited ? "purple" : (check.pass ? "teal" : "red");
+          detailedAnalysis.push([color, `${check.icon} ${check.name}: ${check.score}/${check.maxScore} (${check.confidenceLevel})`]);
+          detailedAnalysis.push(["", `   ${check.detail}`]);
         }
       });
       
@@ -4082,6 +4672,437 @@
       const activeSkin = document.querySelector(".skin.is-active");
       if (activeSkin && activeSkin.id === "dungeonSkin" && !isMuted) startDungeonMusic();
     }, { once: true });
+
+    // Knowledge Base Data
+    const knowledgeBase = {
+      typography: {
+        id: "typography",
+        title: "Typography & IBM Plex",
+        category: "Visual Design",
+        icon: "📝",
+        summary: "Typography evaluation focuses on IBM Plex font family usage, type scale adherence, and readable text hierarchy.",
+        whatWeEvaluate: [
+          "IBM Plex Sans, Plex Mono, or Plex Serif detection",
+          "Type scale compliance (12px, 14px, 16px, 20px, 24px, 32px, 42px, 54px)",
+          "Line height ratios (1.25-1.5 for body text)",
+          "Text contrast against backgrounds"
+        ],
+        whyItMatters: "Consistent typography creates visual harmony and reinforces IBM's brand identity across all touchpoints.",
+        automaticChecks: [
+          "Text detection via OCR",
+          "Font size measurement",
+          "Contrast ratio calculation"
+        ],
+        estimatedChecks: [
+          "IBM Plex font family identification (requires manual verification)"
+        ],
+        manualVerification: [
+          "Confirm IBM Plex is actually used (OCR cannot detect fonts)",
+          "Verify type scale matches Carbon guidelines",
+          "Check for proper font weights (Regular 400, Medium 500, SemiBold 600)"
+        ],
+        scoring: {
+          excellent: "IBM Plex detected, proper scale, high contrast",
+          good: "Readable fonts, mostly correct sizes",
+          needsWork: "Non-IBM fonts or inconsistent sizing"
+        },
+        commonMistakes: [
+          "Using system fonts instead of IBM Plex",
+          "Inconsistent type scale",
+          "Poor text contrast",
+          "Missing font weights"
+        ],
+        bestPractices: [
+          "Use IBM Plex Sans for UI and body text",
+          "Use IBM Plex Mono for code snippets",
+          "Follow Carbon type scale exactly",
+          "Maintain 4.5:1 contrast minimum for body text"
+        ],
+        officialLinks: [
+          { label: "IBM Plex Typeface", url: "https://www.ibm.com/plex/" },
+          { label: "Carbon Type Tokens", url: "https://carbondesignsystem.com/guidelines/typography/overview" }
+        ]
+      },
+      color: {
+        id: "color",
+        title: "Color & IBM Palette",
+        category: "Visual Design",
+        icon: "🎨",
+        summary: "Color evaluation compares design pixels to IBM's 19-color core palette and validates proper usage.",
+        whatWeEvaluate: [
+          "IBM Blue (#0f62fe) usage for primary actions",
+          "IBM color palette compliance (19 core colors)",
+          "Color contrast ratios (WCAG AA/AAA)",
+          "Background and text color pairings"
+        ],
+        whyItMatters: "IBM's color palette ensures brand consistency, accessibility, and visual hierarchy across all products.",
+        automaticChecks: [
+          "Pixel sampling and color extraction",
+          "IBM palette matching (within tolerance)",
+          "Dominant color identification",
+          "Contrast ratio calculation"
+        ],
+        estimatedChecks: [
+          "Color usage intent (primary vs secondary)",
+          "Semantic color application"
+        ],
+        manualVerification: [
+          "Verify colors match IBM Design Language exactly",
+          "Check color usage follows Carbon guidelines",
+          "Confirm accessible color combinations"
+        ],
+        scoring: {
+          excellent: "90%+ IBM palette colors, proper contrast",
+          good: "70%+ IBM colors, mostly accessible",
+          needsWork: "Off-brand colors or poor contrast"
+        },
+        commonMistakes: [
+          "Using similar but non-IBM colors",
+          "Insufficient contrast ratios",
+          "Overusing IBM Blue",
+          "Ignoring color accessibility"
+        ],
+        bestPractices: [
+          "Use IBM Blue (#0f62fe) for primary CTAs",
+          "Maintain 4.5:1 contrast for text",
+          "Use IBM Gray scale for neutrals",
+          "Test colors in light and dark modes"
+        ],
+        officialLinks: [
+          { label: "IBM Design Language Color", url: "https://www.ibm.com/design/language/color" },
+          { label: "Carbon Color Tokens", url: "https://carbondesignsystem.com/guidelines/color/overview" }
+        ]
+      },
+      grid: {
+        id: "grid",
+        title: "2x Grid & Alignment",
+        category: "Layout",
+        icon: "📐",
+        summary: "Grid evaluation validates alignment to Carbon's 2x grid system (16px base) and proper spacing.",
+        whatWeEvaluate: [
+          "16px base grid alignment",
+          "2x grid compliance (all measurements divisible by 2)",
+          "Consistent spacing between elements",
+          "Margin and padding adherence"
+        ],
+        whyItMatters: "The 2x grid creates visual rhythm, predictable layouts, and easier developer handoff.",
+        automaticChecks: [
+          "Element position measurement",
+          "Spacing calculation",
+          "Grid alignment validation"
+        ],
+        estimatedChecks: [
+          "Visual grid adherence",
+          "Spacing consistency"
+        ],
+        manualVerification: [
+          "Confirm all spacing uses 2x increments",
+          "Verify 16px base grid alignment",
+          "Check responsive breakpoints"
+        ],
+        scoring: {
+          excellent: "95%+ elements aligned to 2x grid",
+          good: "80%+ grid compliance",
+          needsWork: "Inconsistent spacing or off-grid elements"
+        },
+        commonMistakes: [
+          "Using odd-number spacing (3px, 5px, 7px)",
+          "Ignoring the 16px base grid",
+          "Inconsistent margins",
+          "Breaking grid at responsive breakpoints"
+        ],
+        bestPractices: [
+          "Use 16px as the base unit",
+          "All spacing in 2x increments (2, 4, 8, 16, 24, 32, 48, 64px)",
+          "Align all elements to the grid",
+          "Maintain grid across breakpoints"
+        ],
+        officialLinks: [
+          { label: "Carbon 2x Grid", url: "https://carbondesignsystem.com/guidelines/2x-grid/overview" },
+          { label: "IBM Design Language Layout", url: "https://www.ibm.com/design/language/layout" }
+        ]
+      },
+      accessibility: {
+        id: "accessibility",
+        title: "Accessibility & Contrast",
+        category: "Usability",
+        icon: "♿",
+        summary: "Accessibility evaluation measures WCAG compliance, contrast ratios, and inclusive design practices.",
+        whatWeEvaluate: [
+          "WCAG 2.1 AA contrast ratios (4.5:1 text, 3:1 UI)",
+          "Color contrast for text and interactive elements",
+          "Visual hierarchy and readability",
+          "Touch target sizes (44x44px minimum)"
+        ],
+        whyItMatters: "Accessible design ensures all users, including those with disabilities, can use IBM products effectively.",
+        automaticChecks: [
+          "Luminance calculation",
+          "Contrast ratio measurement",
+          "Text detection and sizing"
+        ],
+        estimatedChecks: [
+          "Interactive element identification",
+          "Touch target size estimation"
+        ],
+        manualVerification: [
+          "Test with screen readers",
+          "Verify keyboard navigation",
+          "Check focus indicators",
+          "Validate ARIA labels"
+        ],
+        scoring: {
+          excellent: "WCAG AAA compliance (7:1 text)",
+          good: "WCAG AA compliance (4.5:1 text)",
+          needsWork: "Below WCAG AA standards"
+        },
+        commonMistakes: [
+          "Insufficient text contrast",
+          "Small touch targets",
+          "Missing focus indicators",
+          "Color-only information"
+        ],
+        bestPractices: [
+          "Maintain 4.5:1 contrast for body text",
+          "Use 3:1 contrast for UI components",
+          "Provide 44x44px touch targets",
+          "Include visible focus states"
+        ],
+        officialLinks: [
+          { label: "Carbon Accessibility", url: "https://carbondesignsystem.com/guidelines/accessibility/overview" },
+          { label: "WCAG 2.1 Guidelines", url: "https://www.w3.org/WAI/WCAG21/quickref/" }
+        ]
+      },
+      components: {
+        id: "components",
+        title: "Carbon Components",
+        category: "UI Patterns",
+        icon: "🧩",
+        summary: "Component evaluation identifies Carbon Design System components and validates proper usage.",
+        whatWeEvaluate: [
+          "Carbon component identification (buttons, inputs, cards)",
+          "Component styling consistency",
+          "Proper component variants",
+          "Spacing and sizing adherence"
+        ],
+        whyItMatters: "Using Carbon components ensures consistency, accessibility, and faster development.",
+        automaticChecks: [
+          "Visual pattern recognition",
+          "Color and shape matching"
+        ],
+        estimatedChecks: [
+          "Component type identification",
+          "Variant detection"
+        ],
+        manualVerification: [
+          "Confirm components match Carbon exactly",
+          "Verify proper component usage",
+          "Check for custom modifications",
+          "Validate interaction states"
+        ],
+        scoring: {
+          excellent: "All UI uses Carbon components",
+          good: "Most UI matches Carbon patterns",
+          needsWork: "Custom components or inconsistent styling"
+        },
+        commonMistakes: [
+          "Creating custom components instead of using Carbon",
+          "Modifying Carbon components incorrectly",
+          "Mixing component styles",
+          "Ignoring component guidelines"
+        ],
+        bestPractices: [
+          "Use Carbon components without modification",
+          "Follow component usage guidelines",
+          "Maintain consistent component styling",
+          "Use proper component variants"
+        ],
+        officialLinks: [
+          { label: "Carbon Components", url: "https://carbondesignsystem.com/components/overview" },
+          { label: "Component Patterns", url: "https://carbondesignsystem.com/patterns/overview" }
+        ]
+      }
+    };
+
+    // Knowledge Base Helper Functions
+    function normalizeKbText(value) {
+      if (!value) return "";
+      if (Array.isArray(value)) return value.map(normalizeKbText).join(" ");
+      if (typeof value === "object") return Object.values(value).map(normalizeKbText).join(" ");
+      return String(value).toLowerCase();
+    }
+
+    function getKbSearchText(topic) {
+      return normalizeKbText([
+        topic.id,
+        topic.title,
+        topic.category,
+        topic.summary,
+        topic.whatWeEvaluate,
+        topic.whyItMatters,
+        topic.automaticChecks,
+        topic.estimatedChecks,
+        topic.manualVerification,
+        topic.commonMistakes,
+        topic.bestPractices,
+        topic.officialLinks
+      ]);
+    }
+
+    function applyKnowledgeBaseSearch() {
+      const input = document.getElementById("kbSearchInput");
+      const resultsLabel = document.getElementById("kbResultsLabel");
+      const noResults = document.getElementById("kbNoResults");
+      const query = (input?.value || "").trim().toLowerCase();
+
+      const topics = document.querySelectorAll(".kb-topic");
+      let visibleCount = 0;
+      let firstMatch = null;
+
+      topics.forEach((topicEl) => {
+        const topicId = topicEl.dataset.topicId;
+        const topic = knowledgeBase[topicId];
+        if (!topic) return;
+
+        const searchText = getKbSearchText(topic);
+
+        const matches =
+          !query ||
+          searchText.includes(query) ||
+          (query === "colors" && searchText.includes("color")) ||
+          (query === "fonts" && searchText.includes("typography")) ||
+          (query === "font" && searchText.includes("typography")) ||
+          (query === "plex" && searchText.includes("typography"));
+
+        topicEl.hidden = !matches;
+
+        if (matches) {
+          visibleCount++;
+          if (!firstMatch) firstMatch = topicEl;
+        }
+      });
+
+      if (query && firstMatch) {
+        document.querySelectorAll(".kb-topic").forEach(t => t.classList.remove("is-expanded"));
+        firstMatch.classList.add("is-expanded");
+      }
+
+      if (resultsLabel) {
+        resultsLabel.textContent = query
+          ? `Showing ${visibleCount} result${visibleCount === 1 ? "" : "s"} for "${query}"`
+          : "Showing all design standards";
+      }
+
+      if (noResults) {
+        noResults.hidden = visibleCount !== 0;
+      }
+    }
+
+    function renderKnowledgeBase() {
+      const container = document.getElementById("kbContent");
+      if (!container) return;
+
+      const topicsHtml = Object.values(knowledgeBase).map(topic => `
+        <div class="kb-topic" data-topic-id="${topic.id}">
+          <div class="kb-topic-header">
+            <span class="kb-topic-icon">${topic.icon}</span>
+            <div class="kb-topic-title">
+              <strong>${escapeHtml(topic.title)}</strong>
+              <span style="font-size: 13px; color: var(--ibm-muted); display: block; margin-top: 4px;">${escapeHtml(topic.category)}</span>
+            </div>
+            <span class="kb-topic-toggle">▼</span>
+          </div>
+          <div class="kb-topic-body" style="padding: 20px;">
+            <p style="margin: 0 0 20px 0; line-height: 1.6;">${escapeHtml(topic.summary)}</p>
+            
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">What We Evaluate</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.whatWeEvaluate.map(item => `<li style="margin-bottom: 8px;">${escapeHtml(item)}</li>`).join("")}
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Why It Matters</h4>
+            <p style="margin: 0 0 20px 0; line-height: 1.6;">${escapeHtml(topic.whyItMatters)}</p>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Automatic Checks</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.automaticChecks.map(item => `<li style="margin-bottom: 8px;">✓ ${escapeHtml(item)}</li>`).join("")}
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Estimated Checks</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.estimatedChecks.map(item => `<li style="margin-bottom: 8px;">~ ${escapeHtml(item)}</li>`).join("")}
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Manual Verification Required</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.manualVerification.map(item => `<li style="margin-bottom: 8px;">👁 ${escapeHtml(item)}</li>`).join("")}
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Scoring</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              <li style="margin-bottom: 8px;"><strong>Excellent:</strong> ${escapeHtml(topic.scoring.excellent)}</li>
+              <li style="margin-bottom: 8px;"><strong>Good:</strong> ${escapeHtml(topic.scoring.good)}</li>
+              <li style="margin-bottom: 8px;"><strong>Needs Work:</strong> ${escapeHtml(topic.scoring.needsWork)}</li>
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Common Mistakes</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.commonMistakes.map(item => `<li style="margin-bottom: 8px;">⚠️ ${escapeHtml(item)}</li>`).join("")}
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Best Practices</h4>
+            <ul style="margin: 0 0 20px 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.bestPractices.map(item => `<li style="margin-bottom: 8px;">✨ ${escapeHtml(item)}</li>`).join("")}
+            </ul>
+
+            <h4 style="margin: 20px 0 12px 0; font-size: 16px; font-weight: 600;">Official Documentation</h4>
+            <ul style="margin: 0; padding-left: 20px; line-height: 1.6;">
+              ${topic.officialLinks.map(link => `<li style="margin-bottom: 8px;"><a href="${escapeHtml(link.url)}" target="_blank" rel="noopener noreferrer" style="color: var(--ibm-blue); text-decoration: underline;">${escapeHtml(link.label)}</a></li>`).join("")}
+            </ul>
+          </div>
+        </div>
+      `).join("");
+
+      container.innerHTML = topicsHtml;
+    }
+
+    function initializeKnowledgeBaseInteractions() {
+      const input = document.getElementById("kbSearchInput");
+
+      if (input) {
+        input.removeEventListener("input", applyKnowledgeBaseSearch);
+        input.addEventListener("input", applyKnowledgeBaseSearch);
+      }
+
+      document.querySelectorAll(".kb-topic-header").forEach((header) => {
+        header.addEventListener("click", () => {
+          const topic = header.closest(".kb-topic");
+          if (!topic) return;
+          topic.classList.toggle("is-expanded");
+        });
+      });
+
+      document.querySelectorAll(".kb-filter-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+          document.querySelectorAll(".kb-filter-btn").forEach((b) =>
+            b.classList.remove("is-active")
+          );
+          button.classList.add("is-active");
+          // Filter functionality can be added here if needed
+        });
+      });
+    }
+
+    // Override openModal to initialize KB when opening designStandardsModal
+    const originalOpenModal = openModal;
+    openModal = function(id) {
+      if (id === "designStandardsModal") {
+        renderKnowledgeBase();
+        initializeKnowledgeBaseInteractions();
+      }
+      originalOpenModal(id);
+    };
+
+    console.log("✓ Core app initialized");
   </script>
 </body>
 </html>
