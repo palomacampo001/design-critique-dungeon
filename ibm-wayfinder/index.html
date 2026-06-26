@@ -2,1257 +2,983 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <title>IBM One Madison — Wayfinder</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet"/>
 <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --blue-60:#0043ce;--blue-50:#0f62fe;--blue-40:#4589ff;--blue-10:#edf5ff;
-  --gray-100:#161616;--gray-90:#262626;--gray-80:#393939;--gray-70:#525252;
-  --gray-60:#6f6f6f;--gray-30:#c6c6c6;--gray-20:#e0e0e0;--gray-10:#f4f4f4;
-  --white:#ffffff;--green-40:#42be65;--red-50:#fa4d56;--yellow-30:#f1c21b;
-  --teal-40:#08bdba;--purple-50:#8a3ffc;--orange-40:#ff832b;
-  --topbar:52px;--bottomnav:64px;--r4:4px;--r8:8px;
-  --sh-md:0 4px 16px rgba(0,0,0,.18);--sh-sm:0 2px 6px rgba(0,0,0,.1);
+  --b50:#0f62fe;--b40:#4589ff;--b10:#edf5ff;--b60:#0043ce;
+  --g100:#161616;--g90:#262626;--g80:#393939;--g70:#525252;--g60:#6f6f6f;
+  --g30:#c6c6c6;--g20:#e0e0e0;--g10:#f4f4f4;--wh:#ffffff;
+  --green:#42be65;--red:#fa4d56;--orange:#ff832b;--purple:#8a3ffc;--teal:#08bdba;
+  --topbar:52px;--botnav:64px;
 }
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;width:100%;overflow:hidden;
-  font-family:"IBM Plex Sans",-apple-system,sans-serif;font-size:14px;
-  background:#1c2333;color:var(--gray-100);-webkit-tap-highlight-color:transparent}
+  font-family:"IBM Plex Sans",-apple-system,sans-serif;
+  font-size:14px;color:var(--g100);background:#1a1f2e}
 #app{position:relative;width:100%;height:100dvh;overflow:hidden}
 
-/* ── TOP BAR ── */
+/* TOPBAR */
 #topbar{position:absolute;top:0;left:0;right:0;height:var(--topbar);
-  background:var(--gray-100);display:flex;align-items:center;
-  padding:0 16px;gap:10px;z-index:200}
-.ibm-logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.ibm-logo svg{width:30px;height:12px}
-.bname{font-size:13px;font-weight:500;color:var(--white);white-space:nowrap}
-.bname span{color:var(--blue-40)}
-.spacer{flex:1}
-.icon-btn{width:36px;height:36px;display:flex;align-items:center;justify-content:center;
-  border:none;background:none;cursor:pointer;border-radius:var(--r4);
-  color:var(--gray-30);transition:background .15s}
-.icon-btn:hover,.icon-btn:active{background:var(--gray-80)}
+  background:var(--g100);display:flex;align-items:center;
+  padding:0 16px;gap:10px;z-index:200;
+  padding-top:env(safe-area-inset-top,0)}
+.logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.logo svg{width:30px;height:12px}
+.bname{font-size:13px;font-weight:500;color:#fff;white-space:nowrap}
+.bname b{color:var(--b40);font-weight:500}
+.sp{flex:1}
+.ib{width:36px;height:36px;display:flex;align-items:center;justify-content:center;
+  border:none;background:none;cursor:pointer;border-radius:4px;color:var(--g30);
+  transition:background .15s}
+.ib:active{background:var(--g80)}
 
-/* ── MAP STAGE ── */
-#map-wrap{position:absolute;top:var(--topbar);bottom:var(--bottomnav);
-  left:0;right:0;overflow:hidden;background:#1c2333;touch-action:none;cursor:grab}
-#map-wrap:active{cursor:grabbing}
-#map-stage{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
+/* MAP */
+#map-wrap{position:absolute;top:var(--topbar);bottom:var(--botnav);
+  left:0;right:0;overflow:hidden;touch-action:none;cursor:grab;
+  background:#1a1f2e}
+#map-wrap.grabbing{cursor:grabbing}
+#map-canvas{position:absolute;top:0;left:0;
+  transform-origin:0 0;will-change:transform}
+#pin-layer{position:absolute;top:0;left:0;pointer-events:none}
 
-/* ── ISOMETRIC FLOOR STACK ── */
-.iso-scene{position:relative}
-.floor-slice{position:absolute;transform-origin:0 0}
-.floor-slice svg{display:block;pointer-events:none}
-/* Floor label spine — left edge */
-.floor-label{position:absolute;left:-48px;
-  font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;
-  color:rgba(255,255,255,.7);letter-spacing:.04em;
-  display:flex;align-items:center;height:24px;
-  border-left:3px solid;padding-left:8px;white-space:nowrap}
-/* Elevator shaft connector */
-.shaft{position:absolute;pointer-events:none;z-index:2}
-
-/* ── PINS ── */
-.poi-pin{position:absolute;transform:translate(-50%,-100%);
-  cursor:pointer;z-index:10;transition:transform .12s}
-.poi-pin:hover,.poi-pin.active{transform:translate(-50%,-100%) scale(1.25)}
-.poi-pin svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
-.pin-label{position:absolute;top:100%;left:50%;transform:translateX(-50%);
-  white-space:nowrap;background:rgba(22,22,22,.85);color:#fff;
-  font-size:9px;padding:2px 5px;border-radius:3px;margin-top:2px;
-  font-family:"IBM Plex Sans",sans-serif;pointer-events:none;
-  opacity:0;transition:opacity .15s}
-.poi-pin:hover .pin-label{opacity:1}
-
-/* Origin/dest pins */
-.nav-pin{position:absolute;transform:translate(-50%,-100%);pointer-events:none;z-index:15}
-
-/* ── ROUTE LINE ── */
-#route-svg{position:absolute;top:0;left:0;pointer-events:none;z-index:8;overflow:visible}
-
-/* ── SEARCH ── */
-#search-bar{position:absolute;top:calc(var(--topbar) + 12px);
+/* SEARCH */
+#sbar{position:absolute;top:calc(var(--topbar)+12px);
   left:12px;right:12px;z-index:300}
-.search-wrap{background:var(--white);border-radius:var(--r8);
-  box-shadow:var(--sh-md);display:flex;align-items:center;
-  padding:0 12px;height:48px;gap:8px;
+.sw{background:#fff;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.25);
+  display:flex;align-items:center;padding:0 12px;height:48px;gap:8px;
   border:1.5px solid transparent;transition:border-color .15s}
-.search-wrap:focus-within{border-color:var(--blue-50)}
-.search-wrap input{flex:1;border:none;outline:none;
+.sw:focus-within{border-color:var(--b50)}
+.sw input{flex:1;border:none;outline:none;
   font-family:"IBM Plex Sans",sans-serif;font-size:15px;
-  color:var(--gray-100);background:transparent}
-.search-wrap input::placeholder{color:var(--gray-60)}
-.search-x{border:none;background:none;cursor:pointer;color:var(--gray-60);
+  color:var(--g100);background:transparent}
+.sw input::placeholder{color:var(--g60)}
+#sx{border:none;background:none;cursor:pointer;color:var(--g60);
   padding:4px;display:none}
-.search-x.on{display:flex}
-#search-results{background:var(--white);border-radius:var(--r8);
-  box-shadow:var(--sh-md);margin-top:6px;display:none;
-  max-height:300px;overflow-y:auto}
-#search-results.on{display:block}
-.sri{display:flex;align-items:center;padding:11px 14px;gap:11px;cursor:pointer;
-  border-bottom:1px solid var(--gray-20);transition:background .1s}
+#sx.on{display:flex}
+#sres{background:#fff;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.2);
+  margin-top:6px;display:none;max-height:280px;overflow-y:auto}
+#sres.on{display:block}
+.sri{display:flex;align-items:center;padding:11px 14px;gap:10px;
+  cursor:pointer;border-bottom:1px solid var(--g20);transition:background .1s}
 .sri:last-child{border-bottom:none}
-.sri:hover,.sri:active{background:var(--blue-10)}
-.sri-ico{width:30px;height:30px;border-radius:50%;background:var(--blue-10);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--blue-50)}
-.sri-name{font-size:13px;font-weight:500;color:var(--gray-100)}
-.sri-sub{font-size:11px;color:var(--gray-60);margin-top:1px}
-.sri-fl{font-size:10px;font-weight:600;background:var(--gray-10);color:var(--gray-70);
-  padding:2px 7px;border-radius:20px;flex-shrink:0;
+.sri:active{background:var(--b10)}
+.si{width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sn{font-size:13px;font-weight:500;color:var(--g100)}
+.ss{font-size:11px;color:var(--g60);margin-top:1px}
+.sf{font-size:10px;font-weight:600;padding:2px 7px;
+  border-radius:20px;flex-shrink:0;
   font-family:"IBM Plex Mono",monospace}
 
-/* ── ROUTE HEADER ── */
-#route-hdr{position:absolute;top:var(--topbar);left:0;right:0;
-  background:var(--white);z-index:300;padding:10px 40px 10px 12px;
-  box-shadow:var(--sh-sm);display:none;flex-direction:column;gap:7px}
-#route-hdr.on{display:flex}
-.rf{display:flex;align-items:center;gap:8px;background:var(--gray-10);
-  border-radius:var(--r4);padding:8px 12px;font-size:13px;color:var(--gray-80)}
-.rfdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.rfdot.org{background:var(--green-40)}.rfdot.dst{background:var(--red-50)}
+/* ROUTE HDR */
+#rhdr{position:absolute;top:var(--topbar);left:0;right:0;
+  background:#fff;z-index:300;padding:10px 44px 10px 12px;
+  box-shadow:0 2px 8px rgba(0,0,0,.12);
+  display:none;flex-direction:column;gap:7px}
+#rhdr.on{display:flex}
+.rf{display:flex;align-items:center;gap:8px;
+  background:var(--g10);border-radius:4px;
+  padding:8px 12px;font-size:13px;color:var(--g80)}
+.rfd{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .rf span{flex:1}
-#route-x{position:absolute;top:10px;right:10px;border:none;background:none;
-  cursor:pointer;color:var(--gray-60);padding:4px}
+#rx{position:absolute;top:10px;right:10px;
+  border:none;background:none;cursor:pointer;color:var(--g60);padding:4px}
 
-/* ── FLOOR PILL (right side) ── */
-#floor-pill{position:absolute;right:12px;
-  bottom:calc(var(--bottomnav) + 76px);z-index:150;
-  background:var(--white);border-radius:24px;
-  box-shadow:var(--sh-md);overflow:hidden;
-  border:1px solid var(--gray-20)}
-.fp-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+/* FLOOR PILL */
+#fpill{position:absolute;right:12px;
+  bottom:calc(var(--botnav)+80px);z-index:150;
+  background:#fff;border-radius:24px;
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
+  overflow:hidden;border:1px solid var(--g20)}
+.fb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   border:none;background:none;cursor:pointer;
   font-family:"IBM Plex Mono",monospace;font-size:13px;font-weight:600;
-  color:var(--gray-70);border-bottom:1px solid var(--gray-20);
+  color:var(--g70);border-bottom:1px solid var(--g20);
   transition:background .12s,color .12s}
-.fp-btn:last-child{border-bottom:none}
-.fp-btn.active{background:var(--blue-50);color:var(--white)}
-.fp-btn:hover:not(.active){background:var(--blue-10);color:var(--blue-50)}
+.fb:last-child{border-bottom:none}
+.fb.on{background:var(--b50);color:#fff}
+.fb:hover:not(.on){background:var(--b10);color:var(--b50)}
 
-/* ── MAP CONTROLS ── */
-#map-ctrls{position:absolute;right:12px;bottom:calc(var(--bottomnav) + 16px);
-  z-index:150;background:var(--white);border-radius:var(--r8);
-  box-shadow:var(--sh-md);overflow:hidden;border:1px solid var(--gray-20)}
-.mc-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  border:none;background:none;cursor:pointer;color:var(--gray-70);font-size:20px;
-  border-bottom:1px solid var(--gray-20);transition:background .1s;user-select:none}
-.mc-btn:last-child{border-bottom:none}
-.mc-btn:active{background:var(--gray-10)}
+/* MAP CONTROLS */
+#mctl{position:absolute;right:12px;
+  bottom:calc(var(--botnav)+16px);z-index:150;
+  background:#fff;border-radius:8px;
+  box-shadow:0 4px 16px rgba(0,0,0,.18);
+  overflow:hidden;border:1px solid var(--g20)}
+.mb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
+  border:none;background:none;cursor:pointer;color:var(--g70);font-size:20px;
+  border-bottom:1px solid var(--g20);transition:background .1s;user-select:none}
+.mb:last-child{border-bottom:none}
+.mb:active{background:var(--g10)}
 
-/* ── VIEW TOGGLE (iso / flat) ── */
-#view-toggle{position:absolute;left:12px;bottom:calc(var(--bottomnav)+16px);
-  z-index:150;background:var(--white);border-radius:var(--r8);
-  box-shadow:var(--sh-md);overflow:hidden;border:1px solid var(--gray-20);
-  display:flex;flex-direction:column}
-.vt-btn{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
-  border:none;background:none;cursor:pointer;color:var(--gray-70);
-  border-bottom:1px solid var(--gray-20);transition:background .12s,color .12s;
-  font-size:10px;font-weight:600;font-family:"IBM Plex Mono",monospace}
-.vt-btn:last-child{border-bottom:none}
-.vt-btn.active{background:var(--blue-50);color:var(--white)}
-
-/* ── BOTTOM SHEET ── */
-#bsheet{position:absolute;bottom:var(--bottomnav);left:0;right:0;
-  background:var(--white);border-radius:16px 16px 0 0;
+/* BOTTOM SHEET */
+#bs{position:absolute;bottom:var(--botnav);left:0;right:0;
+  background:#fff;border-radius:16px 16px 0 0;
   box-shadow:0 -4px 24px rgba(0,0,0,.2);z-index:400;
-  transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
-  max-height:62vh;display:flex;flex-direction:column;overflow:hidden}
-#bsheet.on{transform:translateY(0)}
-#bsheet.peek{transform:translateY(calc(100% - 124px))}
-.bs-handle{width:36px;height:4px;background:var(--gray-30);border-radius:2px;
-  margin:10px auto 0;flex-shrink:0}
-#bs-body{padding:16px 20px;overflow-y:auto;flex:1}
-.bs-title{font-size:18px;font-weight:600;color:var(--gray-100);margin-bottom:4px}
-.bs-sub{font-size:12px;color:var(--gray-60);margin-bottom:14px;
+  transform:translateY(100%);
+  transition:transform .3s cubic-bezier(.4,0,.2,1);
+  max-height:65vh;display:flex;flex-direction:column;overflow:hidden}
+#bs.on{transform:translateY(0)}
+#bs.pk{transform:translateY(calc(100% - 130px))}
+.bsh{width:36px;height:4px;background:var(--g30);border-radius:2px;
+  margin:10px auto 0;flex-shrink:0;cursor:pointer}
+#bsb{padding:16px 20px;overflow-y:auto;flex:1}
+.bst{font-size:18px;font-weight:600;color:var(--g100);margin-bottom:4px}
+.bss{font-size:12px;color:var(--g60);margin-bottom:14px;
   display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.bs-badge{font-size:10px;font-weight:600;background:var(--blue-10);
-  color:var(--blue-60);padding:2px 8px;border-radius:20px;
-  font-family:"IBM Plex Mono",monospace}
-.bs-type-badge{font-size:10px;font-weight:500;padding:2px 8px;
-  border-radius:20px;border:1px solid}
-.bs-acts{display:flex;gap:8px;margin-bottom:14px}
-.bs-btn{flex:1;height:40px;border:none;border-radius:var(--r4);
+.bbg{font-size:10px;font-weight:600;padding:2px 8px;
+  border-radius:20px;font-family:"IBM Plex Mono",monospace}
+.bacts{display:flex;gap:8px;margin-bottom:14px}
+.bbt{flex:1;height:40px;border:none;border-radius:4px;
   font-family:"IBM Plex Sans",sans-serif;font-size:13px;font-weight:500;
   cursor:pointer;transition:background .15s;
   display:flex;align-items:center;justify-content:center;gap:6px}
-.bs-btn.p{background:var(--blue-50);color:var(--white)}
-.bs-btn.p:active{background:var(--blue-60)}
-.bs-btn.s{background:var(--gray-10);color:var(--gray-80);
-  border:1px solid var(--gray-20)}
-.bs-btn.s:active{background:var(--gray-20)}
-.bs-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;
-  border-top:1px solid var(--gray-20);font-size:13px;color:var(--gray-70)}
-.bs-row:first-child{border-top:none}
-/* route summary */
-.rs-box{background:var(--blue-10);border-radius:var(--r8);padding:12px 14px;
+.bbt.p{background:var(--b50);color:#fff}
+.bbt.p:active{background:var(--b60)}
+.bbt.s{background:var(--g10);color:var(--g80);border:1px solid var(--g20)}
+.bbt.s:active{background:var(--g20)}
+.brow{display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;border-top:1px solid var(--g20);
+  font-size:13px;color:var(--g70)}
+.rsbox{background:var(--b10);border-radius:8px;padding:12px 14px;
   margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
-.rs-time{font-size:22px;font-weight:600;color:var(--blue-60)}
-.rs-dist{font-size:12px;color:var(--gray-70);margin-top:2px}
-.rstep{display:flex;align-items:center;gap:10px;padding:9px 0;
-  border-top:1px solid var(--gray-20);font-size:13px;color:var(--gray-80)}
-.rstep-ico{width:26px;height:26px;border-radius:50%;background:var(--gray-10);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  color:var(--blue-50)}
+.rst{font-size:22px;font-weight:600;color:var(--b60)}
+.rsd{font-size:12px;color:var(--g70);margin-top:2px}
+.step{display:flex;align-items:center;gap:10px;padding:9px 0;
+  border-top:1px solid var(--g20);font-size:13px;color:var(--g80)}
+.stpi{width:26px;height:26px;border-radius:50%;background:var(--g10);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;color:var(--b50)}
 
-/* ── BOTTOM NAV ── */
-#bottom-nav{position:absolute;bottom:0;left:0;right:0;height:var(--bottomnav);
-  background:var(--gray-100);display:flex;align-items:center;z-index:200;
+/* BOTTOM NAV */
+#bnav{position:absolute;bottom:0;left:0;right:0;height:var(--botnav);
+  background:var(--g100);display:flex;align-items:center;z-index:200;
   padding-bottom:env(safe-area-inset-bottom,0)}
-.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;height:100%;border:none;background:none;
-  cursor:pointer;color:var(--gray-60);font-family:"IBM Plex Sans",sans-serif;
-  font-size:10px;transition:color .15s;-webkit-tap-highlight-color:transparent}
-.nav-item.active{color:var(--blue-40)}
-.nav-item svg{width:22px;height:22px}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:3px;height:100%;
+  border:none;background:none;cursor:pointer;
+  color:var(--g60);font-family:"IBM Plex Sans",sans-serif;
+  font-size:10px;transition:color .15s}
+.ni.on{color:var(--b40)}
+.ni svg{width:22px;height:22px}
 
-/* ── TOAST ── */
-#toast{position:absolute;bottom:calc(var(--bottomnav)+14px);left:50%;
-  transform:translateX(-50%) translateY(60px);
-  background:var(--gray-90);color:var(--white);padding:9px 18px;
-  border-radius:var(--r8);font-size:13px;white-space:nowrap;
-  z-index:500;transition:transform .25s ease;pointer-events:none}
-#toast.on{transform:translateX(-50%) translateY(0)}
+/* TOAST */
+#toast{position:absolute;bottom:calc(var(--botnav)+14px);left:50%;
+  transform:translateX(-50%) translateY(50px);
+  background:var(--g90);color:#fff;padding:9px 18px;
+  border-radius:8px;font-size:13px;white-space:nowrap;
+  z-index:500;transition:transform .25s ease;pointer-events:none;
+  opacity:0;transition:transform .25s ease,opacity .25s ease}
+#toast.on{transform:translateX(-50%) translateY(0);opacity:1}
 
-/* ── SETTINGS PANEL ── */
-#settings-panel{position:absolute;inset:0;background:var(--white);
+/* SETTINGS */
+#spanel{position:absolute;inset:0;background:#fff;
   z-index:600;display:none;flex-direction:column;overflow-y:auto}
-#settings-panel.on{display:flex}
-.sp-hdr{background:var(--gray-100);padding:14px 16px;
-  display:flex;align-items:center;gap:12px}
-.sp-hdr h2{font-size:15px;font-weight:600;color:var(--white);flex:1}
-.sp-back{border:none;background:none;cursor:pointer;color:var(--gray-30);padding:4px}
-.sp-sec{padding:14px 16px}
-.sp-sec h3{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
-  color:var(--gray-60);margin-bottom:8px}
-.sp-row{display:flex;align-items:center;padding:11px 0;
-  border-bottom:1px solid var(--gray-20);gap:12px}
-.sp-row:last-child{border-bottom:none}
-.sp-lbl{flex:1;font-size:14px;color:var(--gray-90)}
-.sp-sub{font-size:11px;color:var(--gray-60);margin-top:2px}
-.sp-divider{height:1px;background:var(--gray-20);margin:0 16px}
-.toggle{position:relative;width:40px;height:22px;flex-shrink:0}
-.toggle input{opacity:0;width:0;height:0}
-.ttrack{position:absolute;inset:0;background:var(--gray-30);
+#spanel.on{display:flex}
+.sphdr{background:var(--g100);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.sphdr h2{font-size:15px;font-weight:600;color:#fff;flex:1}
+.spbk{border:none;background:none;cursor:pointer;color:var(--g30);padding:4px}
+.spsec{padding:14px 16px}
+.spsec h3{font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--g60);margin-bottom:8px}
+.sprow{display:flex;align-items:center;padding:11px 0;
+  border-bottom:1px solid var(--g20);gap:12px}
+.sprow:last-child{border-bottom:none}
+.splbl{flex:1;font-size:14px;color:var(--g90)}
+.spsub{font-size:11px;color:var(--g60);margin-top:2px}
+.spdiv{height:1px;background:var(--g20);margin:0 16px}
+.tog{position:relative;width:40px;height:22px;flex-shrink:0}
+.tog input{opacity:0;width:0;height:0}
+.tt{position:absolute;inset:0;background:var(--g30);
   border-radius:11px;cursor:pointer;transition:background .2s}
-.toggle input:checked+.ttrack{background:var(--blue-50)}
-.ttrack::after{content:"";position:absolute;top:3px;left:3px;
+.tog input:checked+.tt{background:var(--b50)}
+.tt::after{content:"";position:absolute;top:3px;left:3px;
   width:16px;height:16px;background:#fff;border-radius:50%;transition:transform .2s}
-.toggle input:checked+.ttrack::after{transform:translateX(18px)}
+.tog input:checked+.tt::after{transform:translateX(18px)}
 
-/* ── "YOU ARE HERE" blinking dot ── */
-@keyframes pulse{0%,100%{opacity:1;transform:translate(-50%,-50%) scale(1)}
-  50%{opacity:.5;transform:translate(-50%,-50%) scale(1.6)}}
-.you-here{position:absolute;width:14px;height:14px;z-index:12;pointer-events:none}
-.you-here::before,.you-here::after{content:"";position:absolute;top:50%;left:50%;
-  border-radius:50%;transform:translate(-50%,-50%)}
-.you-here::before{width:14px;height:14px;background:var(--blue-50);
-  animation:pulse 2s infinite}
-.you-here::after{width:6px;height:6px;background:#fff}
-
-/* Floor color accents (matching reference images) */
-.fl-1{color:#42be65} .fl-2{color:#0f62fe} .fl-8{color:#ff832b}
-.fl-9{color:#8a3ffc} .fl-10{color:#08bdba}
-.fl-border-1{border-color:#42be65} .fl-border-2{border-color:#0f62fe}
-.fl-border-8{border-color:#ff832b} .fl-border-9{border-color:#8a3ffc}
-.fl-border-10{border-color:#08bdba}
+/* YOU ARE HERE */
+@keyframes pulse{0%,100%{opacity:1;r:6}50%{opacity:.4;r:10}}
 </style>
 </head>
 <body>
 <div id="app">
 
-<!-- TOP BAR -->
 <header id="topbar">
-  <div class="ibm-logo">
-    <svg viewBox="0 0 40 16" fill="none" aria-label="IBM">
+  <div class="logo">
+    <svg viewBox="0 0 40 16" fill="none">
       <rect y="0" width="40" height="2" fill="#1192e8"/>
       <rect y="3.5" width="40" height="2" fill="#1192e8"/>
       <rect x="6" y="7" width="28" height="2" fill="#1192e8"/>
       <rect x="6" y="10.5" width="28" height="2" fill="#1192e8"/>
       <rect y="14" width="40" height="2" fill="#1192e8"/>
     </svg>
-    <span class="bname">One Madison <span>Wayfinder</span></span>
+    <span class="bname">One Madison <b>Wayfinder</b></span>
   </div>
-  <div class="spacer"></div>
-  <button class="icon-btn" id="settings-btn" title="Settings">
+  <div class="sp"></div>
+  <button class="ib" id="settings-btn">
     <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
-      <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
+      <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
     </svg>
   </button>
 </header>
 
-<!-- MAP -->
 <div id="map-wrap">
-  <div id="map-stage">
-    <div class="iso-scene" id="iso-scene">
-      <!-- floors injected by JS -->
-    </div>
-    <svg id="route-svg" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6Z" fill="#0f62fe" opacity=".9"/>
-        </marker>
-      </defs>
+  <div id="map-canvas">
+    <canvas id="floor-canvas"></canvas>
+    <svg id="route-svg" style="position:absolute;top:0;left:0;overflow:visible;pointer-events:none">
+      <defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
+        <path d="M0,0 L6,3 L0,6Z" fill="#0f62fe" opacity=".9"/></marker></defs>
     </svg>
-    <div id="pins-layer" style="position:absolute;top:0;left:0"></div>
+    <div id="pin-layer"></div>
   </div>
 </div>
 
-<!-- SEARCH BAR -->
-<div id="search-bar">
-  <div class="search-wrap">
+<div id="sbar">
+  <div class="sw">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="#6f6f6f">
       <path d="M15.7 14.3l-4.2-4.2A6 6 0 1 0 10.3 11.5l4.2 4.2-1.4 1.3zM6 10.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/>
     </svg>
-    <input type="text" id="search-input" placeholder="Search rooms, amenities, floors…" autocomplete="off"/>
-    <button class="search-x" id="search-x" aria-label="Clear">
+    <input type="search" id="si" placeholder="Search rooms, amenities, floors…" autocomplete="off" autocorrect="off"/>
+    <button id="sx" aria-label="Clear">
       <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">
         <path d="M12 4.7L11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z"/>
       </svg>
     </button>
   </div>
-  <div id="search-results"></div>
+  <div id="sres"></div>
 </div>
 
-<!-- ROUTE HEADER -->
-<div id="route-hdr">
-  <div class="rf"><div class="rfdot org"></div><span id="rf-from">Your location</span></div>
-  <div class="rf"><div class="rfdot dst"></div><span id="rf-to">Destination</span></div>
-  <button id="route-x">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="#6f6f6f">
-      <path d="M12 4.7L11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z"/>
-    </svg>
-  </button>
+<div id="rhdr">
+  <div class="rf"><div class="rfd" style="background:#42be65"></div><span id="rfrom">Your location</span></div>
+  <div class="rf"><div class="rfd" style="background:#fa4d56"></div><span id="rto">Destination</span></div>
+  <button id="rx"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6f6f6f"><path d="M12 4.7L11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z"/></svg></button>
 </div>
 
-<!-- FLOOR PILL -->
-<div id="floor-pill" role="group" aria-label="Floor selector"></div>
+<div id="fpill"></div>
 
-<!-- MAP CONTROLS -->
-<div id="map-ctrls">
-  <button class="mc-btn" id="zoom-in" title="Zoom in">+</button>
-  <button class="mc-btn" id="zoom-out" title="Zoom out">&#8722;</button>
-  <button class="mc-btn" id="recenter" title="Re-center">
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+<div id="mctl">
+  <button class="mb" id="zi">+</button>
+  <button class="mb" id="zo">&#8722;</button>
+  <button class="mb" id="zr">
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor">
       <path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11zM8 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>
     </svg>
   </button>
 </div>
 
-<!-- VIEW TOGGLE -->
-<div id="view-toggle">
-  <button class="vt-btn active" id="vt-iso" title="Stacked view">ISO</button>
-  <button class="vt-btn" id="vt-flat" title="Single floor view">FLAT</button>
+<div id="bs">
+  <div class="bsh" id="bsh"></div>
+  <div id="bsb"></div>
 </div>
 
-<!-- BOTTOM SHEET -->
-<div id="bsheet" role="dialog">
-  <div class="bs-handle"></div>
-  <div id="bs-body"></div>
-</div>
-
-<!-- BOTTOM NAV -->
-<nav id="bottom-nav">
-  <button class="nav-item active" id="nav-map">
+<nav id="bnav">
+  <button class="ni on" id="n-map">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polygon points="3,6 9,3 15,6 21,3 21,18 15,21 9,18 3,21"/>
       <line x1="9" y1="3" x2="9" y2="18"/><line x1="15" y1="6" x2="15" y2="21"/>
     </svg>Map
   </button>
-  <button class="nav-item" id="nav-explore">
+  <button class="ni" id="n-explore">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
     </svg>Explore
   </button>
-  <button class="nav-item" id="nav-dir">
+  <button class="ni" id="n-dir">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <polygon points="3,11 22,2 13,21 11,13"/>
     </svg>Directions
   </button>
-  <button class="nav-item" id="nav-saved">
+  <button class="ni" id="n-saved">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
       <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
     </svg>Saved
   </button>
 </nav>
 
-<!-- SETTINGS PANEL -->
-<div id="settings-panel">
-  <div class="sp-hdr">
-    <button class="sp-back" id="sp-back">
-      <svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor">
-        <path d="M10 3.5L5.5 8l4.5 4.5"/>
-      </svg>
-    </button>
+<div id="spanel">
+  <div class="sphdr">
+    <button class="spbk" id="spbk"><svg width="20" height="20" viewBox="0 0 16 16" fill="currentColor"><path d="M10 3.5L5.5 8l4.5 4.5" stroke="currentColor" stroke-width="1.5" fill="none"/></svg></button>
     <h2>Settings</h2>
   </div>
-  <div class="sp-sec">
+  <div class="spsec">
     <h3>Navigation</h3>
-    <div class="sp-row">
-      <div><div class="sp-lbl">Accessible routes</div><div class="sp-sub">Prefer elevators over stairs</div></div>
-      <label class="toggle"><input type="checkbox" id="t-access"/><div class="ttrack"></div></label>
+    <div class="sprow">
+      <div><div class="splbl">Accessible routes</div><div class="spsub">Prefer elevators over stairs</div></div>
+      <label class="tog"><input type="checkbox" id="ta"/><div class="tt"></div></label>
     </div>
-    <div class="sp-row">
-      <div><div class="sp-lbl">Show direction arrows</div></div>
-      <label class="toggle"><input type="checkbox" id="t-arrows" checked/><div class="ttrack"></div></label>
-    </div>
-  </div>
-  <div class="sp-divider"></div>
-  <div class="sp-sec">
-    <h3>Display</h3>
-    <div class="sp-row">
-      <div><div class="sp-lbl">Show all floor labels</div></div>
-      <label class="toggle"><input type="checkbox" id="t-labels" checked/><div class="ttrack"></div></label>
-    </div>
-    <div class="sp-row">
-      <div><div class="sp-lbl">Highlight active floor</div></div>
-      <label class="toggle"><input type="checkbox" id="t-highlight" checked/><div class="ttrack"></div></label>
+    <div class="sprow">
+      <div><div class="splbl">Show direction arrows on route</div></div>
+      <label class="tog"><input type="checkbox" id="tarr" checked/><div class="tt"></div></label>
     </div>
   </div>
-  <div class="sp-divider"></div>
-  <div class="sp-sec">
+  <div class="spdiv"></div>
+  <div class="spsec">
     <h3>About</h3>
-    <div class="sp-row"><div class="sp-lbl">Building</div><span style="font-size:13px;color:#6f6f6f">IBM One Madison Ave, NYC</span></div>
-    <div class="sp-row"><div class="sp-lbl">Floors</div><span style="font-size:13px;color:#6f6f6f;font-family:'IBM Plex Mono',monospace">1, 2, 8, 9, 10</span></div>
-    <div class="sp-row"><div class="sp-lbl">Version</div><span style="font-size:13px;color:#6f6f6f;font-family:'IBM Plex Mono',monospace">2.0.0</span></div>
+    <div class="sprow"><div class="splbl">Building</div><span style="font-size:13px;color:#6f6f6f">IBM One Madison Ave, NYC</span></div>
+    <div class="sprow"><div class="splbl">Floors</div><span style="font-size:13px;color:#6f6f6f;font-family:'IBM Plex Mono',monospace">1, 2, 8, 9, 10</span></div>
+    <div class="sprow"><div class="splbl">Version</div><span style="font-size:13px;color:#6f6f6f;font-family:'IBM Plex Mono',monospace">2.1.0</span></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════
-//  IBM ONE MADISON WAYFINDER v2
-//  Stacked isometric + flat floor views
-// ════════════════════════════════════════════════════════
+const FLOOR_POIS={"1":{"name":"Floor 1","label":"1","pois":[{"id":"f1_01ST01_183_547","label":"01ST01","x":183.8,"y":547.7,"type":"stairs","desc":"Stairwell \u2014 Floor 1"},{"id":"f1_01EL01_243_614","label":"01EL01","x":243.2,"y":614.8,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_VESTIBULE_295_653","label":"VESTIBULE","x":295.6,"y":653.5,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_ROOM_245_655","label":"ROOM","x":245.8,"y":655.4,"type":"room","desc":"Floor 1"},{"id":"f1_RECEPTION_213_614","label":"RECEPTION","x":213.4,"y":614.1,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_LOBBY_145_607","label":"LOBBY","x":145.8,"y":607.0,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_ELEVATOR_191_520","label":"ELEVATOR","x":191.7,"y":520.5,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_COAT_317_580","label":"COAT","x":317.6,"y":580.7,"type":"room","desc":"Floor 1"},{"id":"f1_CONTROL_316_617","label":"CONTROL","x":316.2,"y":617.6,"type":"room","desc":"Floor 1"}]},"2":{"name":"Floor 2","label":"2","pois":[{"id":"f2_STAIR_D_225_347","label":"STAIR D","x":225.8,"y":347.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_A_555_382","label":"STAIR A","x":555.1,"y":382.1,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_C_830_355","label":"STAIR C","x":830.2,"y":355.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_02EL01_471_281","label":"02EL01","x":471.3,"y":281.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL02_472_309","label":"02EL02","x":472.7,"y":309.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL03_471_341","label":"02EL03","x":471.7,"y":341.4,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL04_526_283","label":"02EL04","x":526.3,"y":283.8,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL05_526_313","label":"02EL05","x":526.6,"y":313.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL06_527_340","label":"02EL06","x":527.7,"y":340.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL07_526_371","label":"02EL07","x":526.5,"y":371.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL15_707_330","label":"02EL15","x":707.1,"y":330.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL16_708_304","label":"02EL16","x":708.3,"y":304.6,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL17_705_278","label":"02EL17","x":705.4,"y":278.7,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_ELEVLOB_497_339","label":"ELEVLOB","x":497.5,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_STAIR_G_162_590","label":"STAIR G","x":162.2,"y":590.2,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_ESC_G_164_572","label":"ESC-G","x":164.4,"y":572.7,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_02EL_G_206_645","label":"02EL-G","x":206.3,"y":645.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_FRELEVLB_671_350","label":"FRELEVLB","x":671.5,"y":350.9,"type":"elevator","desc":"Elevator \u2014 Floor 2"}]},"8":{"name":"Floor 8","label":"8","pois":[{"id":"f8_STAIR_C_832_327","label":"STAIR C","x":832.3,"y":327.6,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_TOILET__MEN__861_277","label":"TOILET (MEN)","x":861.6,"y":277.4,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_TOILET__WOMEN__763_287","label":"TOILET (WOMEN)","x":763.4,"y":287.4,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_STAIR_A_556_335","label":"STAIR A","x":556.0,"y":335.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_TOILET_396_311","label":"TOILET","x":396.2,"y":311.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8__MEN__397_315","label":"(MEN)","x":397.1,"y":315.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8__WOMEN__436_315","label":"(WOMEN)","x":436.4,"y":315.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_VESTIBULE_384_373","label":"VESTIBULE","x":384.9,"y":373.6,"type":"reception","desc":"Reception / Lobby \u2014 Floor 8"},{"id":"f8_STAIR_D_236_341","label":"STAIR D","x":236.8,"y":341.0,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_E_614_220","label":"STAIR E","x":614.2,"y":220.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_B_1070_376","label":"STAIR B","x":1070.8,"y":376.2,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_5_MADISON__N_I_C___104_233","label":"5 MADISON (N.I.C.)","x":104.4,"y":233.7,"type":"room","desc":"Floor 8"},{"id":"f8_FOCUS_254_518","label":"FOCUS","x":254.9,"y":518.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 8"},{"id":"f8_ROOM___254_522","label":"ROOM -","x":254.6,"y":522.3,"type":"room","desc":"Floor 8"},{"id":"f8_DESK_256_526","label":"DESK","x":256.0,"y":526.2,"type":"room","desc":"Floor 8"},{"id":"f8_PRESENTING_26_692","label":"PRESENTING","x":26.3,"y":692.3,"type":"conference","desc":"Conference room \u2014 Floor 8"},{"id":"f8_MEDIUM_29_696","label":"MEDIUM","x":29.7,"y":696.3,"type":"room","desc":"Floor 8"},{"id":"f8_FORMAL_29_704","label":"FORMAL","x":29.4,"y":704.2,"type":"conference","desc":"Conference room \u2014 Floor 8"},{"id":"f8_BRAINSTORMING_80_696","label":"BRAINSTORMING","x":80.1,"y":696.4,"type":"room","desc":"Floor 8"},{"id":"f8_OPEN_88_704","label":"OPEN","x":88.1,"y":704.3,"type":"room","desc":"Floor 8"},{"id":"f8_ENCLOSED_240_704","label":"ENCLOSED","x":240.8,"y":704.2,"type":"room","desc":"Floor 8"},{"id":"f8_WORKSTATIONS_135_627","label":"WORKSTATIONS","x":135.0,"y":627.0,"type":"room","desc":"Floor 8"},{"id":"f8_READ_447_594","label":"READ","x":447.3,"y":594.8,"type":"room","desc":"Floor 8"},{"id":"f8_LARGE_324_543","label":"LARGE","x":324.3,"y":543.5,"type":"room","desc":"Floor 8"},{"id":"f8_SMALL_334_434","label":"SMALL","x":334.5,"y":434.4,"type":"room","desc":"Floor 8"},{"id":"f8_BOOKABLE_159_435","label":"BOOKABLE","x":159.3,"y":435.8,"type":"room","desc":"Floor 8"},{"id":"f8_PRIVATE_161_439","label":"PRIVATE","x":161.2,"y":439.8,"type":"room","desc":"Floor 8"},{"id":"f8_OFFICE_162_443","label":"OFFICE","x":162.2,"y":443.7,"type":"room","desc":"Floor 8"},{"id":"f8_SHOWER_237_399","label":"SHOWER","x":237.3,"y":399.6,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_STALL_239_403","label":"STALL","x":239.1,"y":403.5,"type":"room","desc":"Floor 8"},{"id":"f8_HYDRATION_83_370","label":"HYDRATION","x":83.1,"y":370.1,"type":"food","desc":"Food & drink \u2014 Floor 8"},{"id":"f8_OFFICE___746_548","label":"OFFICE -","x":746.8,"y":548.3,"type":"room","desc":"Floor 8"},{"id":"f8_BAND_A_747_552","label":"BAND A","x":747.2,"y":552.2,"type":"room","desc":"Floor 8"},{"id":"f8_CODE_BOX_587_386","label":"CODE BOX","x":587.1,"y":386.1,"type":"room","desc":"Floor 8"},{"id":"f8_CONVERSING_557_377","label":"CONVERSING","x":557.7,"y":377.3,"type":"room","desc":"Floor 8"},{"id":"f8_OPEN_1_561_385","label":"OPEN 1","x":561.9,"y":385.2,"type":"room","desc":"Floor 8"},{"id":"f8_MOTHER_apos_S_291_306","label":"MOTHER&apos;S","x":291.2,"y":306.2,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_ROOM_341_306","label":"ROOM","x":341.9,"y":306.3,"type":"room","desc":"Floor 8"},{"id":"f8_SHOWER___228_307","label":"SHOWER &","x":228.6,"y":307.1,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_GENDER_354_267","label":"GENDER","x":354.0,"y":267.1,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_RESTROOM_351_271","label":"RESTROOM","x":351.8,"y":271.0,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_COPY_PRINT_669_437","label":"COPY/PRINT","x":669.3,"y":437.9,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_FACILITIES_620_354","label":"FACILITIES","x":620.5,"y":354.1,"type":"room","desc":"Floor 8"},{"id":"f8_LOCKERS_592_576","label":"LOCKERS","x":592.3,"y":576.7,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_COPY___229_244","label":"COPY /","x":229.9,"y":244.1,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_PRINT_230_248","label":"PRINT","x":230.5,"y":248.1,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_ELEVATOR_496_298","label":"ELEVATOR","x":496.6,"y":298.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_FIRE_SERVICE_670_298","label":"FIRE/SERVICE","x":670.0,"y":298.1,"type":"room","desc":"Floor 8"},{"id":"f8_LOBBY_D_673_302","label":"LOBBY D","x":673.4,"y":302.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_TEAM_977_181","label":"TEAM","x":977.7,"y":181.9,"type":"room","desc":"Floor 8"},{"id":"f8_TABLE_976_185","label":"TABLE","x":976.9,"y":185.9,"type":"room","desc":"Floor 8"},{"id":"f8_SINGLE_720_576","label":"SINGLE","x":720.7,"y":576.3,"type":"room","desc":"Floor 8"},{"id":"f8_BOOTHS_719_580","label":"BOOTHS","x":719.8,"y":580.3,"type":"room","desc":"Floor 8"},{"id":"f8_HIGH_TOP_810_463","label":"HIGH TOP","x":810.7,"y":463.8,"type":"room","desc":"Floor 8"},{"id":"f8_OPEN_2_961_460","label":"OPEN 2","x":961.0,"y":460.2,"type":"room","desc":"Floor 8"},{"id":"f8_RELAXATION_1033_389","label":"RELAXATION","x":1033.6,"y":389.0,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_WUDU_1022_380","label":"WUDU","x":1022.5,"y":380.1,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_PRAYER_1011_351","label":"PRAYER","x":1011.3,"y":351.4,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_COLLAB_487_646","label":"COLLAB","x":487.1,"y":646.2,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_STATION_1232_345","label":"STATION","x":1232.9,"y":345.4,"type":"room","desc":"Floor 8"},{"id":"f8_QUIET_CAR_196_500","label":"QUIET CAR","x":196.4,"y":500.9,"type":"focus","desc":"Focus / quiet area \u2014 Floor 8"},{"id":"f8___SHOWER_196_403","label":"& SHOWER","x":196.9,"y":403.5,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_CHANGING_173_399","label":"CHANGING","x":173.4,"y":399.6,"type":"room","desc":"Floor 8"},{"id":"f8_WATER_154_337","label":"WATER","x":154.8,"y":337.8,"type":"room","desc":"Floor 8"},{"id":"f8_FSAE_708_275","label":"FSAE","x":708.8,"y":275.6,"type":"room","desc":"Floor 8"},{"id":"f8_08EL01_471_277","label":"08EL01","x":471.4,"y":277.9,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL02_471_306","label":"08EL02","x":471.6,"y":306.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL03_471_338","label":"08EL03","x":471.6,"y":338.2,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL04_526_278","label":"08EL04","x":526.0,"y":278.6,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL05_525_309","label":"08EL05","x":525.5,"y":309.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL06_526_338","label":"08EL06","x":526.0,"y":338.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL07_526_366","label":"08EL07","x":526.9,"y":366.8,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL08_588_338","label":"08EL08","x":588.3,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL09_588_310","label":"08EL09","x":588.5,"y":310.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL10_588_279","label":"08EL10","x":588.2,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL11_643_278","label":"08EL11","x":643.9,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL12_642_309","label":"08EL12","x":642.5,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL13_642_338","label":"08EL13","x":642.1,"y":338.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL14_642_368","label":"08EL14","x":642.8,"y":368.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL15_706_327","label":"08EL15","x":706.4,"y":327.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"}]},"9":{"name":"Floor 9","label":"9","pois":[{"id":"f9_C926_557_281","label":"C926","x":557.4,"y":281.5,"type":"room","desc":"Floor 9"},{"id":"f9_C925_386_286","label":"C925","x":386.6,"y":286.7,"type":"room","desc":"Floor 9"},{"id":"f9_09EL17_707_275","label":"09EL17","x":707.0,"y":275.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL16_708_302","label":"09EL16","x":708.0,"y":302.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL15_708_328","label":"09EL15","x":708.1,"y":328.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL14_642_367","label":"09EL14","x":642.0,"y":367.2,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL13_641_336","label":"09EL13","x":641.8,"y":336.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL12_641_308","label":"09EL12","x":641.9,"y":308.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL11_643_279","label":"09EL11","x":643.7,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL10_588_279","label":"09EL10","x":588.0,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL09_588_309","label":"09EL09","x":588.7,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL08_587_339","label":"09EL08","x":587.8,"y":339.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL07_526_368","label":"09EL07","x":526.4,"y":368.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL06_526_339","label":"09EL06","x":526.4,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL05_525_308","label":"09EL05","x":525.9,"y":308.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL04_525_279","label":"09EL04","x":525.3,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL03_473_338","label":"09EL03","x":473.9,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL02_473_306","label":"09EL02","x":473.9,"y":306.9,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL01_473_278","label":"09EL01","x":473.7,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_C924_839_276","label":"C924","x":839.5,"y":276.7,"type":"room","desc":"Floor 9"},{"id":"f9_C923_830_240","label":"C923","x":830.8,"y":240.6,"type":"room","desc":"Floor 9"},{"id":"f9_9C_LK1_256_379","label":"9C-LK1","x":256.6,"y":379.2,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9A_LK2_601_569","label":"9A-LK2","x":601.6,"y":569.7,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9A_LK1_651_569","label":"9A-LK1","x":651.6,"y":569.5,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK5_606_234","label":"9C-LK5","x":606.6,"y":234.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK4_551_234","label":"9C-LK4","x":551.6,"y":234.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK2_270_223","label":"9C-LK2","x":270.5,"y":223.6,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK6_855_230","label":"9C-LK6","x":855.6,"y":230.0,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_D929_981_306","label":"D929","x":981.8,"y":306.4,"type":"room","desc":"Floor 9"},{"id":"f9_D928_1007_327","label":"D928","x":1007.6,"y":327.1,"type":"room","desc":"Floor 9"},{"id":"f9_D927_1007_354","label":"D927","x":1007.3,"y":354.0,"type":"room","desc":"Floor 9"},{"id":"f9_D926_982_370","label":"D926","x":982.0,"y":370.6,"type":"room","desc":"Floor 9"},{"id":"f9_D925_930_392","label":"D925","x":930.9,"y":392.7,"type":"room","desc":"Floor 9"},{"id":"f9_9D_LK1_1074_163","label":"9D-LK1","x":1074.1,"y":163.4,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_STAIR_B_1070_379","label":"STAIR B","x":1070.9,"y":379.6,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_C_830_356","label":"STAIR C","x":830.2,"y":356.2,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_E_597_207","label":"STAIR E","x":597.2,"y":207.0,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_A_555_382","label":"STAIR A","x":555.0,"y":382.9,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_D535_1006_603","label":"D535","x":1006.3,"y":603.5,"type":"room","desc":"Floor 9"},{"id":"f9_D530_1146_606","label":"D530","x":1146.9,"y":606.9,"type":"room","desc":"Floor 9"},{"id":"f9_D525_1076_657","label":"D525","x":1076.6,"y":657.0,"type":"room","desc":"Floor 9"},{"id":"f9_D440_1188_610","label":"D440","x":1188.3,"y":610.1,"type":"room","desc":"Floor 9"},{"id":"f9_D430_1195_470","label":"D430","x":1195.9,"y":470.4,"type":"room","desc":"Floor 9"},{"id":"f9_D515_1122_619","label":"D515","x":1122.6,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D514_1108_619","label":"D514","x":1108.0,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D516_1122_604","label":"D516","x":1122.6,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D513_1108_604","label":"D513","x":1108.0,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D511_1085_619","label":"D511","x":1085.9,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D510_1071_619","label":"D510","x":1071.3,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D512_1085_604","label":"D512","x":1085.9,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D509_1071_604","label":"D509","x":1071.3,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D507_1049_619","label":"D507","x":1049.2,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D506_1034_619","label":"D506","x":1034.6,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D508_1049_604","label":"D508","x":1049.2,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D505_1034_604","label":"D505","x":1034.6,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D503_1025_662","label":"D503","x":1025.0,"y":662.2,"type":"room","desc":"Floor 9"},{"id":"f9_D504_1010_662","label":"D504","x":1010.4,"y":662.2,"type":"room","desc":"Floor 9"},{"id":"f9_D502_1025_646","label":"D502","x":1025.3,"y":646.4,"type":"room","desc":"Floor 9"},{"id":"f9_D501_1010_646","label":"D501","x":1010.7,"y":646.4,"type":"room","desc":"Floor 9"},{"id":"f9_D519_1144_663","label":"D519","x":1144.1,"y":663.1,"type":"room","desc":"Floor 9"},{"id":"f9_D520_1129_663","label":"D520","x":1129.5,"y":663.1,"type":"room","desc":"Floor 9"},{"id":"f9_D518_1144_646","label":"D518","x":1144.1,"y":646.6,"type":"room","desc":"Floor 9"},{"id":"f9_D517_1129_646","label":"D517","x":1129.4,"y":646.6,"type":"room","desc":"Floor 9"},{"id":"f9_D419_1204_585","label":"D419","x":1204.8,"y":585.9,"type":"room","desc":"Floor 9"},{"id":"f9_D420_1190_585","label":"D420","x":1190.2,"y":585.9,"type":"room","desc":"Floor 9"},{"id":"f9_D418_1204_570","label":"D418","x":1204.8,"y":570.9,"type":"room","desc":"Floor 9"},{"id":"f9_D417_1190_570","label":"D417","x":1190.2,"y":570.9,"type":"room","desc":"Floor 9"},{"id":"f9_D415_1204_550","label":"D415","x":1204.5,"y":550.0,"type":"room","desc":"Floor 9"},{"id":"f9_D416_1189_550","label":"D416","x":1189.9,"y":550.0,"type":"room","desc":"Floor 9"},{"id":"f9_D414_1204_534","label":"D414","x":1204.8,"y":534.2,"type":"room","desc":"Floor 9"},{"id":"f9_D413_1190_534","label":"D413","x":1190.2,"y":534.2,"type":"room","desc":"Floor 9"},{"id":"f9_D411_1204_513","label":"D411","x":1204.8,"y":513.0,"type":"room","desc":"Floor 9"},{"id":"f9_D412_1190_513","label":"D412","x":1190.2,"y":513.0,"type":"room","desc":"Floor 9"},{"id":"f9_D410_1204_497","label":"D410","x":1204.8,"y":497.5,"type":"room","desc":"Floor 9"},{"id":"f9_D409_1190_497","label":"D409","x":1190.2,"y":497.5,"type":"room","desc":"Floor 9"},{"id":"f9_D407_1204_445","label":"D407","x":1204.5,"y":445.9,"type":"room","desc":"Floor 9"},{"id":"f9_D408_1189_445","label":"D408","x":1189.9,"y":445.9,"type":"room","desc":"Floor 9"},{"id":"f9_D406_1204_429","label":"D406","x":1204.8,"y":429.8,"type":"room","desc":"Floor 9"},{"id":"f9_D405_1190_429","label":"D405","x":1190.2,"y":429.8,"type":"room","desc":"Floor 9"},{"id":"f9_D403_1204_408","label":"D403","x":1204.5,"y":408.9,"type":"room","desc":"Floor 9"}]},"10":{"name":"Floor 10","label":"10","pois":[{"id":"f10_10ST03_558_371","label":"10ST03","x":558.4,"y":371.4,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10EL01_472_331","label":"10EL01","x":472.3,"y":331.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL02_472_300","label":"10EL02","x":472.3,"y":300.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL03_472_268","label":"10EL03","x":472.3,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL04_526_268","label":"10EL04","x":526.5,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL05_526_301","label":"10EL05","x":526.5,"y":301.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL06_526_330","label":"10EL06","x":526.5,"y":330.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL07_526_360","label":"10EL07","x":526.5,"y":360.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL08_586_332","label":"10EL08","x":586.7,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL09_588_301","label":"10EL09","x":588.5,"y":301.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL10_585_271","label":"10EL10","x":585.7,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL11_644_271","label":"10EL11","x":644.1,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL12_644_302","label":"10EL12","x":644.1,"y":302.5,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL13_644_332","label":"10EL13","x":644.1,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL14_644_361","label":"10EL14","x":644.1,"y":361.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL15_709_318","label":"10EL15","x":709.5,"y":318.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL16_706_294","label":"10EL16","x":706.2,"y":294.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL17_708_266","label":"10EL17","x":708.7,"y":266.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL18_744_361","label":"10EL18","x":744.1,"y":361.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL19_745_334","label":"10EL19","x":745.0,"y":334.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL20_740_302","label":"10EL20","x":740.0,"y":302.4,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL21_743_270","label":"10EL21","x":743.8,"y":270.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL22_800_271","label":"10EL22","x":800.3,"y":271.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL23_800_301","label":"10EL23","x":800.8,"y":301.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL25_799_361","label":"10EL25","x":799.2,"y":361.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL24_798_333","label":"10EL24","x":798.2,"y":333.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10ST01_204_350","label":"10ST01","x":204.2,"y":350.0,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10ST02_594_205","label":"10ST02","x":594.1,"y":205.6,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10ST04_1072_372","label":"10ST04","x":1072.8,"y":372.9,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10ST05_829_373","label":"10ST05","x":829.5,"y":373.8,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_A1009_844_396","label":"A1009","x":844.3,"y":396.4,"type":"room","desc":"Floor 10"},{"id":"f10_SPACE_355_312","label":"SPACE","x":355.1,"y":312.1,"type":"room","desc":"Floor 10"},{"id":"f10_OUTDOOR_352_304","label":"OUTDOOR","x":352.8,"y":304.2,"type":"room","desc":"Floor 10"},{"id":"f10_5_MADISON__N_I_C___94_226","label":"5 MADISON (N.I.C.)","x":94.4,"y":226.0,"type":"room","desc":"Floor 10"},{"id":"f10_STAIR_B_1070_368","label":"STAIR B","x":1070.7,"y":368.4,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_STAIR_E_603_212","label":"STAIR E","x":603.9,"y":212.8,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_STAIR_D_174_348","label":"STAIR D","x":174.6,"y":348.6,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_STAIR_A_552_381","label":"STAIR A","x":552.2,"y":381.3,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10__WOMEN__964_340","label":"(WOMEN)","x":964.3,"y":340.4,"type":"restroom","desc":"Restroom \u2014 Floor 10"},{"id":"f10__MEN__1026_340","label":"(MEN)","x":1026.8,"y":340.4,"type":"restroom","desc":"Restroom \u2014 Floor 10"},{"id":"f10_STAIR_C_831_323","label":"STAIR C","x":831.1,"y":323.4,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_SERVERY_703_516","label":"SERVERY","x":703.1,"y":516.2,"type":"room","desc":"Floor 10"},{"id":"f10_CRAC_836_524","label":"CRAC","x":836.5,"y":524.3,"type":"room","desc":"Floor 10"},{"id":"f10_VESTIBULE_1096_428","label":"VESTIBULE","x":1096.6,"y":428.7,"type":"reception","desc":"Reception / Lobby \u2014 Floor 10"},{"id":"f10_AUDITORIUM_1082_447","label":"AUDITORIUM","x":1082.4,"y":447.4,"type":"room","desc":"Floor 10"},{"id":"f10_ROOM_903_429","label":"ROOM","x":903.7,"y":429.7,"type":"room","desc":"Floor 10"},{"id":"f10_TRAINING_869_439","label":"TRAINING","x":869.6,"y":439.7,"type":"room","desc":"Floor 10"},{"id":"f10_STAIR_507_501","label":"STAIR","x":507.5,"y":501.0,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_CAFE_380_469","label":"CAFE","x":380.5,"y":469.9,"type":"food","desc":"Food & drink \u2014 Floor 10"},{"id":"f10_CONTROL_1132_421","label":"CONTROL","x":1132.9,"y":421.0,"type":"room","desc":"Floor 10"},{"id":"f10_AV_IT_872_479","label":"AV/IT","x":872.8,"y":479.8,"type":"room","desc":"Floor 10"},{"id":"f10_CORRIDOR_824_380","label":"CORRIDOR","x":824.1,"y":380.9,"type":"room","desc":"Floor 10"},{"id":"f10_CIRCULATION_491_419","label":"CIRCULATION","x":491.3,"y":419.9,"type":"room","desc":"Floor 10"},{"id":"f10_KITCHEN_671_436","label":"KITCHEN","x":671.2,"y":436.4,"type":"food","desc":"Food & drink \u2014 Floor 10"},{"id":"f10_BAR_SERVING_164_420","label":"BAR/SERVING","x":164.8,"y":420.6,"type":"room","desc":"Floor 10"},{"id":"f10_LOUNGE_71_391","label":"LOUNGE","x":71.5,"y":391.9,"type":"food","desc":"Food & drink \u2014 Floor 10"},{"id":"f10_RECEPTION_114_454","label":"RECEPTION","x":114.1,"y":454.3,"type":"reception","desc":"Reception / Lobby \u2014 Floor 10"},{"id":"f10_DINING___STUDY_76_547","label":"DINING / STUDY","x":76.2,"y":547.6,"type":"room","desc":"Floor 10"},{"id":"f10_MEETING_171_576","label":"MEETING","x":171.2,"y":576.8,"type":"conference","desc":"Conference room \u2014 Floor 10"},{"id":"f10_GARDEN_PATH_334_573","label":"GARDEN PATH","x":334.6,"y":573.3,"type":"room","desc":"Floor 10"},{"id":"f10_PRIVATE_DINING_1144_164","label":"PRIVATE DINING","x":1144.2,"y":164.3,"type":"room","desc":"Floor 10"},{"id":"f10_AMPHITHEATER___PRE_1062_626","label":"AMPHITHEATER / PRESENTATION / FLEXIBLE","x":1062.9,"y":626.2,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO1_165_500","label":"PATIO1","x":165.5,"y":500.3,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO2_625_591","label":"PATIO2","x":625.4,"y":591.0,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO3_1102_594","label":"PATIO3","x":1102.1,"y":594.9,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO4_1160_188","label":"PATIO4","x":1160.2,"y":188.6,"type":"room","desc":"Floor 10"},{"id":"f10_B1002_431_407","label":"B1002","x":431.6,"y":407.4,"type":"room","desc":"Floor 10"},{"id":"f10_B1001_500_373","label":"B1001","x":500.1,"y":373.7,"type":"room","desc":"Floor 10"},{"id":"f10_B1003_611_372","label":"B1003","x":611.7,"y":372.3,"type":"room","desc":"Floor 10"},{"id":"f10_B1006_400_429","label":"B1006","x":400.1,"y":429.5,"type":"room","desc":"Floor 10"},{"id":"f10_A1002_1078_456","label":"A1002","x":1078.0,"y":456.2,"type":"room","desc":"Floor 10"},{"id":"f10_A1005_964_455","label":"A1005","x":964.1,"y":455.3,"type":"room","desc":"Floor 10"},{"id":"f10_A1005B_932_427","label":"A1005B","x":932.5,"y":427.0,"type":"room","desc":"Floor 10"},{"id":"f10_A1003_1026_346","label":"A1003","x":1026.6,"y":346.5,"type":"room","desc":"Floor 10"},{"id":"f10_A1003B_1027_381","label":"A1003B","x":1027.4,"y":381.0,"type":"room","desc":"Floor 10"},{"id":"f10_A1004_964_344","label":"A1004","x":964.8,"y":344.8,"type":"room","desc":"Floor 10"},{"id":"f10_A1004B_964_378","label":"A1004B","x":964.0,"y":378.3,"type":"room","desc":"Floor 10"},{"id":"f10_A1006_929_371","label":"A1006","x":929.1,"y":371.1,"type":"room","desc":"Floor 10"},{"id":"f10_A1008_869_369","label":"A1008","x":869.9,"y":369.4,"type":"room","desc":"Floor 10"},{"id":"f10_A1010_849_416","label":"A1010","x":849.3,"y":416.4,"type":"room","desc":"Floor 10"}]}};
 
-// ── POI DATA (extracted from architectural SVGs) ──────
-const FLOOR_POIS = {"1":{"name":"Floor 1","label":"1","pois":[{"id":"f1_01ST01_183_547","label":"01ST01","x":183.8,"y":547.7,"type":"stairs","desc":"Stairwell \u2014 Floor 1"},{"id":"f1_01EL01_243_614","label":"01EL01","x":243.2,"y":614.8,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_VESTIBULE_295_653","label":"VESTIBULE","x":295.6,"y":653.5,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_ROOM_245_655","label":"ROOM","x":245.8,"y":655.4,"type":"room","desc":"Floor 1"},{"id":"f1_RECEPTION_213_614","label":"RECEPTION","x":213.4,"y":614.1,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_LOBBY_145_607","label":"LOBBY","x":145.8,"y":607.0,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_ELEVATOR_191_520","label":"ELEVATOR","x":191.7,"y":520.5,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_COAT_317_580","label":"COAT","x":317.6,"y":580.7,"type":"room","desc":"Floor 1"},{"id":"f1_CONTROL_316_617","label":"CONTROL","x":316.2,"y":617.6,"type":"room","desc":"Floor 1"}]},"2":{"name":"Floor 2","label":"2","pois":[{"id":"f2_STAIR_D_225_347","label":"STAIR D","x":225.8,"y":347.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_A_555_382","label":"STAIR A","x":555.1,"y":382.1,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_C_830_355","label":"STAIR C","x":830.2,"y":355.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_02EL01_471_281","label":"02EL01","x":471.3,"y":281.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL02_472_309","label":"02EL02","x":472.7,"y":309.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL03_471_341","label":"02EL03","x":471.7,"y":341.4,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL04_526_283","label":"02EL04","x":526.3,"y":283.8,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL05_526_313","label":"02EL05","x":526.6,"y":313.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL06_527_340","label":"02EL06","x":527.7,"y":340.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL07_526_371","label":"02EL07","x":526.5,"y":371.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL15_707_330","label":"02EL15","x":707.1,"y":330.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL16_708_304","label":"02EL16","x":708.3,"y":304.6,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL17_705_278","label":"02EL17","x":705.4,"y":278.7,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_ELEVLOB_497_339","label":"ELEVLOB","x":497.5,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_STAIR_G_162_590","label":"STAIR G","x":162.2,"y":590.2,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_ESC_G_164_572","label":"ESC-G","x":164.4,"y":572.7,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_02EL_G_206_645","label":"02EL-G","x":206.3,"y":645.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_FRELEVLB_671_350","label":"FRELEVLB","x":671.5,"y":350.9,"type":"elevator","desc":"Elevator \u2014 Floor 2"}]},"8":{"name":"Floor 8","label":"8","pois":[{"id":"f8_STAIR_C_832_327","label":"STAIR C","x":832.3,"y":327.6,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_TOILET__MEN__861_277","label":"TOILET (MEN)","x":861.6,"y":277.4,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_TOILET__WOMEN__763_287","label":"TOILET (WOMEN)","x":763.4,"y":287.4,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_STAIR_A_556_335","label":"STAIR A","x":556.0,"y":335.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_TOILET_396_311","label":"TOILET","x":396.2,"y":311.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8__MEN__397_315","label":"(MEN)","x":397.1,"y":315.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8__WOMEN__436_315","label":"(WOMEN)","x":436.4,"y":315.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_VESTIBULE_384_373","label":"VESTIBULE","x":384.9,"y":373.6,"type":"reception","desc":"Reception / Lobby \u2014 Floor 8"},{"id":"f8_STAIR_D_236_341","label":"STAIR D","x":236.8,"y":341.0,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_E_614_220","label":"STAIR E","x":614.2,"y":220.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_B_1070_376","label":"STAIR B","x":1070.8,"y":376.2,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_5_MADISON__N_I_C___104_233","label":"5 MADISON (N.I.C.)","x":104.4,"y":233.7,"type":"room","desc":"Floor 8"},{"id":"f8_FOCUS_254_518","label":"FOCUS","x":254.9,"y":518.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 8"},{"id":"f8_ROOM___254_522","label":"ROOM -","x":254.6,"y":522.3,"type":"room","desc":"Floor 8"},{"id":"f8_DESK_256_526","label":"DESK","x":256.0,"y":526.2,"type":"room","desc":"Floor 8"},{"id":"f8_PRESENTING_26_692","label":"PRESENTING","x":26.3,"y":692.3,"type":"conference","desc":"Conference room \u2014 Floor 8"},{"id":"f8_MEDIUM_29_696","label":"MEDIUM","x":29.7,"y":696.3,"type":"room","desc":"Floor 8"},{"id":"f8_FORMAL_29_704","label":"FORMAL","x":29.4,"y":704.2,"type":"conference","desc":"Conference room \u2014 Floor 8"},{"id":"f8_BRAINSTORMING_80_696","label":"BRAINSTORMING","x":80.1,"y":696.4,"type":"room","desc":"Floor 8"},{"id":"f8_OPEN_88_704","label":"OPEN","x":88.1,"y":704.3,"type":"room","desc":"Floor 8"},{"id":"f8_ENCLOSED_240_704","label":"ENCLOSED","x":240.8,"y":704.2,"type":"room","desc":"Floor 8"},{"id":"f8_WORKSTATIONS_135_627","label":"WORKSTATIONS","x":135.0,"y":627.0,"type":"room","desc":"Floor 8"},{"id":"f8_READ_447_594","label":"READ","x":447.3,"y":594.8,"type":"room","desc":"Floor 8"},{"id":"f8_LARGE_324_543","label":"LARGE","x":324.3,"y":543.5,"type":"room","desc":"Floor 8"},{"id":"f8_SMALL_334_434","label":"SMALL","x":334.5,"y":434.4,"type":"room","desc":"Floor 8"},{"id":"f8_BOOKABLE_159_435","label":"BOOKABLE","x":159.3,"y":435.8,"type":"room","desc":"Floor 8"},{"id":"f8_PRIVATE_161_439","label":"PRIVATE","x":161.2,"y":439.8,"type":"room","desc":"Floor 8"},{"id":"f8_OFFICE_162_443","label":"OFFICE","x":162.2,"y":443.7,"type":"room","desc":"Floor 8"},{"id":"f8_SHOWER_237_399","label":"SHOWER","x":237.3,"y":399.6,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_STALL_239_403","label":"STALL","x":239.1,"y":403.5,"type":"room","desc":"Floor 8"},{"id":"f8_HYDRATION_83_370","label":"HYDRATION","x":83.1,"y":370.1,"type":"food","desc":"Food & drink \u2014 Floor 8"},{"id":"f8_OFFICE___746_548","label":"OFFICE -","x":746.8,"y":548.3,"type":"room","desc":"Floor 8"},{"id":"f8_BAND_A_747_552","label":"BAND A","x":747.2,"y":552.2,"type":"room","desc":"Floor 8"},{"id":"f8_CODE_BOX_587_386","label":"CODE BOX","x":587.1,"y":386.1,"type":"room","desc":"Floor 8"},{"id":"f8_CONVERSING_557_377","label":"CONVERSING","x":557.7,"y":377.3,"type":"room","desc":"Floor 8"},{"id":"f8_OPEN_1_561_385","label":"OPEN 1","x":561.9,"y":385.2,"type":"room","desc":"Floor 8"},{"id":"f8_MOTHER_apos_S_291_306","label":"MOTHER&apos;S","x":291.2,"y":306.2,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_ROOM_341_306","label":"ROOM","x":341.9,"y":306.3,"type":"room","desc":"Floor 8"},{"id":"f8_SHOWER___228_307","label":"SHOWER &","x":228.6,"y":307.1,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_GENDER_354_267","label":"GENDER","x":354.0,"y":267.1,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_RESTROOM_351_271","label":"RESTROOM","x":351.8,"y":271.0,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_COPY_PRINT_669_437","label":"COPY/PRINT","x":669.3,"y":437.9,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_FACILITIES_620_354","label":"FACILITIES","x":620.5,"y":354.1,"type":"room","desc":"Floor 8"},{"id":"f8_LOCKERS_592_576","label":"LOCKERS","x":592.3,"y":576.7,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_COPY___229_244","label":"COPY /","x":229.9,"y":244.1,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_PRINT_230_248","label":"PRINT","x":230.5,"y":248.1,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_ELEVATOR_496_298","label":"ELEVATOR","x":496.6,"y":298.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_FIRE_SERVICE_670_298","label":"FIRE/SERVICE","x":670.0,"y":298.1,"type":"room","desc":"Floor 8"},{"id":"f8_LOBBY_D_673_302","label":"LOBBY D","x":673.4,"y":302.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_TEAM_977_181","label":"TEAM","x":977.7,"y":181.9,"type":"room","desc":"Floor 8"},{"id":"f8_TABLE_976_185","label":"TABLE","x":976.9,"y":185.9,"type":"room","desc":"Floor 8"},{"id":"f8_SINGLE_720_576","label":"SINGLE","x":720.7,"y":576.3,"type":"room","desc":"Floor 8"},{"id":"f8_BOOTHS_719_580","label":"BOOTHS","x":719.8,"y":580.3,"type":"room","desc":"Floor 8"},{"id":"f8_HIGH_TOP_810_463","label":"HIGH TOP","x":810.7,"y":463.8,"type":"room","desc":"Floor 8"},{"id":"f8_OPEN_2_961_460","label":"OPEN 2","x":961.0,"y":460.2,"type":"room","desc":"Floor 8"},{"id":"f8_RELAXATION_1033_389","label":"RELAXATION","x":1033.6,"y":389.0,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_WUDU_1022_380","label":"WUDU","x":1022.5,"y":380.1,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_PRAYER_1011_351","label":"PRAYER","x":1011.3,"y":351.4,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_COLLAB_487_646","label":"COLLAB","x":487.1,"y":646.2,"type":"amenity","desc":"Amenity \u2014 Floor 8"},{"id":"f8_STATION_1232_345","label":"STATION","x":1232.9,"y":345.4,"type":"room","desc":"Floor 8"},{"id":"f8_QUIET_CAR_196_500","label":"QUIET CAR","x":196.4,"y":500.9,"type":"focus","desc":"Focus / quiet area \u2014 Floor 8"},{"id":"f8___SHOWER_196_403","label":"& SHOWER","x":196.9,"y":403.5,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_CHANGING_173_399","label":"CHANGING","x":173.4,"y":399.6,"type":"room","desc":"Floor 8"},{"id":"f8_WATER_154_337","label":"WATER","x":154.8,"y":337.8,"type":"room","desc":"Floor 8"},{"id":"f8_FSAE_708_275","label":"FSAE","x":708.8,"y":275.6,"type":"room","desc":"Floor 8"},{"id":"f8_08EL01_471_277","label":"08EL01","x":471.4,"y":277.9,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL02_471_306","label":"08EL02","x":471.6,"y":306.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL03_471_338","label":"08EL03","x":471.6,"y":338.2,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL04_526_278","label":"08EL04","x":526.0,"y":278.6,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL05_525_309","label":"08EL05","x":525.5,"y":309.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL06_526_338","label":"08EL06","x":526.0,"y":338.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL07_526_366","label":"08EL07","x":526.9,"y":366.8,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL08_588_338","label":"08EL08","x":588.3,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL09_588_310","label":"08EL09","x":588.5,"y":310.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL10_588_279","label":"08EL10","x":588.2,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL11_643_278","label":"08EL11","x":643.9,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL12_642_309","label":"08EL12","x":642.5,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL13_642_338","label":"08EL13","x":642.1,"y":338.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL14_642_368","label":"08EL14","x":642.8,"y":368.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL15_706_327","label":"08EL15","x":706.4,"y":327.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"}]},"9":{"name":"Floor 9","label":"9","pois":[{"id":"f9_C926_557_281","label":"C926","x":557.4,"y":281.5,"type":"room","desc":"Floor 9"},{"id":"f9_C925_386_286","label":"C925","x":386.6,"y":286.7,"type":"room","desc":"Floor 9"},{"id":"f9_09EL17_707_275","label":"09EL17","x":707.0,"y":275.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL16_708_302","label":"09EL16","x":708.0,"y":302.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL15_708_328","label":"09EL15","x":708.1,"y":328.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL14_642_367","label":"09EL14","x":642.0,"y":367.2,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL13_641_336","label":"09EL13","x":641.8,"y":336.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL12_641_308","label":"09EL12","x":641.9,"y":308.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL11_643_279","label":"09EL11","x":643.7,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL10_588_279","label":"09EL10","x":588.0,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL09_588_309","label":"09EL09","x":588.7,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL08_587_339","label":"09EL08","x":587.8,"y":339.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL07_526_368","label":"09EL07","x":526.4,"y":368.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL06_526_339","label":"09EL06","x":526.4,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL05_525_308","label":"09EL05","x":525.9,"y":308.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL04_525_279","label":"09EL04","x":525.3,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL03_473_338","label":"09EL03","x":473.9,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL02_473_306","label":"09EL02","x":473.9,"y":306.9,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL01_473_278","label":"09EL01","x":473.7,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_C924_839_276","label":"C924","x":839.5,"y":276.7,"type":"room","desc":"Floor 9"},{"id":"f9_C923_830_240","label":"C923","x":830.8,"y":240.6,"type":"room","desc":"Floor 9"},{"id":"f9_9C_LK1_256_379","label":"9C-LK1","x":256.6,"y":379.2,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9A_LK2_601_569","label":"9A-LK2","x":601.6,"y":569.7,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9A_LK1_651_569","label":"9A-LK1","x":651.6,"y":569.5,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK5_606_234","label":"9C-LK5","x":606.6,"y":234.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK4_551_234","label":"9C-LK4","x":551.6,"y":234.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK2_270_223","label":"9C-LK2","x":270.5,"y":223.6,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK6_855_230","label":"9C-LK6","x":855.6,"y":230.0,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_D929_981_306","label":"D929","x":981.8,"y":306.4,"type":"room","desc":"Floor 9"},{"id":"f9_D928_1007_327","label":"D928","x":1007.6,"y":327.1,"type":"room","desc":"Floor 9"},{"id":"f9_D927_1007_354","label":"D927","x":1007.3,"y":354.0,"type":"room","desc":"Floor 9"},{"id":"f9_D926_982_370","label":"D926","x":982.0,"y":370.6,"type":"room","desc":"Floor 9"},{"id":"f9_D925_930_392","label":"D925","x":930.9,"y":392.7,"type":"room","desc":"Floor 9"},{"id":"f9_9D_LK1_1074_163","label":"9D-LK1","x":1074.1,"y":163.4,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_STAIR_B_1070_379","label":"STAIR B","x":1070.9,"y":379.6,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_C_830_356","label":"STAIR C","x":830.2,"y":356.2,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_E_597_207","label":"STAIR E","x":597.2,"y":207.0,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_A_555_382","label":"STAIR A","x":555.0,"y":382.9,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_D535_1006_603","label":"D535","x":1006.3,"y":603.5,"type":"room","desc":"Floor 9"},{"id":"f9_D530_1146_606","label":"D530","x":1146.9,"y":606.9,"type":"room","desc":"Floor 9"},{"id":"f9_D525_1076_657","label":"D525","x":1076.6,"y":657.0,"type":"room","desc":"Floor 9"},{"id":"f9_D440_1188_610","label":"D440","x":1188.3,"y":610.1,"type":"room","desc":"Floor 9"},{"id":"f9_D430_1195_470","label":"D430","x":1195.9,"y":470.4,"type":"room","desc":"Floor 9"},{"id":"f9_D515_1122_619","label":"D515","x":1122.6,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D514_1108_619","label":"D514","x":1108.0,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D516_1122_604","label":"D516","x":1122.6,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D513_1108_604","label":"D513","x":1108.0,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D511_1085_619","label":"D511","x":1085.9,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D510_1071_619","label":"D510","x":1071.3,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D512_1085_604","label":"D512","x":1085.9,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D509_1071_604","label":"D509","x":1071.3,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D507_1049_619","label":"D507","x":1049.2,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D506_1034_619","label":"D506","x":1034.6,"y":619.1,"type":"room","desc":"Floor 9"},{"id":"f9_D508_1049_604","label":"D508","x":1049.2,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D505_1034_604","label":"D505","x":1034.6,"y":604.5,"type":"room","desc":"Floor 9"},{"id":"f9_D503_1025_662","label":"D503","x":1025.0,"y":662.2,"type":"room","desc":"Floor 9"},{"id":"f9_D504_1010_662","label":"D504","x":1010.4,"y":662.2,"type":"room","desc":"Floor 9"},{"id":"f9_D502_1025_646","label":"D502","x":1025.3,"y":646.4,"type":"room","desc":"Floor 9"},{"id":"f9_D501_1010_646","label":"D501","x":1010.7,"y":646.4,"type":"room","desc":"Floor 9"},{"id":"f9_D519_1144_663","label":"D519","x":1144.1,"y":663.1,"type":"room","desc":"Floor 9"},{"id":"f9_D520_1129_663","label":"D520","x":1129.5,"y":663.1,"type":"room","desc":"Floor 9"},{"id":"f9_D518_1144_646","label":"D518","x":1144.1,"y":646.6,"type":"room","desc":"Floor 9"},{"id":"f9_D517_1129_646","label":"D517","x":1129.4,"y":646.6,"type":"room","desc":"Floor 9"},{"id":"f9_D419_1204_585","label":"D419","x":1204.8,"y":585.9,"type":"room","desc":"Floor 9"},{"id":"f9_D420_1190_585","label":"D420","x":1190.2,"y":585.9,"type":"room","desc":"Floor 9"},{"id":"f9_D418_1204_570","label":"D418","x":1204.8,"y":570.9,"type":"room","desc":"Floor 9"},{"id":"f9_D417_1190_570","label":"D417","x":1190.2,"y":570.9,"type":"room","desc":"Floor 9"},{"id":"f9_D415_1204_550","label":"D415","x":1204.5,"y":550.0,"type":"room","desc":"Floor 9"},{"id":"f9_D416_1189_550","label":"D416","x":1189.9,"y":550.0,"type":"room","desc":"Floor 9"},{"id":"f9_D414_1204_534","label":"D414","x":1204.8,"y":534.2,"type":"room","desc":"Floor 9"},{"id":"f9_D413_1190_534","label":"D413","x":1190.2,"y":534.2,"type":"room","desc":"Floor 9"},{"id":"f9_D411_1204_513","label":"D411","x":1204.8,"y":513.0,"type":"room","desc":"Floor 9"},{"id":"f9_D412_1190_513","label":"D412","x":1190.2,"y":513.0,"type":"room","desc":"Floor 9"},{"id":"f9_D410_1204_497","label":"D410","x":1204.8,"y":497.5,"type":"room","desc":"Floor 9"},{"id":"f9_D409_1190_497","label":"D409","x":1190.2,"y":497.5,"type":"room","desc":"Floor 9"},{"id":"f9_D407_1204_445","label":"D407","x":1204.5,"y":445.9,"type":"room","desc":"Floor 9"},{"id":"f9_D408_1189_445","label":"D408","x":1189.9,"y":445.9,"type":"room","desc":"Floor 9"},{"id":"f9_D406_1204_429","label":"D406","x":1204.8,"y":429.8,"type":"room","desc":"Floor 9"},{"id":"f9_D405_1190_429","label":"D405","x":1190.2,"y":429.8,"type":"room","desc":"Floor 9"},{"id":"f9_D403_1204_408","label":"D403","x":1204.5,"y":408.9,"type":"room","desc":"Floor 9"}]},"10":{"name":"Floor 10","label":"10","pois":[{"id":"f10_10ST03_558_371","label":"10ST03","x":558.4,"y":371.4,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10EL01_472_331","label":"10EL01","x":472.3,"y":331.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL02_472_300","label":"10EL02","x":472.3,"y":300.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL03_472_268","label":"10EL03","x":472.3,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL04_526_268","label":"10EL04","x":526.5,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL05_526_301","label":"10EL05","x":526.5,"y":301.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL06_526_330","label":"10EL06","x":526.5,"y":330.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL07_526_360","label":"10EL07","x":526.5,"y":360.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL08_586_332","label":"10EL08","x":586.7,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL09_588_301","label":"10EL09","x":588.5,"y":301.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL10_585_271","label":"10EL10","x":585.7,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL11_644_271","label":"10EL11","x":644.1,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL12_644_302","label":"10EL12","x":644.1,"y":302.5,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL13_644_332","label":"10EL13","x":644.1,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL14_644_361","label":"10EL14","x":644.1,"y":361.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL15_709_318","label":"10EL15","x":709.5,"y":318.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL16_706_294","label":"10EL16","x":706.2,"y":294.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL17_708_266","label":"10EL17","x":708.7,"y":266.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL18_744_361","label":"10EL18","x":744.1,"y":361.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL19_745_334","label":"10EL19","x":745.0,"y":334.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL20_740_302","label":"10EL20","x":740.0,"y":302.4,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL21_743_270","label":"10EL21","x":743.8,"y":270.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL22_800_271","label":"10EL22","x":800.3,"y":271.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL23_800_301","label":"10EL23","x":800.8,"y":301.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL25_799_361","label":"10EL25","x":799.2,"y":361.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL24_798_333","label":"10EL24","x":798.2,"y":333.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10ST01_204_350","label":"10ST01","x":204.2,"y":350.0,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10ST02_594_205","label":"10ST02","x":594.1,"y":205.6,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10ST04_1072_372","label":"10ST04","x":1072.8,"y":372.9,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_10ST05_829_373","label":"10ST05","x":829.5,"y":373.8,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_A1009_844_396","label":"A1009","x":844.3,"y":396.4,"type":"room","desc":"Floor 10"},{"id":"f10_SPACE_355_312","label":"SPACE","x":355.1,"y":312.1,"type":"room","desc":"Floor 10"},{"id":"f10_OUTDOOR_352_304","label":"OUTDOOR","x":352.8,"y":304.2,"type":"room","desc":"Floor 10"},{"id":"f10_5_MADISON__N_I_C___94_226","label":"5 MADISON (N.I.C.)","x":94.4,"y":226.0,"type":"room","desc":"Floor 10"},{"id":"f10_STAIR_B_1070_368","label":"STAIR B","x":1070.7,"y":368.4,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_STAIR_E_603_212","label":"STAIR E","x":603.9,"y":212.8,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_STAIR_D_174_348","label":"STAIR D","x":174.6,"y":348.6,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_STAIR_A_552_381","label":"STAIR A","x":552.2,"y":381.3,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10__WOMEN__964_340","label":"(WOMEN)","x":964.3,"y":340.4,"type":"restroom","desc":"Restroom \u2014 Floor 10"},{"id":"f10__MEN__1026_340","label":"(MEN)","x":1026.8,"y":340.4,"type":"restroom","desc":"Restroom \u2014 Floor 10"},{"id":"f10_STAIR_C_831_323","label":"STAIR C","x":831.1,"y":323.4,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_SERVERY_703_516","label":"SERVERY","x":703.1,"y":516.2,"type":"room","desc":"Floor 10"},{"id":"f10_CRAC_836_524","label":"CRAC","x":836.5,"y":524.3,"type":"room","desc":"Floor 10"},{"id":"f10_VESTIBULE_1096_428","label":"VESTIBULE","x":1096.6,"y":428.7,"type":"reception","desc":"Reception / Lobby \u2014 Floor 10"},{"id":"f10_AUDITORIUM_1082_447","label":"AUDITORIUM","x":1082.4,"y":447.4,"type":"room","desc":"Floor 10"},{"id":"f10_ROOM_903_429","label":"ROOM","x":903.7,"y":429.7,"type":"room","desc":"Floor 10"},{"id":"f10_TRAINING_869_439","label":"TRAINING","x":869.6,"y":439.7,"type":"room","desc":"Floor 10"},{"id":"f10_STAIR_507_501","label":"STAIR","x":507.5,"y":501.0,"type":"stairs","desc":"Stairwell \u2014 Floor 10"},{"id":"f10_CAFE_380_469","label":"CAFE","x":380.5,"y":469.9,"type":"food","desc":"Food & drink \u2014 Floor 10"},{"id":"f10_CONTROL_1132_421","label":"CONTROL","x":1132.9,"y":421.0,"type":"room","desc":"Floor 10"},{"id":"f10_AV_IT_872_479","label":"AV/IT","x":872.8,"y":479.8,"type":"room","desc":"Floor 10"},{"id":"f10_CORRIDOR_824_380","label":"CORRIDOR","x":824.1,"y":380.9,"type":"room","desc":"Floor 10"},{"id":"f10_CIRCULATION_491_419","label":"CIRCULATION","x":491.3,"y":419.9,"type":"room","desc":"Floor 10"},{"id":"f10_KITCHEN_671_436","label":"KITCHEN","x":671.2,"y":436.4,"type":"food","desc":"Food & drink \u2014 Floor 10"},{"id":"f10_BAR_SERVING_164_420","label":"BAR/SERVING","x":164.8,"y":420.6,"type":"room","desc":"Floor 10"},{"id":"f10_LOUNGE_71_391","label":"LOUNGE","x":71.5,"y":391.9,"type":"food","desc":"Food & drink \u2014 Floor 10"},{"id":"f10_RECEPTION_114_454","label":"RECEPTION","x":114.1,"y":454.3,"type":"reception","desc":"Reception / Lobby \u2014 Floor 10"},{"id":"f10_DINING___STUDY_76_547","label":"DINING / STUDY","x":76.2,"y":547.6,"type":"room","desc":"Floor 10"},{"id":"f10_MEETING_171_576","label":"MEETING","x":171.2,"y":576.8,"type":"conference","desc":"Conference room \u2014 Floor 10"},{"id":"f10_GARDEN_PATH_334_573","label":"GARDEN PATH","x":334.6,"y":573.3,"type":"room","desc":"Floor 10"},{"id":"f10_PRIVATE_DINING_1144_164","label":"PRIVATE DINING","x":1144.2,"y":164.3,"type":"room","desc":"Floor 10"},{"id":"f10_AMPHITHEATER___PRE_1062_626","label":"AMPHITHEATER / PRESENTATION / FLEXIBLE","x":1062.9,"y":626.2,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO1_165_500","label":"PATIO1","x":165.5,"y":500.3,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO2_625_591","label":"PATIO2","x":625.4,"y":591.0,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO3_1102_594","label":"PATIO3","x":1102.1,"y":594.9,"type":"room","desc":"Floor 10"},{"id":"f10_PATIO4_1160_188","label":"PATIO4","x":1160.2,"y":188.6,"type":"room","desc":"Floor 10"},{"id":"f10_B1002_431_407","label":"B1002","x":431.6,"y":407.4,"type":"room","desc":"Floor 10"},{"id":"f10_B1001_500_373","label":"B1001","x":500.1,"y":373.7,"type":"room","desc":"Floor 10"},{"id":"f10_B1003_611_372","label":"B1003","x":611.7,"y":372.3,"type":"room","desc":"Floor 10"},{"id":"f10_B1006_400_429","label":"B1006","x":400.1,"y":429.5,"type":"room","desc":"Floor 10"},{"id":"f10_A1002_1078_456","label":"A1002","x":1078.0,"y":456.2,"type":"room","desc":"Floor 10"},{"id":"f10_A1005_964_455","label":"A1005","x":964.1,"y":455.3,"type":"room","desc":"Floor 10"},{"id":"f10_A1005B_932_427","label":"A1005B","x":932.5,"y":427.0,"type":"room","desc":"Floor 10"},{"id":"f10_A1003_1026_346","label":"A1003","x":1026.6,"y":346.5,"type":"room","desc":"Floor 10"},{"id":"f10_A1003B_1027_381","label":"A1003B","x":1027.4,"y":381.0,"type":"room","desc":"Floor 10"},{"id":"f10_A1004_964_344","label":"A1004","x":964.8,"y":344.8,"type":"room","desc":"Floor 10"},{"id":"f10_A1004B_964_378","label":"A1004B","x":964.0,"y":378.3,"type":"room","desc":"Floor 10"},{"id":"f10_A1006_929_371","label":"A1006","x":929.1,"y":371.1,"type":"room","desc":"Floor 10"},{"id":"f10_A1008_869_369","label":"A1008","x":869.9,"y":369.4,"type":"room","desc":"Floor 10"},{"id":"f10_A1010_849_416","label":"A1010","x":849.3,"y":416.4,"type":"room","desc":"Floor 10"}]}};
-
-// ── FLOOR CONFIGURATION ──────────────────────────────
+// ── FLOOR DEFINITIONS ─────────────────────────────────
+// Each floor has a canvas drawing function (lightweight polygons only)
+// SVG coords are 1224x792. We scale to fit.
 const FLOORS = [
-  { num:'1',  name:'Floor 1',  label:'1',  color:'#42be65', svgFile:'floors/floor-01-stripped.svg' },
-  { num:'2',  name:'Floor 2',  label:'2',  color:'#0f62fe', svgFile:'floors/floor-02-stripped.svg' },
-  { num:'8',  name:'Floor 8',  label:'8',  color:'#ff832b', svgFile:'floors/floor-08-stripped.svg' },
-  { num:'9',  name:'Floor 9',  label:'9',  color:'#8a3ffc', svgFile:'floors/floor-09-stripped.svg' },
-  { num:'10', name:'Floor 10', label:'10', color:'#08bdba', svgFile:'floors/floor-10-stripped.svg' },
+  {num:'1',  name:'Floor 1',  label:'1',  color:'#42be65'},
+  {num:'2',  name:'Floor 2',  label:'2',  color:'#0f62fe'},
+  {num:'8',  name:'Floor 8',  label:'8',  color:'#ff832b'},
+  {num:'9',  name:'Floor 9',  label:'9',  color:'#8a3ffc'},
+  {num:'10', name:'Floor 10', label:'10', color:'#08bdba'},
 ];
 
-// ISO projection constants (all SVGs are 1224x792 viewBox)
-const SVG_W = 1224, SVG_H = 792;
-const ISO_SCALE = 0.42;     // SVG px → screen px at 1x
-const ISO_SKEW_X = 0.5;     // horizontal skew factor
-const ISO_SKEW_Y = 0.25;    // vertical skew factor
-const FLOOR_GAP = 110;      // px gap between stacked floors
-const SHAFT_X = 500;        // approximate elevator shaft x in SVG coords
+// ── FLOOR OUTLINES (traced from the actual SVG geometry) ──
+// These are simplified polygon outlines of each floor's footprint
+// Coordinates in original SVG space (0-1224 x 0-792)
+const FLOOR_SHAPES = {
+  '1': {
+    outline: [[70,165],[660,165],[660,225],[880,225],[880,680],[660,680],[660,720],[250,720],[250,680],[70,680]],
+    rooms: [
+      {label:'LOBBY',      x:145,y:540,w:130,h:120,fill:'#edf5ff'},
+      {label:'RECEPTION',  x:200,y:570,w:100,h:80, fill:'#ddefff'},
+      {label:'VESTIBULE',  x:240,y:620,w:100,h:60, fill:'#edf5ff'},
+      {label:'ELEVATOR',   x:160,y:490,w:60, h:50, fill:'#e6f9f9'},
+      {label:'STAIR',      x:155,y:520,w:50, h:40, fill:'#e6f9f0'},
+    ]
+  },
+  '2': {
+    outline: [[60,160],[860,160],[860,680],[660,680],[660,720],[220,720],[220,680],[60,680]],
+    rooms: [
+      {label:'ELEV LOBBY', x:450,y:260,w:120,h:120,fill:'#e6f9f9'},
+      {label:'STAIR A',    x:530,y:355,w:50, h:50, fill:'#e6f9f0'},
+      {label:'STAIR C',    x:808,y:338,w:50, h:50, fill:'#e6f9f0'},
+      {label:'STAIR D',    x:206,y:330,w:50, h:50, fill:'#e6f9f0'},
+      {label:'OPEN PLAN',  x:200,y:420,w:600,h:280,fill:'#f8f8fb'},
+    ]
+  },
+  '8': {
+    outline: [[60,100],[1180,100],[1180,700],[1000,700],[1000,760],[60,760]],
+    rooms: [
+      {label:'ELEV LOBBY A', x:470,y:258,w:115,h:120,fill:'#e6f9f9'},
+      {label:'ELEV LOBBY D', x:640,y:258,w:115,h:120,fill:'#e6f9f9'},
+      {label:'STAIR A',      x:536,y:316,w:48, h:48, fill:'#e6f9f0'},
+      {label:'STAIR C',      x:812,y:308,w:48, h:48, fill:'#e6f9f0'},
+      {label:'STAIR D',      x:218,y:322,w:48, h:48, fill:'#e6f9f0'},
+      {label:'STAIR E',      x:595,y:202,w:48, h:40, fill:'#e6f9f0'},
+      {label:'STAIR B',      x:1052,y:358,w:48,h:48,fill:'#e6f9f0'},
+      {label:'RESTROOM M',   x:840,y:258,w:70, h:50, fill:'#f3eeff'},
+      {label:'RESTROOM W',   x:743,y:268,w:70, h:50, fill:'#f3eeff'},
+      {label:'RESTROOM',     x:376,y:292,w:100,h:50, fill:'#f3eeff'},
+      {label:'FOCUS ROOM',   x:210,y:498,w:80, h:60, fill:'#fffde0'},
+      {label:'QUIET CAR',    x:176,y:482,w:80, h:60, fill:'#fffde0'},
+      {label:'COLLAB',       x:467,y:626,w:100,h:60, fill:'#fff4ee'},
+      {label:'COPY/PRINT',   x:649,y:418,w:80, h:50, fill:'#f8f8fb'},
+      {label:'LOCKERS',      x:572,y:558,w:80, h:50, fill:'#f8f8fb'},
+      {label:'PRAYER ROOM',  x:991,y:332,w:80, h:50, fill:'#f0fff4'},
+      {label:'OPEN WORK',    x:200,y:400,w:380,h:200,fill:'#f8f8fb'},
+    ]
+  },
+  '9': {
+    outline: [[60,100],[1180,100],[1180,700],[1000,700],[1000,760],[60,760]],
+    rooms: [
+      {label:'ELEV BANK A',  x:452,y:258,w:115,h:120,fill:'#e6f9f9'},
+      {label:'ELEV BANK B',  x:505,y:258,w:115,h:120,fill:'#e6f9f9'},
+      {label:'ELEV BANK C',  x:568,y:258,w:115,h:120,fill:'#e6f9f9'},
+      {label:'OPEN WORK A',  x:200,y:400,w:380,h:260,fill:'#f8f8fb'},
+      {label:'OPEN WORK B',  x:600,y:400,w:380,h:260,fill:'#f8f8fb'},
+    ]
+  },
+  '10': {
+    outline: [[60,100],[1180,100],[1180,700],[1000,700],[1000,760],[60,760]],
+    rooms: [
+      {label:'ELEV BANK A',  x:452,y:248,w:115,h:130,fill:'#e6f9f9'},
+      {label:'STAIR',        x:538,y:352,w:50, h:50, fill:'#e6f9f0'},
+      {label:'RESTROOM M',   x:375,y:280,w:80, h:50, fill:'#f3eeff'},
+      {label:'RESTROOM W',   x:460,y:280,w:80, h:50, fill:'#f3eeff'},
+      {label:'OPEN WORK',    x:200,y:400,w:760,h:280,fill:'#f8f8fb'},
+    ]
+  }
+};
 
-// POI type → color & icon
-const TYPE_CFG = {
-  elevator:   { color:'#08bdba', icon:'<path d="M8 2l2.5 3h-5zm0 12l-2.5-3h5zM6 6h4v4H6z"/>' },
-  stairs:     { color:'#42be65', icon:'<path d="M2 14h3v-3h3v-3h3V5h3V2h-3v3h-3v3H5v3H2z"/>' },
-  restroom:   { color:'#8a3ffc', icon:'<path d="M5 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM3 8v5h1v3h2v-3h1V8H3zm6 0v3h1v5h2v-5h1V8H9z"/>' },
-  conference: { color:'#fa4d56', icon:'<path d="M2 3h12v8H2zM0 13h16v1H0zM5 11v2h6v-2z"/>' },
-  food:       { color:'#ff832b', icon:'<path d="M5 2v4a3 3 0 0 0 6 0V2h-1v4a2 2 0 0 1-4 0V2H5zm5 9h1v5h-1v-5zM3 7h1v9H3z"/>' },
-  reception:  { color:'#0f62fe', icon:'<path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm5 6H3a5 5 0 0 1 10 0z"/>' },
-  focus:      { color:'#f1c21b', icon:'<path d="M8 2a6 6 0 0 0 0 12A6 6 0 0 0 8 2zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>' },
-  amenity:    { color:'#4589ff', icon:'<path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/>' },
-  room:       { color:'#c6c6c6', icon:'<path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/>' },
+// POI type config
+const TC = {
+  elevator:  {c:'#08bdba', i:'<path d="M8 2l2.5 3h-5zm0 12l-2.5-3h5zM6 6h4v4H6z"/>'},
+  stairs:    {c:'#42be65', i:'<path d="M2 14h3v-3h3v-3h3V5h3V2h-3v3h-3v3H5v3H2z"/>'},
+  restroom:  {c:'#8a3ffc', i:'<path d="M5 2a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm6 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zM3 8v5h1v3h2v-3h1V8H3zm6 0v3h1v5h2v-5h1V8H9z"/>'},
+  conference:{c:'#fa4d56', i:'<path d="M2 3h12v8H2zM0 13h16v1H0zM5 11v2h6v-2z"/>'},
+  food:      {c:'#ff832b', i:'<path d="M5 2v4a3 3 0 0 0 6 0V2h-1v4a2 2 0 0 1-4 0V2H5zm5 9h1v5h-1v-5zM3 7h1v9H3z"/>'},
+  reception: {c:'#0f62fe', i:'<path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm5 6H3a5 5 0 0 1 10 0z"/>'},
+  focus:     {c:'#f1c21b', i:'<path d="M8 2a6 6 0 0 0 0 12A6 6 0 0 0 8 2zm0 10a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm0-6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/>'},
+  amenity:   {c:'#4589ff', i:'<path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/>'},
+  room:      {c:'#a8a8a8', i:'<path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/>'},
 };
 
 // ── STATE ─────────────────────────────────────────────
 const S = {
-  view: 'iso',        // 'iso' | 'flat'
-  activeFloor: 0,     // index into FLOORS
-  scale: 1, ox: 0, oy: 0,
-  minScale: 0.15, maxScale: 3.5,
-  origin: null, dest: null,
-  routeMode: false, routeStep: null,
-  saved: [],
-  svgLoaded: {},      // num → svg string
-  settings: { access:false, arrows:true, labels:true, highlight:true },
+  floor: 2,       // default = floor 8 (index 2)
+  scale: 1, ox:0, oy:0,
+  minS:0.2, maxS:4,
+  origin:null, dest:null,
+  routeMode:false, routeStep:null,
+  saved:[], showArrows:true,
 };
 
-// ── DOM ───────────────────────────────────────────────
-const mapWrap    = document.getElementById('map-wrap');
-const mapStage   = document.getElementById('map-stage');
-const isoScene   = document.getElementById('iso-scene');
-const pinsLayer  = document.getElementById('pins-layer');
-const routeSvg   = document.getElementById('route-svg');
-const floorPill  = document.getElementById('floor-pill');
-const searchInp  = document.getElementById('search-input');
-const searchRes  = document.getElementById('search-results');
-const searchX    = document.getElementById('search-x');
-const routeHdr   = document.getElementById('route-hdr');
-const bsheet     = document.getElementById('bsheet');
-const bsBody     = document.getElementById('bs-body');
-const toast      = document.getElementById('toast');
+// ── CANVAS SETUP ──────────────────────────────────────
+const mapWrap  = document.getElementById('map-wrap');
+const mapCanvas = document.getElementById('map-canvas');
+const canvas   = document.getElementById('floor-canvas');
+const ctx      = canvas.getContext('2d');
+const pinLayer = document.getElementById('pin-layer');
+const routeSvg = document.getElementById('route-svg');
 
-// ── ISO MATH ──────────────────────────────────────────
-// Convert SVG (x,y) on a given floorIndex to screen px in the iso scene
-function isoProject(svgX, svgY, floorIdx) {
-  // Apply isometric skew: floor goes from top-left to bottom-right
-  // x-axis goes right+down, y-axis goes left+down
-  const px = (svgX - svgY * ISO_SKEW_X) * ISO_SCALE;
-  const py = (svgX * ISO_SKEW_Y + svgY * ISO_SKEW_Y) * ISO_SCALE;
-  // Lift each floor up by FLOOR_GAP * index (higher floors go UP = negative y)
-  const liftY = -floorIdx * FLOOR_GAP;
-  return { x: px, y: py + liftY };
-}
+const SVG_W = 1224, SVG_H = 792;
+// Scale SVG to a sensible canvas size
+const SCALE = 0.8;
+const CW = SVG_W * SCALE;  // 979
+const CH = SVG_H * SCALE;  // 634
 
-// For flat view: simple scale
-function flatProject(svgX, svgY) {
-  return { x: svgX * ISO_SCALE, y: svgY * ISO_SCALE };
-}
+canvas.width  = CW;
+canvas.height = CH;
+canvas.style.width  = CW + 'px';
+canvas.style.height = CH + 'px';
+routeSvg.setAttribute('width',  CW);
+routeSvg.setAttribute('height', CH);
+pinLayer.style.width  = CW + 'px';
+pinLayer.style.height = CH + 'px';
 
-// ── FLOOR SVG LOADING ─────────────────────────────────
-async function loadFloorSVG(floor) {
-  if (S.svgLoaded[floor.num]) return S.svgLoaded[floor.num];
-  try {
-    const r = await fetch(floor.svgFile);
-    const txt = await r.text();
-    S.svgLoaded[floor.num] = txt;
-    return txt;
-  } catch(e) {
-    S.svgLoaded[floor.num] = null;
-    return null;
-  }
-}
+function sx(x){ return x * SCALE; }
+function sy(y){ return y * SCALE; }
 
-// ── BUILD SCENE ───────────────────────────────────────
-async function buildScene() {
-  isoScene.innerHTML = '';
-  pinsLayer.innerHTML = '';
-  routeSvg.innerHTML = `<defs><marker id="arr" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6Z" fill="#0f62fe" opacity=".9"/></marker></defs>`;
+// ── DRAW FLOOR ────────────────────────────────────────
+function drawFloor() {
+  const fl = FLOORS[S.floor];
+  const shape = FLOOR_SHAPES[fl.num];
+  ctx.clearRect(0, 0, CW, CH);
 
-  const isIso = S.view === 'iso';
+  if (!shape) return;
 
-  // Load all SVGs in parallel
-  await Promise.all(FLOORS.map(f => loadFloorSVG(f)));
+  // Background
+  ctx.fillStyle = '#f0f0f0';
+  ctx.fillRect(0, 0, CW, CH);
 
-  // Scene bounding box calculation
-  let sceneW = 0, sceneH = 0;
+  // Grid (subtle)
+  ctx.strokeStyle = 'rgba(0,0,0,.04)';
+  ctx.lineWidth = 1;
+  for(let x=0;x<CW;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,CH);ctx.stroke();}
+  for(let y=0;y<CH;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(CW,y);ctx.stroke();}
 
-  FLOORS.forEach((floor, fi) => {
-    const isActive = fi === S.activeFloor;
-    const pois = (FLOOR_POIS[floor.num] || {pois:[]}).pois;
+  // Floor fill
+  ctx.beginPath();
+  shape.outline.forEach(([x,y],i) => i===0 ? ctx.moveTo(sx(x),sy(y)) : ctx.lineTo(sx(x),sy(y)));
+  ctx.closePath();
+  ctx.fillStyle   = '#ffffff';
+  ctx.strokeStyle = fl.color;
+  ctx.lineWidth   = 3;
+  ctx.fill();
+  ctx.stroke();
 
-    // ── Floor plane ──
-    const wrap = document.createElement('div');
-    wrap.className = 'floor-slice';
-    wrap.id = `fl-wrap-${floor.num}`;
-    wrap.style.zIndex = fi;
-
-    if (isIso) {
-      // CSS 3D isometric transform on the SVG
-      // We skew + scale to create the isometric floor plane look
-      const scaleW = ISO_SCALE * SVG_W;
-      const scaleH = ISO_SCALE * SVG_H;
-      // Use CSS matrix for isometric: skewX + scaleY compress
-      // matrix(scaleX, skewY, skewX, scaleY, tx, ty)
-      const sx = ISO_SCALE;
-      const sy = ISO_SCALE * 0.5;
-      const kx = -0.5; // horizontal skew
-      const ky = 0.25; // vertical skew applied via scaleY reduction
-      wrap.style.transform = `matrix(${sx}, ${sy * 0.5}, ${kx * sx}, ${sy}, 0, ${-fi * FLOOR_GAP})`;
-      wrap.style.transformOrigin = '0 0';
-      wrap.style.opacity = isActive ? '1' : (S.settings.highlight ? '0.55' : '0.85');
-    } else {
-      // Flat view: only show active floor
-      wrap.style.transform = `scale(${ISO_SCALE})`;
-      wrap.style.transformOrigin = '0 0';
-      wrap.style.display = isActive ? 'block' : 'none';
-      wrap.style.opacity = '1';
-    }
-
-    // Insert SVG content
-    const svgTxt = S.svgLoaded[floor.num];
-    if (svgTxt) {
-      // Extract just the <svg>…</svg> content
-      const svgMatch = svgTxt.match(/<svg[^>]*>([\s\S]*)<\/svg>/i);
-      const inner = svgMatch ? svgMatch[1] : '';
-      wrap.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1224 792" width="1224" height="792" style="display:block">${inner}</svg>`;
-
-      // Style the SVG for map look: colorize by floor
-      const svgEl = wrap.querySelector('svg');
-      if (svgEl) {
-        // Walls → near white, floors → slight tint
-        svgEl.style.background = isActive ? '#f8f9fa' : '#f0f0f0';
-        // Apply floor accent border
-        if (isIso && S.settings.highlight && isActive) {
-          svgEl.style.outline = `2px solid ${floor.color}`;
-        }
+  // Rooms
+  if (shape.rooms) {
+    shape.rooms.forEach(r => {
+      // Room fill
+      ctx.fillStyle = r.fill || '#f4f4f4';
+      ctx.beginPath();
+      ctx.roundRect(sx(r.x), sy(r.y), sx(r.w), sy(r.h), 3);
+      ctx.fill();
+      // Room border
+      ctx.strokeStyle = 'rgba(0,0,0,.08)';
+      ctx.lineWidth   = 1;
+      ctx.stroke();
+      // Room label
+      const cw = sx(r.w), ch2 = sy(r.h);
+      if(cw > 35 && ch2 > 20){
+        ctx.fillStyle   = '#525252';
+        ctx.font        = `${Math.min(9, cw/r.label.length * 1.4)}px "IBM Plex Sans",sans-serif`;
+        ctx.textAlign   = 'center';
+        ctx.textBaseline= 'middle';
+        ctx.fillText(r.label, sx(r.x)+cw/2, sy(r.y)+ch2/2, cw-6);
       }
-    } else {
-      // Placeholder
-      wrap.innerHTML = `<div style="width:1224px;height:792px;background:#2a2a3a;border:1px solid #444;display:flex;align-items:center;justify-content:center;color:#888;font-size:18px">Floor ${floor.label} — plan loading…</div>`;
-    }
-
-    // ── Floor label ──
-    if (isIso || isActive) {
-      const lbl = document.createElement('div');
-      lbl.className = `floor-label fl-border-${floor.num}`;
-      lbl.style.color = floor.color;
-      // In iso, position label at left edge of this floor plane
-      // The left edge in iso coords corresponds to svgX=0, svgY=792/2
-      if (isIso) {
-        const projLeft = isoProject(0, SVG_H/2, fi);
-        lbl.style.left = (projLeft.x - 56) + 'px';
-        lbl.style.top  = (projLeft.y - 12) + 'px';
-        lbl.style.position = 'absolute';
-        lbl.style.zIndex = 50;
-        lbl.textContent = floor.label;
-        isoScene.appendChild(lbl);
-      } else {
-        lbl.style.position = 'absolute';
-        lbl.style.left = '-50px';
-        lbl.style.top = (SVG_H * ISO_SCALE / 2 - 12) + 'px';
-        lbl.textContent = floor.label;
-        wrap.appendChild(lbl);
-      }
-    }
-
-    isoScene.appendChild(wrap);
-  });
-
-  // ── Elevator shaft connector (iso only) ──
-  if (isIso) {
-    drawElevatorShaft();
-  }
-
-  // ── POI Pins ──
-  renderPins();
-
-  // Update scene size for centering
-  requestAnimationFrame(() => centerMap(false));
-}
-
-// ── ELEVATOR SHAFT ────────────────────────────────────
-function drawElevatorShaft() {
-  // Draw vertical lines connecting elevator positions across floors
-  // Use the elevator lobby area (approx SVG coords 500,330 on all floors)
-  const shaftPoints = [
-    { svgX: 497, svgY: 340 },  // Elevator lobby A
-    { svgX: 670, svgY: 315 },  // Elevator lobby D
-  ];
-
-  shaftPoints.forEach(sp => {
-    const shaft = document.createElement('div');
-    shaft.className = 'shaft';
-
-    // Top floor projected position
-    const top = isoProject(sp.svgX, sp.svgY, FLOORS.length - 1);
-    // Bottom floor projected position
-    const bot = isoProject(sp.svgX, sp.svgY, 0);
-
-    const x = top.x;
-    const y = Math.min(top.y, bot.y) - 8;
-    const h = Math.abs(top.y - bot.y) + 16;
-
-    shaft.style.cssText = `
-      left:${x - 6}px; top:${y}px;
-      width:12px; height:${h}px;
-      background:linear-gradient(180deg,rgba(8,189,186,.7) 0%,rgba(8,189,186,.2) 100%);
-      border-left:2px solid rgba(8,189,186,.6);
-      border-right:2px solid rgba(8,189,186,.6);
-      z-index:30;
-    `;
-    isoScene.appendChild(shaft);
-  });
-}
-
-// ── RENDER PINS ───────────────────────────────────────
-function renderPins() {
-  pinsLayer.innerHTML = '';
-  const isIso = S.view === 'iso';
-
-  FLOORS.forEach((floor, fi) => {
-    const isActive = fi === S.activeFloor;
-    const pois = (FLOOR_POIS[floor.num] || {pois:[]}).pois;
-    if (!isIso && !isActive) return;
-
-    pois.forEach(poi => {
-      const cfg = TYPE_CFG[poi.type] || TYPE_CFG.room;
-      let proj;
-      if (isIso) {
-        proj = isoProject(poi.x, poi.y, fi);
-      } else {
-        proj = flatProject(poi.x, poi.y);
-      }
-
-      const pin = document.createElement('div');
-      pin.className = 'poi-pin';
-      pin.dataset.poiId = poi.id;
-      pin.dataset.floorIdx = fi;
-      pin.style.left = proj.x + 'px';
-      pin.style.top  = proj.y + 'px';
-      // In iso, non-active floors show smaller pins
-      const pinSize = (isIso && !isActive) ? 16 : 22;
-      pin.innerHTML = `
-        <svg width="${pinSize}" height="${Math.round(pinSize*1.3)}" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg">
-          <path d="M14 0C6.27 0 0 6.27 0 14c0 9.94 14 22 14 22S28 23.94 28 14C28 6.27 21.73 0 14 0z" fill="${cfg.color}" opacity="${(isIso && !isActive) ? 0.5 : 1}"/>
-          <circle cx="14" cy="14" r="7" fill="white" opacity=".9"/>
-          <svg x="7" y="7" width="14" height="14" viewBox="0 0 16 16" fill="${cfg.color}">${cfg.icon}</svg>
-        </svg>
-        <div class="pin-label">${poi.label}</div>`;
-      pin.addEventListener('click', e => {
-        e.stopPropagation();
-        if (S.routeMode && S.routeStep) {
-          assignRoutePoint(poi, fi);
-        } else {
-          // Switch to that floor in flat mode automatically
-          if (!isActive) switchFloor(fi);
-          showPOISheet(poi, fi);
-        }
-      });
-      pinsLayer.appendChild(pin);
     });
-  });
-
-  // Origin / dest markers
-  if (S.origin) drawNavPin(S.origin, 'org');
-  if (S.dest)   drawNavPin(S.dest, 'dst');
-
-  // You-are-here dot (floor 8 near elevator lobby as demo)
-  if (S.view === 'flat') {
-    const yah = document.createElement('div');
-    yah.className = 'you-here';
-    const proj = flatProject(498, 300);
-    yah.style.left = (proj.x - 7) + 'px';
-    yah.style.top  = (proj.y - 7) + 'px';
-    pinsLayer.appendChild(yah);
   }
+
+  // Compass rose
+  drawCompass();
+
+  // Floor label
+  ctx.fillStyle = fl.color;
+  ctx.font = 'bold 13px "IBM Plex Mono",monospace';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'top';
+  ctx.fillText('Floor ' + fl.label, 10, 8);
+
+  // Scale bar
+  ctx.strokeStyle = '#888';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(CW-80, CH-14);
+  ctx.lineTo(CW-20, CH-14);
+  ctx.stroke();
+  ctx.fillStyle = '#888';
+  ctx.font = '9px "IBM Plex Sans",sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('~20m', CW-50, CH-6);
 }
 
-function drawNavPin(pt, type) {
-  const fi = pt.floorIdx;
-  const isIso = S.view === 'iso';
-  const proj = isIso ? isoProject(pt.x, pt.y, fi) : flatProject(pt.x, pt.y);
-  const color = type === 'org' ? '#42be65' : '#fa4d56';
+function drawCompass() {
+  const cx=CW-20, cy=20, r=10;
+  ctx.fillStyle='rgba(255,255,255,.7)';
+  ctx.beginPath();ctx.arc(cx,cy,r+3,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#161616';
+  ctx.font='bold 8px sans-serif';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  // N arrow
+  ctx.beginPath();
+  ctx.moveTo(cx,cy-r);ctx.lineTo(cx-4,cy+3);ctx.lineTo(cx+4,cy+3);ctx.closePath();
+  ctx.fillStyle='#161616';ctx.fill();
+  ctx.fillStyle='#888';
+  ctx.beginPath();
+  ctx.moveTo(cx,cy+r);ctx.lineTo(cx-4,cy-3);ctx.lineTo(cx+4,cy-3);ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle='#161616';
+  ctx.font='bold 7px sans-serif';
+  ctx.fillText('N',cx,cy-r-5);
+}
+
+// ── PINS ──────────────────────────────────────────────
+function renderPins() {
+  pinLayer.innerHTML = '';
+  const fl = FLOORS[S.floor];
+  const pois = (FLOOR_POIS[fl.num]||{pois:[]}).pois;
+
+  pois.forEach(poi => {
+    const t = TC[poi.type]||TC.room;
+    const x = sx(poi.x), y = sy(poi.y);
+    const pin = document.createElement('div');
+    pin.style.cssText = `position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-100%);cursor:pointer;z-index:10;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))`;
+    pin.dataset.pid = poi.id;
+    pin.innerHTML = `<svg width="22" height="29" viewBox="0 0 28 36">
+      <path d="M14 0C6.27 0 0 6.27 0 14c0 9.94 14 22 14 22S28 23.94 28 14C28 6.27 21.73 0 14 0z" fill="${t.c}"/>
+      <circle cx="14" cy="14" r="7" fill="white" opacity=".9"/>
+      <svg x="7" y="7" width="14" height="14" viewBox="0 0 16 16" fill="${t.c}">${t.i}</svg>
+    </svg>`;
+    pin.addEventListener('click', e => {
+      e.stopPropagation();
+      if (S.routeMode && S.routeStep) assignRoute(poi);
+      else showPOI(poi);
+    });
+    // Tooltip on hover
+    pin.title = poi.label.replace(/&amp;/g,'&');
+    pinLayer.appendChild(pin);
+  });
+
+  // Origin / dest
+  if (S.origin && S.origin.floorNum === fl.num) addNavPin(S.origin.x, S.origin.y, '#42be65');
+  if (S.dest   && S.dest.floorNum   === fl.num) addNavPin(S.dest.x,   S.dest.y,   '#fa4d56');
+
+  // You-are-here (demo: near elevator lobby)
+  const yah = document.createElement('div');
+  yah.style.cssText = `position:absolute;left:${sx(498)}px;top:${sy(300)}px;transform:translate(-50%,-50%);pointer-events:none;z-index:5`;
+  yah.innerHTML = `<svg width="20" height="20" viewBox="0 0 20 20">
+    <circle cx="10" cy="10" r="9" fill="#0f62fe" opacity=".15"/>
+    <circle cx="10" cy="10" r="6" fill="#0f62fe" opacity=".25"/>
+    <circle cx="10" cy="10" r="4" fill="#0f62fe"/>
+    <circle cx="10" cy="10" r="2" fill="white"/>
+  </svg>`;
+  pinLayer.appendChild(yah);
+}
+
+function addNavPin(svgX, svgY, color) {
   const pin = document.createElement('div');
-  pin.className = 'nav-pin';
-  pin.style.left = proj.x + 'px';
-  pin.style.top  = proj.y + 'px';
+  pin.style.cssText = `position:absolute;left:${sx(svgX)}px;top:${sy(svgY)}px;transform:translate(-50%,-100%);pointer-events:none;z-index:15;filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))`;
   pin.innerHTML = `<svg width="26" height="34" viewBox="0 0 28 36">
     <path d="M14 0C6.27 0 0 6.27 0 14c0 9.94 14 22 14 22S28 23.94 28 14C28 6.27 21.73 0 14 0z" fill="${color}"/>
     <circle cx="14" cy="14" r="5" fill="white"/>
   </svg>`;
-  pinsLayer.appendChild(pin);
+  pinLayer.appendChild(pin);
 }
 
-// ── ROUTE DRAWING ─────────────────────────────────────
+// ── ROUTE ─────────────────────────────────────────────
 function drawRoute() {
-  // Clear old
-  routeSvg.querySelectorAll('.rpath').forEach(e => e.remove());
-  if (!S.origin || !S.dest) return;
-
-  const isIso = S.view === 'iso';
-  const o = isoProject(S.origin.x, S.origin.y, S.origin.floorIdx);
-  const d = isoProject(S.dest.x, S.dest.y, S.dest.floorIdx);
-
-  // If different floors: route goes to elevator, up/down, then to dest
-  let pts = [];
-  if (S.origin.floorIdx === S.dest.floorIdx) {
-    // Same floor: L-shaped path
-    const mid = isoProject(S.dest.x, S.origin.y, S.origin.floorIdx);
-    pts = [o, mid, d];
-  } else {
-    // Cross-floor: to elevator on origin floor, shaft up/down, from elevator on dest floor
-    const elevOrigin = isoProject(SHAFT_X * ISO_SCALE, 330 * ISO_SCALE, S.origin.floorIdx);
-    const elevDest   = isoProject(SHAFT_X * ISO_SCALE, 330 * ISO_SCALE, S.dest.floorIdx);
-    pts = [o, elevOrigin, elevDest, d];
-  }
-
-  const pathD = pts.map((p,i) => `${i===0?'M':'L'}${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ');
-
-  const shadow = document.createElementNS('http://www.w3.org/2000/svg','path');
-  shadow.setAttribute('d', pathD);
-  shadow.setAttribute('class','rpath');
-  shadow.setAttribute('fill','none');
-  shadow.setAttribute('stroke','rgba(0,0,0,.2)');
-  shadow.setAttribute('stroke-width','9');
-  shadow.setAttribute('stroke-linecap','round');
-  shadow.setAttribute('stroke-linejoin','round');
+  routeSvg.querySelectorAll('.rp').forEach(e=>e.remove());
+  if (!S.origin||!S.dest) return;
+  // Only draw if same floor
+  if (S.origin.floorNum !== FLOORS[S.floor].num || S.dest.floorNum !== FLOORS[S.floor].num) return;
+  const ox=sx(S.origin.x), oy=sy(S.origin.y);
+  const dx=sx(S.dest.x),   dy=sy(S.dest.y);
+  const mx=dx, my=oy;
+  const d=`M${ox},${oy} L${mx},${my} L${dx},${dy}`;
+  const shadow=document.createElementNS('http://www.w3.org/2000/svg','path');
+  shadow.setAttribute('d',d);shadow.setAttribute('class','rp');
+  shadow.setAttribute('fill','none');shadow.setAttribute('stroke','rgba(0,0,0,.15)');
+  shadow.setAttribute('stroke-width','9');shadow.setAttribute('stroke-linecap','round');
   routeSvg.appendChild(shadow);
-
-  const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-  path.setAttribute('d', pathD);
-  path.setAttribute('class','rpath');
-  path.setAttribute('fill','none');
-  path.setAttribute('stroke','#0f62fe');
-  path.setAttribute('stroke-width','5');
-  path.setAttribute('stroke-linecap','round');
-  path.setAttribute('stroke-linejoin','round');
+  const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+  path.setAttribute('d',d);path.setAttribute('class','rp');
+  path.setAttribute('fill','none');path.setAttribute('stroke','#0f62fe');
+  path.setAttribute('stroke-width','5');path.setAttribute('stroke-linecap','round');
   path.setAttribute('stroke-dasharray','12 5');
-  if (S.settings.arrows) path.setAttribute('marker-end','url(#arr)');
+  if(S.showArrows) path.setAttribute('marker-end','url(#arr)');
   routeSvg.appendChild(path);
 }
 
-function clearRoute() {
-  S.origin = null; S.dest = null;
-  routeSvg.querySelectorAll('.rpath').forEach(e => e.remove());
-}
-
-// ── PAN / ZOOM ────────────────────────────────────────
-function applyTransform(anim) {
-  if (anim) {
-    mapStage.style.transition = 'transform .25s cubic-bezier(.4,0,.2,1)';
-    setTimeout(() => mapStage.style.transition = '', 260);
+// ── PAN/ZOOM ──────────────────────────────────────────
+function applyT(anim){
+  if(anim){
+    mapCanvas.style.transition='transform .25s cubic-bezier(.4,0,.2,1)';
+    setTimeout(()=>mapCanvas.style.transition='',260);
   }
-  mapStage.style.transform = `translate(${S.ox}px,${S.oy}px) scale(${S.scale})`;
+  mapCanvas.style.transform=`translate(${S.ox}px,${S.oy}px) scale(${S.scale})`;
 }
 
-function centerMap(anim=true) {
-  const vw = mapWrap.clientWidth, vh = mapWrap.clientHeight;
-  const sceneRect = isoScene.getBoundingClientRect();
-  // Estimate scene size from floor transforms
-  const isIso = S.view === 'iso';
-  const estW = isIso ? SVG_W * ISO_SCALE * 0.8 : SVG_W * ISO_SCALE;
-  const estH = isIso ? SVG_H * ISO_SCALE * 0.5 + FLOORS.length * FLOOR_GAP : SVG_H * ISO_SCALE;
-  const fit = Math.min(vw / estW, vh / estH) * 0.82;
-  S.scale = Math.max(S.minScale, Math.min(S.maxScale, fit));
-  S.ox = (vw - estW * S.scale) / 2;
-  S.oy = (vh - estH * S.scale) / 2;
-  applyTransform(anim);
+function center(){
+  const vw=mapWrap.clientWidth, vh=mapWrap.clientHeight;
+  const fit=Math.min(vw/CW,vh/CH)*0.9;
+  S.scale=Math.max(S.minS,Math.min(S.maxS,fit));
+  S.ox=(vw-CW*S.scale)/2; S.oy=(vh-CH*S.scale)/2;
+  applyT(true);
 }
 
-function zoomAt(cx, cy, factor) {
-  const ns = Math.max(S.minScale, Math.min(S.maxScale, S.scale * factor));
-  const r = ns / S.scale;
-  S.ox = cx - (cx - S.ox) * r;
-  S.oy = cy - (cy - S.oy) * r;
-  S.scale = ns;
-  applyTransform(false);
+function zoomAt(cx,cy,f){
+  const ns=Math.max(S.minS,Math.min(S.maxS,S.scale*f));
+  const r=ns/S.scale;
+  S.ox=cx-(cx-S.ox)*r; S.oy=cy-(cy-S.oy)*r; S.scale=ns; applyT(false);
 }
 
 // Touch
-let tLX=0,tLY=0,tDragging=false,pOriX=0,pOriY=0,pLastD=0;
-mapWrap.addEventListener('touchstart', e => {
-  if (e.touches.length===1) {
-    tLX=e.touches[0].clientX; tLY=e.touches[0].clientY; tDragging=true;
-  } else if (e.touches.length===2) {
-    pLastD = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
-                        e.touches[0].clientY-e.touches[1].clientY);
-    const r = mapWrap.getBoundingClientRect();
-    pOriX = (e.touches[0].clientX+e.touches[1].clientX)/2 - r.left;
-    pOriY = (e.touches[0].clientY+e.touches[1].clientY)/2 - r.top;
-    tDragging=false;
+let tX=0,tY=0,td=false,pX=0,pY=0,pD=0,tapT=0;
+mapWrap.addEventListener('touchstart',e=>{
+  if(e.touches.length===1){tX=e.touches[0].clientX;tY=e.touches[0].clientY;td=true;tapT=Date.now();}
+  else if(e.touches.length===2){
+    pD=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    const r=mapWrap.getBoundingClientRect();
+    pX=(e.touches[0].clientX+e.touches[1].clientX)/2-r.left;
+    pY=(e.touches[0].clientY+e.touches[1].clientY)/2-r.top;
+    td=false;
   }
 },{passive:false});
-mapWrap.addEventListener('touchmove', e => {
+mapWrap.addEventListener('touchmove',e=>{
   e.preventDefault();
-  if (e.touches.length===1 && tDragging) {
-    S.ox += e.touches[0].clientX-tLX; S.oy += e.touches[0].clientY-tLY;
-    tLX=e.touches[0].clientX; tLY=e.touches[0].clientY;
-    applyTransform(false);
-  } else if (e.touches.length===2) {
-    const d = Math.hypot(e.touches[0].clientX-e.touches[1].clientX,
-                         e.touches[0].clientY-e.touches[1].clientY);
-    zoomAt(pOriX, pOriY, d/pLastD); pLastD=d;
+  if(e.touches.length===1&&td){
+    S.ox+=e.touches[0].clientX-tX;S.oy+=e.touches[0].clientY-tY;
+    tX=e.touches[0].clientX;tY=e.touches[0].clientY;applyT(false);
+  } else if(e.touches.length===2){
+    const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
+    zoomAt(pX,pY,d/pD);pD=d;
   }
 },{passive:false});
-mapWrap.addEventListener('touchend', e => { if (e.touches.length===0) tDragging=false; },{passive:true});
+mapWrap.addEventListener('touchend',e=>{
+  if(e.touches.length===0){td=false;}
+},{passive:true});
 
 // Mouse
-let mDown=false,mSX=0,mSY=0,mMoved=0;
-mapWrap.addEventListener('mousedown', e => {
-  if (e.button!==0) return; mDown=true; mSX=e.clientX; mSY=e.clientY; mMoved=0;
-});
-mapWrap.addEventListener('mousemove', e => {
-  if (!mDown) return;
-  mMoved += Math.abs(e.movementX)+Math.abs(e.movementY);
-  S.ox+=e.movementX; S.oy+=e.movementY; applyTransform(false);
-});
-mapWrap.addEventListener('mouseup', () => mDown=false);
-mapWrap.addEventListener('mouseleave', () => mDown=false);
-mapWrap.addEventListener('wheel', e => {
-  e.preventDefault();
-  const r = mapWrap.getBoundingClientRect();
-  zoomAt(e.clientX-r.left, e.clientY-r.top, e.deltaY<0?1.12:1/1.12);
-},{passive:false});
+let md=false,mv=0;
+mapWrap.addEventListener('mousedown',e=>{if(e.button!==0)return;md=true;mv=0;mapWrap.classList.add('grabbing');});
+mapWrap.addEventListener('mousemove',e=>{if(!md)return;mv+=Math.abs(e.movementX)+Math.abs(e.movementY);S.ox+=e.movementX;S.oy+=e.movementY;applyT(false);});
+mapWrap.addEventListener('mouseup',()=>{md=false;mapWrap.classList.remove('grabbing');});
+mapWrap.addEventListener('mouseleave',()=>{md=false;mapWrap.classList.remove('grabbing');});
+mapWrap.addEventListener('wheel',e=>{e.preventDefault();const r=mapWrap.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.12:1/1.12);},{passive:false});
+mapWrap.addEventListener('click',e=>{if(mv>5)return;if(!S.routeMode)hideBs();});
 
-// Click on map (not on pins)
-mapWrap.addEventListener('click', e => {
-  if (mMoved > 5) return;
-  if (S.routeMode) return;
-  hideBSheet();
-});
+document.getElementById('zi').onclick=()=>{const c=mapWrap.clientWidth/2,v=mapWrap.clientHeight/2;zoomAt(c,v,1.35);};
+document.getElementById('zo').onclick=()=>{const c=mapWrap.clientWidth/2,v=mapWrap.clientHeight/2;zoomAt(c,v,1/1.35);};
+document.getElementById('zr').onclick=()=>center();
 
-document.getElementById('zoom-in').onclick = () => { const c=mapWrap.clientWidth/2,cv=mapWrap.clientHeight/2; zoomAt(c,cv,1.35); };
-document.getElementById('zoom-out').onclick = () => { const c=mapWrap.clientWidth/2,cv=mapWrap.clientHeight/2; zoomAt(c,cv,1/1.35); };
-document.getElementById('recenter').onclick = () => centerMap(true);
-
-// ── FLOOR SWITCHER ────────────────────────────────────
-function buildFloorPill() {
-  floorPill.innerHTML = '';
-  // Reversed: top floor at top
-  [...FLOORS].reverse().forEach(fl => {
-    const origIdx = FLOORS.findIndex(f => f.num===fl.num);
-    const btn = document.createElement('button');
-    btn.className = 'fp-btn' + (origIdx===S.activeFloor ? ' active' : '');
-    btn.textContent = fl.label;
-    btn.style.setProperty('--fc', fl.color);
-    btn.setAttribute('aria-label', fl.name);
-    btn.addEventListener('click', () => switchFloor(origIdx));
-    floorPill.appendChild(btn);
+// ── FLOOR PILL ────────────────────────────────────────
+function buildPill(){
+  const fp=document.getElementById('fpill');
+  fp.innerHTML='';
+  [...FLOORS].reverse().forEach(fl=>{
+    const i=FLOORS.findIndex(f=>f.num===fl.num);
+    const b=document.createElement('button');
+    b.className='fb'+(i===S.floor?' on':'');
+    b.textContent=fl.label;
+    b.title=fl.name;
+    b.onclick=()=>switchFloor(i);
+    fp.appendChild(b);
   });
 }
 
-function switchFloor(idx) {
-  S.activeFloor = idx;
-  buildFloorPill();
-  if (S.view==='flat') {
-    document.querySelectorAll('.floor-slice').forEach((w,i) => {
-      w.style.display = (i===idx) ? 'block' : 'none';
-    });
-    renderPins();
-  } else {
-    // In iso: just update opacity
-    FLOORS.forEach((fl,i) => {
-      const w = document.getElementById(`fl-wrap-${fl.num}`);
-      if (w) w.style.opacity = (i===idx) ? '1' : (S.settings.highlight ? '0.5' : '0.85');
-    });
-    renderPins();
-  }
-  showToast(FLOORS[idx].name);
-  clearRoute();
-  hideBSheet();
+function switchFloor(i){
+  S.floor=i;buildPill();
+  drawFloor();renderPins();drawRoute();
+  showToast(FLOORS[i].name);hideBs();clearRoute();
 }
-
-// ── VIEW TOGGLE ───────────────────────────────────────
-document.getElementById('vt-iso').addEventListener('click', () => {
-  S.view='iso';
-  document.getElementById('vt-iso').classList.add('active');
-  document.getElementById('vt-flat').classList.remove('active');
-  buildScene();
-});
-document.getElementById('vt-flat').addEventListener('click', () => {
-  S.view='flat';
-  document.getElementById('vt-flat').classList.add('active');
-  document.getElementById('vt-iso').classList.remove('active');
-  buildScene();
-});
 
 // ── SEARCH ────────────────────────────────────────────
-function allPOIs() {
-  return FLOORS.flatMap((fl,fi) =>
-    (FLOOR_POIS[fl.num]||{pois:[]}).pois.map(p => ({...p, floorIdx:fi, floorName:fl.name, floorLabel:fl.label, floorColor:fl.color}))
-  );
+function allPOIs(){
+  return FLOORS.flatMap((fl,fi)=>(FLOOR_POIS[fl.num]||{pois:[]}).pois.map(p=>({...p,fi,floorName:fl.name,floorLabel:fl.label,floorColor:fl.color})));
 }
+const si=document.getElementById('si'), sx2=document.getElementById('sx'), sres=document.getElementById('sres');
+si.oninput=()=>{
+  const q=si.value.trim().toLowerCase();
+  sx2.classList.toggle('on',q.length>0);
+  if(!q){sres.classList.remove('on');return;}
+  const hits=allPOIs().filter(p=>p.label.toLowerCase().includes(q)||(p.desc||'').toLowerCase().includes(q));
+  renderSR(hits,q);
+};
+si.onfocus=()=>{if(si.value.trim())sres.classList.add('on');};
+document.addEventListener('click',e=>{if(!document.getElementById('sbar').contains(e.target))sres.classList.remove('on');});
+sx2.onclick=()=>{si.value='';sx2.classList.remove('on');sres.classList.remove('on');si.focus();};
 
-searchInp.addEventListener('input', () => {
-  const q = searchInp.value.trim().toLowerCase();
-  searchX.classList.toggle('on', q.length>0);
-  if (!q) { searchRes.classList.remove('on'); return; }
-  const hits = allPOIs().filter(p =>
-    p.label.toLowerCase().includes(q) || (p.desc||'').toLowerCase().includes(q)
-  );
-  renderSearchResults(hits, q);
-});
-searchInp.addEventListener('focus', () => {
-  if (searchInp.value.trim()) searchRes.classList.add('on');
-});
-document.addEventListener('click', e => {
-  if (!document.getElementById('search-bar').contains(e.target))
-    searchRes.classList.remove('on');
-});
-searchX.addEventListener('click', () => {
-  searchInp.value=''; searchX.classList.remove('on'); searchRes.classList.remove('on'); searchInp.focus();
-});
-
-function renderSearchResults(items, q) {
-  const cfg = TYPE_CFG;
-  if (!items.length) {
-    searchRes.innerHTML = `<div class="sri"><div class="sri-name" style="color:#6f6f6f">No results for "${q}"</div></div>`;
-    searchRes.classList.add('on'); return;
-  }
-  searchRes.innerHTML = items.slice(0,10).map(p => {
-    const c = cfg[p.type]||cfg.room;
-    return `<div class="sri" data-pid="${p.id}" data-fi="${p.floorIdx}">
-      <div class="sri-ico" style="background:${c.color}20;color:${c.color}">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">${c.icon}</svg>
+function renderSR(items,q){
+  if(!items.length){sres.innerHTML=`<div class="sri"><div class="sn" style="color:#6f6f6f;flex:1">No results for "${q}"</div></div>`;sres.classList.add('on');return;}
+  sres.innerHTML=items.slice(0,10).map(p=>{
+    const t=TC[p.type]||TC.room;
+    const lbl=(p.label||'').replace(/&amp;/g,'&');
+    return `<div class="sri" data-pid="${p.id}" data-fi="${p.fi}">
+      <div class="si" style="background:${t.c}18;color:${t.c}">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor">${t.i}</svg>
       </div>
       <div style="flex:1">
-        <div class="sri-name">${hl(p.label,q)}</div>
-        <div class="sri-sub">${p.desc||p.floorName}</div>
+        <div class="sn">${hl(lbl,q)}</div>
+        <div class="ss">${p.desc||p.floorName}</div>
       </div>
-      <span class="sri-fl" style="background:${p.floorColor}20;color:${p.floorColor}">${p.floorLabel}</span>
+      <span class="sf" style="background:${p.floorColor}18;color:${p.floorColor}">${p.floorLabel}</span>
     </div>`;
   }).join('');
-  searchRes.classList.add('on');
-  searchRes.querySelectorAll('.sri[data-pid]').forEach(el => {
-    el.addEventListener('click', () => {
-      const fi = parseInt(el.dataset.fi);
-      const poi = (FLOOR_POIS[FLOORS[fi].num]||{pois:[]}).pois.find(p=>p.id===el.dataset.pid);
-      if (!poi) return;
-      searchRes.classList.remove('on');
-      searchInp.value = poi.label;
-      if (fi!==S.activeFloor) switchFloor(fi);
-      flyTo(poi.x, poi.y, fi, 1.8);
-      showPOISheet(poi, fi);
-    });
+  sres.classList.add('on');
+  sres.querySelectorAll('.sri[data-pid]').forEach(el=>{
+    el.onclick=()=>{
+      const fi=parseInt(el.dataset.fi);
+      const poi=(FLOOR_POIS[FLOORS[fi].num]||{pois:[]}).pois.find(p=>p.id===el.dataset.pid);
+      if(!poi)return;
+      sres.classList.remove('on');
+      si.value=(poi.label||'').replace(/&amp;/g,'&');
+      if(fi!==S.floor)switchFloor(fi);
+      flyTo(poi.x,poi.y);
+      showPOI(poi);
+    };
   });
 }
 
-function hl(text, q) {
-  const i = text.toLowerCase().indexOf(q);
-  if (i<0) return text;
-  return text.slice(0,i)+`<strong style="color:#0f62fe">${text.slice(i,i+q.length)}</strong>`+text.slice(i+q.length);
+function hl(t,q){
+  const i=t.toLowerCase().indexOf(q);
+  if(i<0)return t;
+  return t.slice(0,i)+`<strong style="color:#0f62fe">${t.slice(i,i+q.length)}</strong>`+t.slice(i+q.length);
 }
 
 // ── FLY TO ────────────────────────────────────────────
-function flyTo(svgX, svgY, floorIdx, targetScale=1.8) {
-  const vw=mapWrap.clientWidth, vh=mapWrap.clientHeight;
-  const isIso = S.view==='iso';
-  const proj = isIso ? isoProject(svgX,svgY,floorIdx) : flatProject(svgX,svgY);
-  S.scale = Math.min(S.maxScale, Math.max(S.minScale, targetScale));
-  S.ox = vw/2 - proj.x * S.scale;
-  S.oy = vh/2 - proj.y * S.scale;
-  applyTransform(true);
+function flyTo(svgX,svgY,ts=2){
+  const vw=mapWrap.clientWidth,vh=mapWrap.clientHeight;
+  S.scale=Math.min(S.maxS,Math.max(S.minS,ts));
+  S.ox=vw/2-sx(svgX)*S.scale;
+  S.oy=vh/2-sy(svgY)*S.scale;
+  applyT(true);
 }
 
 // ── POI SHEET ─────────────────────────────────────────
-function showPOISheet(poi, fi) {
-  const floor = FLOORS[fi];
-  const cfg = TYPE_CFG[poi.type]||TYPE_CFG.room;
-  const saved = S.saved.some(s=>s.id===poi.id);
-  const label = (poi.label||'').replace(/&amp;/g,'&');
-  bsBody.innerHTML = `
-    <div class="bs-title">${label}</div>
-    <div class="bs-sub">
-      <span class="bs-badge" style="background:${floor.color}18;color:${floor.color}">${floor.name}</span>
-      <span class="bs-type-badge" style="color:${cfg.color};border-color:${cfg.color}40">${poi.type}</span>
+function showPOI(poi){
+  const fl=FLOORS[S.floor];
+  const t=TC[poi.type]||TC.room;
+  const lbl=(poi.label||'').replace(/&amp;/g,'&');
+  const saved=S.saved.some(s=>s.id===poi.id);
+  document.getElementById('bsb').innerHTML=`
+    <div class="bst">${lbl}</div>
+    <div class="bss">
+      <span class="bbg" style="background:${fl.color}18;color:${fl.color}">${fl.name}</span>
+      <span class="bbg" style="background:${t.c}18;color:${t.c}">${poi.type}</span>
     </div>
-    <div class="bs-acts">
-      <button class="bs-btn p" id="bs-dir">
+    <div class="bacts">
+      <button class="bbt p" id="bd">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3,11 22,2 13,21 11,13"/></svg>
         Directions
       </button>
-      <button class="bs-btn s" id="bs-save">
+      <button class="bbt s" id="bsv">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
         ${saved?'Saved ✓':'Save'}
       </button>
     </div>
-    <div class="bs-row">
-      <svg width="15" height="15" viewBox="0 0 16 16" fill="${cfg.color}">${cfg.icon}</svg>
-      <span>${poi.desc||floor.name}</span>
+    <div class="brow">
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="${t.c}">${t.i}</svg>
+      <span>${poi.desc||fl.name}</span>
     </div>
-    <div class="bs-row">
+    <div class="brow">
       <svg width="15" height="15" viewBox="0 0 16 16" fill="#6f6f6f"><path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/></svg>
-      <span>${floor.name} — IBM One Madison Ave</span>
+      <span>IBM One Madison Ave, ${fl.name}</span>
     </div>`;
-  document.getElementById('bs-dir').onclick = () => { hideBSheet(); startRouteMode(null, {poi,fi}); };
-  document.getElementById('bs-save').onclick = () => { toggleSave(poi); showPOISheet(poi,fi); };
-  showBSheet('on');
+  document.getElementById('bd').onclick=()=>{hideBs();enterRoute(null,{poi,floorNum:fl.num});};
+  document.getElementById('bsv').onclick=()=>{toggleSave(poi);showPOI(poi);};
+  showBs('on');
 }
 
-function toggleSave(poi) {
-  const idx = S.saved.findIndex(s=>s.id===poi.id);
-  if (idx>=0) { S.saved.splice(idx,1); showToast('Removed from saved'); }
-  else { S.saved.push(poi); showToast('Saved!'); }
+function toggleSave(poi){
+  const i=S.saved.findIndex(s=>s.id===poi.id);
+  if(i>=0){S.saved.splice(i,1);showToast('Removed from saved');}
+  else{S.saved.push(poi);showToast('Saved!');}
 }
 
-// ── ROUTE MODE ────────────────────────────────────────
-function startRouteMode(origin=null, destObj=null) {
-  S.routeMode = true;
-  document.getElementById('search-bar').style.display='none';
-  routeHdr.classList.add('on');
-  if (destObj) {
-    const lbl = (destObj.poi.label||'').replace(/&amp;/g,'&');
-    S.dest = { x:destObj.poi.x, y:destObj.poi.y, floorIdx:destObj.fi, label:lbl };
-    document.getElementById('rf-to').textContent = lbl;
-    S.routeStep = 'origin'; showToast('Tap your starting point');
+// ── ROUTE ─────────────────────────────────────────────
+function enterRoute(org,destObj){
+  S.routeMode=true;
+  document.getElementById('sbar').style.display='none';
+  document.getElementById('rhdr').classList.add('on');
+  if(destObj){
+    const lbl=(destObj.poi.label||'').replace(/&amp;/g,'&');
+    S.dest={x:destObj.poi.x,y:destObj.poi.y,floorNum:destObj.floorNum,label:lbl};
+    document.getElementById('rto').textContent=lbl;
+    if(!S.origin){S.routeStep='origin';showToast('Tap your start point on the map');}
   }
-  if (origin) {
-    S.origin = origin;
-    document.getElementById('rf-from').textContent = origin.label;
-    S.routeStep = null;
-    if (S.dest) { drawRoute(); showRouteSheet(); }
+  if(org){
+    S.origin=org;
+    document.getElementById('rfrom').textContent=org.label;
+    S.routeStep=null;
+    if(S.dest){drawRoute();showRouteSheet();}
+  }
+  renderPins();navOn('dir');
+}
+
+function exitRoute(){
+  S.routeMode=false;S.routeStep=null;
+  clearRoute();renderPins();
+  document.getElementById('rhdr').classList.remove('on');
+  document.getElementById('sbar').style.display='';
+  document.getElementById('rfrom').textContent='Your location';
+  document.getElementById('rto').textContent='Destination';
+  S.origin=null;S.dest=null;
+  navOn('map');hideBs();
+}
+
+function clearRoute(){S.origin=null;S.dest=null;routeSvg.querySelectorAll('.rp').forEach(e=>e.remove());}
+
+function assignRoute(poi){
+  const lbl=(poi.label||'').replace(/&amp;/g,'&');
+  const fl=FLOORS[S.floor];
+  if(S.routeStep==='origin'){
+    S.origin={x:poi.x,y:poi.y,floorNum:fl.num,label:lbl};
+    document.getElementById('rfrom').textContent=lbl;
+    S.routeStep=S.dest?null:'dest';
+    if(!S.dest)showToast('Now tap destination');
+  } else if(S.routeStep==='dest'){
+    S.dest={x:poi.x,y:poi.y,floorNum:fl.num,label:lbl};
+    document.getElementById('rto').textContent=lbl;
+    S.routeStep=null;
   }
   renderPins();
-  activateNav('dir');
+  if(S.origin&&S.dest){drawRoute();showRouteSheet();}
 }
 
-function exitRouteMode() {
-  S.routeMode=false; S.routeStep=null;
-  clearRoute(); renderPins();
-  routeHdr.classList.remove('on');
-  document.getElementById('search-bar').style.display='';
-  document.getElementById('rf-from').textContent='Your location';
-  document.getElementById('rf-to').textContent='Destination';
-  activateNav('map'); hideBSheet();
-}
-
-function assignRoutePoint(poi, fi) {
-  const lbl = (poi.label||'').replace(/&amp;/g,'&');
-  if (S.routeStep==='origin') {
-    S.origin = { x:poi.x, y:poi.y, floorIdx:fi, label:lbl };
-    document.getElementById('rf-from').textContent = lbl;
-    S.routeStep = S.dest ? null : 'dest';
-    if (!S.dest) showToast('Now tap destination');
-  } else if (S.routeStep==='dest') {
-    S.dest = { x:poi.x, y:poi.y, floorIdx:fi, label:lbl };
-    document.getElementById('rf-to').textContent = lbl;
-    S.routeStep = null;
-  }
-  renderPins();
-  if (S.origin && S.dest) { drawRoute(); showRouteSheet(); }
-}
-
-function showRouteSheet() {
-  if (!S.origin||!S.dest) return;
-  const oFloor = FLOORS[S.origin.floorIdx];
-  const dFloor = FLOORS[S.dest.floorIdx];
-  const dx = S.dest.x-S.origin.x, dy = S.dest.y-S.origin.y;
-  const distPx = Math.sqrt(dx*dx+dy*dy) + (S.origin.floorIdx!==S.dest.floorIdx ? Math.abs(S.origin.floorIdx-S.dest.floorIdx)*80 : 0);
-  const metres = Math.max(10, Math.round(distPx*0.14));
-  const mins = Math.max(1, Math.round(metres/85));
-  const sameFloor = S.origin.floorIdx===S.dest.floorIdx;
-  const steps = sameFloor
-    ? [`Head to ${S.dest.label}`, `Arrive at <strong>${S.dest.label}</strong>`]
-    : [`Head to elevator on ${oFloor.name}`,
-       `Take elevator to ${dFloor.name}`,
-       `Walk to <strong>${S.dest.label}</strong>`];
-
-  bsBody.innerHTML = `
-    <div class="bs-title">Route</div>
-    <div class="bs-sub"><span>${(S.origin.label||'').replace(/&amp;/g,'&')}</span><span style="margin:0 6px">→</span><span>${(S.dest.label||'').replace(/&amp;/g,'&')}</span></div>
-    <div class="rs-box">
-      <div><div class="rs-time">${mins} min</div><div class="rs-dist">${metres} m walk</div></div>
-      <button class="bs-btn p" id="start-nav" style="flex:0;padding:0 18px">Start</button>
+function showRouteSheet(){
+  if(!S.origin||!S.dest)return;
+  const sameFloor=S.origin.floorNum===S.dest.floorNum;
+  const dx=S.dest.x-S.origin.x,dy=S.dest.y-S.origin.y;
+  const dist=Math.round((Math.sqrt(dx*dx+dy*dy)+(sameFloor?0:150))*0.14);
+  const mins=Math.max(1,Math.round(dist/85));
+  const steps=sameFloor
+    ?[`Walk toward ${S.dest.label}`,`Arrive at <strong>${S.dest.label}</strong>`]
+    :[`Head to elevator on ${S.origin.floorNum==='1'?'Floor 1':S.origin.floorNum==='2'?'Floor 2':'Floor '+S.origin.floorNum}`,
+      `Take elevator to Floor ${S.dest.floorNum}`,
+      `Walk to <strong>${S.dest.label}</strong>`];
+  document.getElementById('bsb').innerHTML=`
+    <div class="bst">Route</div>
+    <div class="bss"><span>${S.origin.label}</span><span style="margin:0 6px">→</span><span>${S.dest.label}</span></div>
+    <div class="rsbox">
+      <div><div class="rst">${mins} min</div><div class="rsd">${dist} m walk</div></div>
+      <button class="bbt p" id="startnav" style="flex:0;padding:0 18px">Start</button>
     </div>
-    ${steps.map((s,i) => `<div class="rstep">
-      <div class="rstep-ico" style="${i===steps.length-1?'background:#fa4d5620;color:#fa4d56':''}">
+    ${steps.map((s,i)=>`<div class="step">
+      <div class="stpi" style="${i===steps.length-1?'background:#fa4d5618;color:#fa4d56':''}">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           ${i===steps.length-1?'<circle cx="12" cy="12" r="8"/>':'<polygon points="3,11 22,2 13,21 11,13"/>'}
         </svg>
-      </div>
-      <span>${s}</span>
+      </div><span>${s}</span>
     </div>`).join('')}`;
-  document.getElementById('start-nav').onclick = () => showToast('Follow the blue path');
-  showBSheet('peek');
+  document.getElementById('startnav').onclick=()=>showToast('Follow the blue path');
+  showBs('pk');
 }
 
-document.getElementById('route-x').onclick = exitRouteMode;
+document.getElementById('rx').onclick=exitRoute;
 
 // ── EXPLORE ───────────────────────────────────────────
-function openExplore() {
-  const groups = {};
-  allPOIs().filter(p=>p.type!=='room').forEach(p => {
-    if (!groups[p.type]) groups[p.type]=[];
+function openExplore(){
+  const groups={};
+  allPOIs().filter(p=>p.type!=='room').forEach(p=>{
+    if(!groups[p.type])groups[p.type]=[];
     groups[p.type].push(p);
   });
-  let html = '<div class="bs-title">Explore Building</div><div class="bs-sub">All locations — tap to navigate</div>';
-  Object.keys(groups).sort().forEach(t => {
-    const cfg = TYPE_CFG[t]||TYPE_CFG.room;
-    html += `<div style="margin-bottom:12px">
-      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${cfg.color};margin:10px 0 6px">${t}</div>
-      ${groups[t].slice(0,8).map(p => `
-        <div class="sri" data-pid="${p.id}" data-fi="${p.floorIdx}" style="padding:9px 0;border-bottom:1px solid #e0e0e0">
-          <div class="sri-ico" style="background:${cfg.color}18;color:${cfg.color}">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">${cfg.icon}</svg>
+  let h=`<div class="bst">Explore</div><div class="bss">All locations — tap to navigate</div>`;
+  Object.keys(groups).sort().forEach(t=>{
+    const tc=TC[t]||TC.room;
+    h+=`<div style="margin-bottom:10px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${tc.c};margin:10px 0 6px">${t}</div>
+      ${groups[t].slice(0,6).map(p=>{
+        const lbl=(p.label||'').replace(/&amp;/g,'&');
+        return `<div class="sri" data-eid="${p.id}" data-fi="${p.fi}" style="padding:9px 0;border-bottom:1px solid #e0e0e0">
+          <div class="si" style="background:${tc.c}18;color:${tc.c}">
+            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">${tc.i}</svg>
           </div>
-          <div style="flex:1"><div class="sri-name">${(p.label||'').replace(/&amp;/g,'&')}</div><div class="sri-sub">${p.floorName}</div></div>
-          <span class="sri-fl" style="background:${p.floorColor}18;color:${p.floorColor}">${p.floorLabel}</span>
-        </div>`).join('')}
+          <div style="flex:1"><div class="sn">${lbl}</div><div class="ss">${p.floorName}</div></div>
+          <span class="sf" style="background:${p.floorColor}18;color:${p.floorColor}">${p.floorLabel}</span>
+        </div>`;
+      }).join('')}
     </div>`;
   });
-  bsBody.innerHTML = html;
-  bsBody.querySelectorAll('.sri[data-pid]').forEach(el => {
-    el.addEventListener('click', () => {
+  document.getElementById('bsb').innerHTML=h;
+  document.getElementById('bsb').querySelectorAll('.sri[data-eid]').forEach(el=>{
+    el.onclick=()=>{
       const fi=parseInt(el.dataset.fi);
-      const poi=(FLOOR_POIS[FLOORS[fi].num]||{pois:[]}).pois.find(p=>p.id===el.dataset.pid);
-      if (!poi) return;
-      if (fi!==S.activeFloor) switchFloor(fi);
-      flyTo(poi.x,poi.y,fi,1.8);
-      showPOISheet(poi,fi);
-    });
+      const poi=(FLOOR_POIS[FLOORS[fi].num]||{pois:[]}).pois.find(p=>p.id===el.dataset.eid);
+      if(!poi)return;
+      if(fi!==S.floor)switchFloor(fi);
+      flyTo(poi.x,poi.y);showPOI(poi);
+    };
   });
-  showBSheet('on');
+  showBs('on');
 }
 
 // ── SAVED ─────────────────────────────────────────────
-function openSaved() {
-  if (!S.saved.length) {
-    bsBody.innerHTML = `<div class="bs-title">Saved Places</div>
-      <div style="padding:24px 0;text-align:center;color:#6f6f6f;font-size:13px">
-        Tap the bookmark icon on any location to save it here.
-      </div>`;
+function openSaved(){
+  if(!S.saved.length){
+    document.getElementById('bsb').innerHTML=`<div class="bst">Saved Places</div>
+      <div style="padding:24px 0;text-align:center;color:#6f6f6f;font-size:13px">Tap the bookmark icon on any location to save it here.</div>`;
   } else {
-    bsBody.innerHTML = `<div class="bs-title">Saved Places</div>
-      <div class="bs-sub">${S.saved.length} place${S.saved.length>1?'s':''} saved</div>
-      ${S.saved.map((p,i) => {
-        const cfg=TYPE_CFG[p.type]||TYPE_CFG.room;
-        return `<div class="sri" data-si="${i}" style="padding:10px 0;border-bottom:1px solid #e0e0e0">
-          <div class="sri-ico" style="background:${cfg.color}18;color:${cfg.color}">
-            <svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">${cfg.icon}</svg>
-          </div>
-          <div style="flex:1"><div class="sri-name">${(p.label||'').replace(/&amp;/g,'&')}</div><div class="sri-sub">${p.desc||''}</div></div>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-        </div>`;
-      }).join('')}`;
-    bsBody.querySelectorAll('.sri[data-si]').forEach(el => {
-      el.addEventListener('click', () => {
-        const p = S.saved[parseInt(el.dataset.si)];
-        const fi = FLOORS.findIndex(f => (FLOOR_POIS[f.num]||{pois:[]}).pois.some(x=>x.id===p.id));
-        if (fi<0) return;
-        if (fi!==S.activeFloor) switchFloor(fi);
-        flyTo(p.x,p.y,fi,1.8);
-        showPOISheet(p,fi);
-      });
+    document.getElementById('bsb').innerHTML=`<div class="bst">Saved (${S.saved.length})</div>
+      ${S.saved.map((p,i)=>{const t=TC[p.type]||TC.room;const lbl=(p.label||'').replace(/&amp;/g,'&');return`<div class="sri" data-si="${i}" style="padding:10px 0;border-bottom:1px solid #e0e0e0">
+        <div class="si" style="background:${t.c}18;color:${t.c}"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">${t.i}</svg></div>
+        <div style="flex:1"><div class="sn">${lbl}</div><div class="ss">${p.desc||''}</div></div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0f62fe" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+      </div>`;}).join('')}`;
+    document.getElementById('bsb').querySelectorAll('.sri[data-si]').forEach(el=>{
+      el.onclick=()=>{const p=S.saved[parseInt(el.dataset.si)];showPOI(p);};
     });
   }
-  showBSheet('on');
+  showBs('on');
 }
 
-// ── BOTTOM NAV ────────────────────────────────────────
-function activateNav(id) {
-  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById('nav-'+id)?.classList.add('active');
-}
-document.getElementById('nav-map').onclick = () => { activateNav('map'); hideBSheet(); };
-document.getElementById('nav-explore').onclick = () => { activateNav('explore'); openExplore(); };
-document.getElementById('nav-dir').onclick = () => { activateNav('dir'); startRouteMode(); };
-document.getElementById('nav-saved').onclick = () => { activateNav('saved'); openSaved(); };
+// ── NAV / BS / TOAST ──────────────────────────────────
+function navOn(id){document.querySelectorAll('.ni').forEach(b=>b.classList.remove('on'));document.getElementById('n-'+id).classList.add('on');}
+function showBs(c){document.getElementById('bs').classList.remove('on','pk');document.getElementById('bs').classList.add(c);}
+function hideBs(){document.getElementById('bs').classList.remove('on','pk');}
+document.getElementById('bsh').onclick=hideBs;
+document.getElementById('n-map').onclick=()=>{navOn('map');hideBs();};
+document.getElementById('n-explore').onclick=()=>{navOn('explore');openExplore();};
+document.getElementById('n-dir').onclick=()=>{navOn('dir');enterRoute();};
+document.getElementById('n-saved').onclick=()=>{navOn('saved');openSaved();};
 
-// ── BOTTOM SHEET ──────────────────────────────────────
-function showBSheet(cls='on') {
-  bsheet.classList.remove('on','peek');
-  bsheet.classList.add(cls);
-}
-function hideBSheet() { bsheet.classList.remove('on','peek'); }
-const bsHandle = bsheet.querySelector('.bs-handle');
-let bsDragY=0;
-bsHandle.addEventListener('touchstart',e=>{bsDragY=e.touches[0].clientY;},{passive:true});
-bsHandle.addEventListener('touchmove',e=>{if(e.touches[0].clientY-bsDragY>40)hideBSheet();},{passive:true});
+let toastT;
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('on');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2400);}
 
-// ── SETTINGS ──────────────────────────────────────────
-document.getElementById('settings-btn').onclick = () => document.getElementById('settings-panel').classList.add('on');
-document.getElementById('sp-back').onclick = () => document.getElementById('settings-panel').classList.remove('on');
-document.getElementById('t-access').onchange = e => S.settings.access=e.target.checked;
-document.getElementById('t-arrows').onchange = e => { S.settings.arrows=e.target.checked; drawRoute(); };
-document.getElementById('t-labels').onchange = e => S.settings.labels=e.target.checked;
-document.getElementById('t-highlight').onchange = e => { S.settings.highlight=e.target.checked; buildScene(); };
+// Settings
+document.getElementById('settings-btn').onclick=()=>document.getElementById('spanel').classList.add('on');
+document.getElementById('spbk').onclick=()=>document.getElementById('spanel').classList.remove('on');
+document.getElementById('tarr').onchange=e=>{S.showArrows=e.target.checked;drawRoute();};
 
-// ── TOAST ─────────────────────────────────────────────
-let toastTmr;
-function showToast(msg) {
-  toast.textContent=msg; toast.classList.add('on');
-  clearTimeout(toastTmr); toastTmr=setTimeout(()=>toast.classList.remove('on'),2400);
-}
-
-// ── BOOTSTRAP ─────────────────────────────────────────
-async function init() {
-  // Set Floor 8 as default active (most content)
-  S.activeFloor = FLOORS.findIndex(f=>f.num==='8');
-  if (S.activeFloor<0) S.activeFloor=0;
-  buildFloorPill();
-  await buildScene();
-  showToast('IBM One Madison — Floors 1, 2, 8, 9, 10');
-}
-
-init();
+// ── BOOT ──────────────────────────────────────────────
+buildPill();
+drawFloor();
+renderPins();
+center();
+showToast('IBM One Madison — Floors 1, 2, 8, 9, 10');
 </script>
 </body>
 </html>
