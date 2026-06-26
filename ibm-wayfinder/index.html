@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
 <title>IBM One Madison Wayfinder</title>
 <style>
-/* System fonts only — zero network requests */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
   --b:#0f62fe;--bh:#0043ce;--bl:#edf5ff;
@@ -15,11 +14,10 @@
   --g4:#6f6f6f;--g5:#c6c6c6;--g6:#e0e0e0;--g7:#f4f4f4;
   --wh:#fff;--grn:#42be65;--red:#fa4d56;
   --fnt:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
-  --mono:"SFMono-Regular",Consolas,"Liberation Mono",Menlo,monospace;
+  --mono:"SFMono-Regular",Consolas,Menlo,monospace;
   --top:52px;--bot:64px;
 }
-html,body{height:100%;width:100%;overflow:hidden;
-  font-family:var(--fnt);font-size:14px;color:var(--g0);background:#1a1f2e}
+html,body{height:100%;width:100%;overflow:hidden;font-family:var(--fnt);font-size:14px;color:var(--g0);background:#12172a}
 #app{position:relative;width:100%;height:100dvh;overflow:hidden}
 
 /* TOP BAR */
@@ -27,9 +25,9 @@ html,body{height:100%;width:100%;overflow:hidden;
   background:var(--g0);display:flex;align-items:center;
   padding:0 16px;gap:10px;z-index:200}
 .logo{display:flex;align-items:center;gap:7px;flex-shrink:0}
-.logo-bars{display:flex;flex-direction:column;gap:2px;width:28px}
-.logo-bars span{display:block;height:2px;background:#1192e8}
-.logo-bars span:nth-child(3),.logo-bars span:nth-child(4){width:72%}
+.logo-bars{display:flex;flex-direction:column;gap:2px;width:26px}
+.logo-bars span{display:block;height:2px;background:#1192e8;border-radius:1px}
+.logo-bars span:nth-child(3),.logo-bars span:nth-child(4){width:70%}
 .bname{font-size:13px;font-weight:500;color:#fff;white-space:nowrap}
 .bname em{color:#4589ff;font-style:normal}
 .sp{flex:1}
@@ -37,124 +35,129 @@ html,body{height:100%;width:100%;overflow:hidden;
   border:none;background:none;cursor:pointer;border-radius:4px;color:var(--g5)}
 .ib:active{background:var(--g2)}
 
-/* MAP CANVAS */
-#mw{position:absolute;top:var(--top);bottom:var(--bot);
-  left:0;right:0;overflow:hidden;touch-action:none;cursor:grab;background:#1a1f2e}
+/* MAP */
+#mw{position:absolute;top:var(--top);bottom:var(--bot);left:0;right:0;
+  overflow:hidden;touch-action:none;cursor:grab;background:#12172a}
 #mw.gr{cursor:grabbing}
 #mc{position:absolute;top:0;left:0;transform-origin:0 0;will-change:transform}
 #mc canvas{display:block}
 #pl{position:absolute;top:0;left:0;pointer-events:none}
 
-/* SEARCH */
-#sb{position:absolute;top:calc(var(--top) + 12px);left:12px;right:12px;z-index:300}
-.sw{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.3);
+/* SEARCH — floats over map, top */
+#sb{position:absolute;top:calc(var(--top)+12px);left:12px;right:66px;z-index:300}
+.sw{background:#fff;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.4);
   display:flex;align-items:center;padding:0 12px;height:48px;gap:8px;
   border:2px solid transparent;transition:border-color .15s}
 .sw:focus-within{border-color:var(--b)}
-.sw input{flex:1;border:none;outline:none;font:15px var(--fnt);
-  color:var(--g0);background:transparent}
+.sw input{flex:1;border:none;outline:none;font:15px var(--fnt);color:var(--g0);background:transparent}
 .sw input::placeholder{color:var(--g4)}
 .sx{border:none;background:none;cursor:pointer;color:var(--g4);
   width:28px;height:28px;display:none;align-items:center;justify-content:center}
 .sx.v{display:flex}
-#sr{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);
+#sr{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.3);
   margin-top:6px;display:none;max-height:260px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #sr.v{display:block}
-.si{display:flex;align-items:center;padding:12px 14px;gap:10px;cursor:pointer;
+.sri{display:flex;align-items:center;padding:12px 14px;gap:10px;cursor:pointer;
   border-bottom:1px solid var(--g6)}
-.si:last-child{border-bottom:none}
-.si:active{background:var(--bl)}
-.sic{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
-  justify-content:center;flex-shrink:0}
+.sri:last-child{border-bottom:none}
+.sri:active{background:var(--bl)}
+.sic{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sn{font-size:13px;font-weight:500;color:var(--g0)}
 .sd{font-size:11px;color:var(--g4);margin-top:1px}
-.sf{font-size:10px;font-weight:600;padding:2px 6px;border-radius:12px;flex-shrink:0;
-  font-family:var(--mono)}
+.sf{font-size:10px;font-weight:600;padding:2px 6px;border-radius:12px;flex-shrink:0;font-family:var(--mono)}
 
-/* ROUTE HEADER */
-#rh{position:absolute;top:var(--top);left:0;right:0;background:#fff;
-  z-index:300;padding:10px 44px 10px 12px;
-  box-shadow:0 2px 8px rgba(0,0,0,.15);display:none;flex-direction:column;gap:7px}
-#rh.v{display:flex}
-.rf{display:flex;align-items:center;gap:8px;background:var(--g7);
-  border-radius:4px;padding:8px 12px;font-size:13px;color:var(--g2)}
-.rfd{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-.rf span{flex:1}
-#rx{position:absolute;top:10px;right:10px;border:none;background:none;
-  cursor:pointer;color:var(--g4);padding:6px}
+/* RIGHT SIDEBAR — floor pill on top, zoom below, both right-aligned */
+#right-side{position:absolute;right:12px;top:calc(var(--top)+12px);
+  display:flex;flex-direction:column;align-items:center;gap:10px;z-index:300}
 
 /* FLOOR PILL */
-#fp{position:absolute;right:12px;bottom:calc(var(--bot)+16px);z-index:150;
-  background:#fff;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.2);
-  overflow:hidden;border:1px solid var(--g6)}
+#fp{background:#fff;border-radius:24px;box-shadow:0 4px 16px rgba(0,0,0,.3);
+  overflow:hidden;border:1px solid var(--g6);flex-shrink:0}
 .fb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   border:none;background:none;cursor:pointer;
   font-family:var(--mono);font-size:13px;font-weight:600;color:var(--g3);
-  border-bottom:1px solid var(--g6)}
+  border-bottom:1px solid var(--g6);transition:background .12s,color .12s}
 .fb:last-child{border-bottom:none}
 .fb.a{background:var(--b);color:#fff}
+.fb:active:not(.a){background:var(--bl);color:var(--b)}
 
-/* MAP CONTROLS — left side, bottom */
-#mc2{position:absolute;left:12px;bottom:calc(var(--bot)+16px);z-index:150;
-  background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.2);
-  overflow:hidden;border:1px solid var(--g6)}
+/* ZOOM CONTROLS */
+#zc{background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.3);
+  overflow:hidden;border:1px solid var(--g6);flex-shrink:0}
 .mb{width:44px;height:44px;display:flex;align-items:center;justify-content:center;
   border:none;background:none;cursor:pointer;color:var(--g3);font-size:20px;
-  border-bottom:1px solid var(--g6);user-select:none}
+  border-bottom:1px solid var(--g6);user-select:none;transition:background .1s}
 .mb:last-child{border-bottom:none}
 .mb:active{background:var(--g7)}
 
+/* VIEW TOGGLE */
+#vt{background:rgba(18,23,42,.85);border:1px solid rgba(255,255,255,.15);
+  border-radius:6px;overflow:hidden;flex-shrink:0;backdrop-filter:blur(8px)}
+.vb{width:44px;height:32px;display:flex;align-items:center;justify-content:center;
+  border:none;background:none;cursor:pointer;color:rgba(255,255,255,.5);
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.05em;
+  border-bottom:1px solid rgba(255,255,255,.1);transition:background .12s,color .12s}
+.vb:last-child{border-bottom:none}
+.vb.a{background:var(--b);color:#fff}
+
+/* ROUTE HEADER */
+#rh{position:absolute;top:var(--top);left:0;right:0;background:#fff;z-index:300;
+  padding:10px 44px 10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.15);
+  display:none;flex-direction:column;gap:7px}
+#rh.v{display:flex}
+.rf{display:flex;align-items:center;gap:8px;background:var(--g7);border-radius:4px;
+  padding:8px 12px;font-size:13px;color:var(--g2)}
+.rfd{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.rf span{flex:1}
+#rx{position:absolute;top:10px;right:10px;border:none;background:none;cursor:pointer;color:var(--g4);padding:6px}
+
 /* BOTTOM SHEET */
 #bs{position:absolute;bottom:var(--bot);left:0;right:0;background:#fff;
-  border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.2);z-index:400;
+  border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.25);z-index:400;
   transform:translateY(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
-  max-height:60vh;display:flex;flex-direction:column;overflow:hidden}
+  max-height:62vh;display:flex;flex-direction:column;overflow:hidden}
 #bs.on{transform:translateY(0)}
 #bs.pk{transform:translateY(calc(100% - 130px))}
-.bh{width:36px;height:4px;background:var(--g5);border-radius:2px;
-  margin:10px auto 0;flex-shrink:0;cursor:pointer}
-#bb{padding:16px 20px 24px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
+.bh{width:36px;height:4px;background:var(--g5);border-radius:2px;margin:10px auto 0;flex-shrink:0;cursor:pointer}
+#bb{padding:16px 20px 28px;overflow-y:auto;-webkit-overflow-scrolling:touch;flex:1}
 .bt{font-size:18px;font-weight:600;margin-bottom:4px}
-.bs2{font-size:12px;color:var(--g4);margin-bottom:14px;
-  display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bs2{font-size:12px;color:var(--g4);margin-bottom:14px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .bg{font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px}
 .ba{display:flex;gap:8px;margin-bottom:14px}
-.bb2{flex:1;height:40px;border:none;border-radius:4px;
-  font:500 13px var(--fnt);cursor:pointer;
+.bb2{flex:1;height:40px;border:none;border-radius:4px;font:500 13px var(--fnt);cursor:pointer;
   display:flex;align-items:center;justify-content:center;gap:6px}
-.bb2.p{background:var(--b);color:#fff}
-.bb2.p:active{background:var(--bh)}
-.bb2.s{background:var(--g7);color:var(--g2);border:1px solid var(--g6)}
-.bb2.s:active{background:var(--g6)}
-.br{display:flex;align-items:flex-start;gap:10px;padding:10px 0;
-  border-top:1px solid var(--g6);font-size:13px;color:var(--g3)}
-.rbox{background:var(--bl);border-radius:8px;padding:12px 14px;
-  margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.bb2.p{background:var(--b);color:#fff}.bb2.p:active{background:var(--bh)}
+.bb2.s{background:var(--g7);color:var(--g2);border:1px solid var(--g6)}.bb2.s:active{background:var(--g6)}
+.br{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-top:1px solid var(--g6);font-size:13px;color:var(--g3)}
+.rbox{background:var(--bl);border-radius:8px;padding:12px 14px;margin-bottom:12px;
+  display:flex;align-items:center;justify-content:space-between}
 .rt{font-size:22px;font-weight:600;color:var(--bh)}
 .rd{font-size:12px;color:var(--g3);margin-top:2px}
-.stp{display:flex;align-items:center;gap:10px;padding:9px 0;
-  border-top:1px solid var(--g6);font-size:13px;color:var(--g2)}
-.stpi{width:26px;height:26px;border-radius:50%;background:var(--g7);
-  display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stp{display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--g6);font-size:13px;color:var(--g2)}
+.stpi{width:26px;height:26px;border-radius:50%;background:var(--g7);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
 /* BOTTOM NAV */
 #bn{position:absolute;bottom:0;left:0;right:0;height:var(--bot);
   background:var(--g0);display:flex;align-items:center;z-index:200;
   padding-bottom:env(safe-area-inset-bottom,0px)}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:3px;height:100%;
-  border:none;background:none;cursor:pointer;color:var(--g4);
-  font-size:10px;font-family:var(--fnt);transition:color .15s}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;height:100%;border:none;background:none;cursor:pointer;
+  color:var(--g4);font-size:10px;font-family:var(--fnt);transition:color .15s}
 .ni.a{color:#4589ff}
 .ni svg{width:22px;height:22px}
 
 /* TOAST */
 #t{position:absolute;bottom:calc(var(--bot)+14px);left:50%;
   transform:translateX(-50%) translateY(50px);
-  background:var(--g1);color:#fff;padding:9px 18px;
-  border-radius:8px;font-size:13px;white-space:nowrap;z-index:600;
+  background:var(--g1);color:#fff;padding:9px 18px;border-radius:8px;
+  font-size:13px;white-space:nowrap;z-index:600;
   transition:transform .25s,opacity .25s;pointer-events:none;opacity:0}
 #t.on{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ISO LABELS */
+.iso-lbl{position:absolute;pointer-events:none;z-index:8;
+  font:700 11px var(--mono);white-space:nowrap;
+  text-shadow:0 1px 3px rgba(0,0,0,.8)}
 </style>
 </head>
 <body>
@@ -163,17 +166,15 @@ html,body{height:100%;width:100%;overflow:hidden;
 <header id="tb">
   <div class="logo">
     <div class="logo-bars">
-      <span style="width:100%"></span>
-      <span style="width:100%"></span>
-      <span></span>
-      <span></span>
+      <span style="width:100%"></span><span style="width:100%"></span>
+      <span></span><span></span>
       <span style="width:100%"></span>
     </div>
     <span class="bname">One Madison <em>Wayfinder</em></span>
   </div>
   <div class="sp"></div>
   <button class="ib" id="stbtn" aria-label="Settings">
-    <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor">
+    <svg width="17" height="17" viewBox="0 0 16 16" fill="currentColor">
       <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
     </svg>
   </button>
@@ -190,6 +191,7 @@ html,body{height:100%;width:100%;overflow:hidden;
   </div>
 </div>
 
+<!-- RIGHT SIDEBAR: search gap | floor pill | zoom | view toggle -->
 <div id="sb">
   <div class="sw">
     <svg width="16" height="16" viewBox="0 0 16 16" fill="#6f6f6f">
@@ -203,18 +205,28 @@ html,body{height:100%;width:100%;overflow:hidden;
   <div id="sr"></div>
 </div>
 
+<div id="right-side">
+  <!-- Floor pill -->
+  <div id="fp"></div>
+  <!-- Zoom controls -->
+  <div id="zc">
+    <button class="mb" id="zi">+</button>
+    <button class="mb" id="zo">&#8722;</button>
+    <button class="mb" id="zr">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11zM8 6a2 2 0 1 0 0 4A2 2 0 0 0 8 6z"/></svg>
+    </button>
+  </div>
+  <!-- ISO/Flat view toggle -->
+  <div id="vt">
+    <button class="vb a" id="v-iso">ISO</button>
+    <button class="vb" id="v-flat">FLAT</button>
+  </div>
+</div>
+
 <div id="rh">
   <div class="rf"><div class="rfd" style="background:#42be65"></div><span id="rfa">Your location</span></div>
   <div class="rf"><div class="rfd" style="background:#fa4d56"></div><span id="rfb">Destination</span></div>
   <button id="rx"><svg width="16" height="16" viewBox="0 0 16 16" fill="#6f6f6f"><path d="M12 4.7L11.3 4 8 7.3 4.7 4 4 4.7 7.3 8 4 11.3l.7.7L8 8.7l3.3 3.3.7-.7L8.7 8z"/></svg></button>
-</div>
-
-<div id="fp"></div>
-
-<div id="mc2">
-  <button class="mb" id="zi">+</button>
-  <button class="mb" id="zo">&#8722;</button>
-  <button class="mb" id="zr"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a7 7 0 1 0 0 14A7 7 0 0 0 8 1zm0 12.5A5.5 5.5 0 1 1 8 2.5a5.5 5.5 0 0 1 0 11zM8 6a2 2 0 1 0 0 4 2 2 0 0 0 0-4z"/></svg></button>
 </div>
 
 <div id="bs">
@@ -233,9 +245,9 @@ html,body{height:100%;width:100%;overflow:hidden;
 
 <script>
 "use strict";
-const FP={"1":{"name":"Floor 1","label":"1","pois":[{"id":"f1_01EL01_243_614","label":"01EL01","x":243.2,"y":614.8,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_ELEVATOR_191_520","label":"ELEVATOR","x":191.7,"y":520.5,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_01ST01_183_547","label":"01ST01","x":183.8,"y":547.7,"type":"stairs","desc":"Stairwell \u2014 Floor 1"},{"id":"f1_VESTIBULE_295_653","label":"VESTIBULE","x":295.6,"y":653.5,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_RECEPTION_213_614","label":"RECEPTION","x":213.4,"y":614.1,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_LOBBY_145_607","label":"LOBBY","x":145.8,"y":607.0,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_ROOM_245_655","label":"ROOM","x":245.8,"y":655.4,"type":"room","desc":"Floor 1"},{"id":"f1_COAT_317_580","label":"COAT","x":317.6,"y":580.7,"type":"room","desc":"Floor 1"},{"id":"f1_CONTROL_316_617","label":"CONTROL","x":316.2,"y":617.6,"type":"room","desc":"Floor 1"}]},"2":{"name":"Floor 2","label":"2","pois":[{"id":"f2_02EL01_471_281","label":"02EL01","x":471.3,"y":281.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL02_472_309","label":"02EL02","x":472.7,"y":309.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL03_471_341","label":"02EL03","x":471.7,"y":341.4,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL04_526_283","label":"02EL04","x":526.3,"y":283.8,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL05_526_313","label":"02EL05","x":526.6,"y":313.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL06_527_340","label":"02EL06","x":527.7,"y":340.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL07_526_371","label":"02EL07","x":526.5,"y":371.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL15_707_330","label":"02EL15","x":707.1,"y":330.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL16_708_304","label":"02EL16","x":708.3,"y":304.6,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL17_705_278","label":"02EL17","x":705.4,"y":278.7,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_ELEVLOB_497_339","label":"ELEVLOB","x":497.5,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL_G_206_645","label":"02EL-G","x":206.3,"y":645.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_FRELEVLB_671_350","label":"FRELEVLB","x":671.5,"y":350.9,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_STAIR_D_225_347","label":"STAIR D","x":225.8,"y":347.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_A_555_382","label":"STAIR A","x":555.1,"y":382.1,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_C_830_355","label":"STAIR C","x":830.2,"y":355.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_G_162_590","label":"STAIR G","x":162.2,"y":590.2,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_ESC_G_164_572","label":"ESC-G","x":164.4,"y":572.7,"type":"stairs","desc":"Stairwell \u2014 Floor 2"}]},"8":{"name":"Floor 8","label":"8","pois":[{"id":"f8_ELEVATOR_496_298","label":"ELEVATOR","x":496.6,"y":298.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_LOBBY_D_673_302","label":"LOBBY D","x":673.4,"y":302.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL01_471_277","label":"08EL01","x":471.4,"y":277.9,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL02_471_306","label":"08EL02","x":471.6,"y":306.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL03_471_338","label":"08EL03","x":471.6,"y":338.2,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL04_526_278","label":"08EL04","x":526.0,"y":278.6,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL05_525_309","label":"08EL05","x":525.5,"y":309.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL06_526_338","label":"08EL06","x":526.0,"y":338.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL07_526_366","label":"08EL07","x":526.9,"y":366.8,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL08_588_338","label":"08EL08","x":588.3,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL09_588_310","label":"08EL09","x":588.5,"y":310.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL10_588_279","label":"08EL10","x":588.2,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL11_643_278","label":"08EL11","x":643.9,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL12_642_309","label":"08EL12","x":642.5,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL13_642_338","label":"08EL13","x":642.1,"y":338.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL14_642_368","label":"08EL14","x":642.8,"y":368.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL15_706_327","label":"08EL15","x":706.4,"y":327.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_STAIR_C_832_327","label":"STAIR C","x":832.3,"y":327.6,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_A_556_335","label":"STAIR A","x":556.0,"y":335.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_D_236_341","label":"STAIR D","x":236.8,"y":341.0,"type":"stairs","desc":"Stairwell \u2014 Floor 8"}]},"9":{"name":"Floor 9","label":"9","pois":[{"id":"f9_09EL17_707_275","label":"09EL17","x":707.0,"y":275.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL16_708_302","label":"09EL16","x":708.0,"y":302.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL15_708_328","label":"09EL15","x":708.1,"y":328.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL14_642_367","label":"09EL14","x":642.0,"y":367.2,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL13_641_336","label":"09EL13","x":641.8,"y":336.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL12_641_308","label":"09EL12","x":641.9,"y":308.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL11_643_279","label":"09EL11","x":643.7,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL10_588_279","label":"09EL10","x":588.0,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL09_588_309","label":"09EL09","x":588.7,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL08_587_339","label":"09EL08","x":587.8,"y":339.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL07_526_368","label":"09EL07","x":526.4,"y":368.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL06_526_339","label":"09EL06","x":526.4,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL05_525_308","label":"09EL05","x":525.9,"y":308.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL04_525_279","label":"09EL04","x":525.3,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL03_473_338","label":"09EL03","x":473.9,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL02_473_306","label":"09EL02","x":473.9,"y":306.9,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL01_473_278","label":"09EL01","x":473.7,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_STAIR_B_1070_379","label":"STAIR B","x":1070.9,"y":379.6,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_C_830_356","label":"STAIR C","x":830.2,"y":356.2,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_E_597_207","label":"STAIR E","x":597.2,"y":207.0,"type":"stairs","desc":"Stairwell \u2014 Floor 9"}]},"10":{"name":"Floor 10","label":"10","pois":[{"id":"f10_10EL01_472_331","label":"10EL01","x":472.3,"y":331.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL02_472_300","label":"10EL02","x":472.3,"y":300.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL03_472_268","label":"10EL03","x":472.3,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL04_526_268","label":"10EL04","x":526.5,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL05_526_301","label":"10EL05","x":526.5,"y":301.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL06_526_330","label":"10EL06","x":526.5,"y":330.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL07_526_360","label":"10EL07","x":526.5,"y":360.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL08_586_332","label":"10EL08","x":586.7,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL09_588_301","label":"10EL09","x":588.5,"y":301.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL10_585_271","label":"10EL10","x":585.7,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL11_644_271","label":"10EL11","x":644.1,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL12_644_302","label":"10EL12","x":644.1,"y":302.5,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL13_644_332","label":"10EL13","x":644.1,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL14_644_361","label":"10EL14","x":644.1,"y":361.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL15_709_318","label":"10EL15","x":709.5,"y":318.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL16_706_294","label":"10EL16","x":706.2,"y":294.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL17_708_266","label":"10EL17","x":708.7,"y":266.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL18_744_361","label":"10EL18","x":744.1,"y":361.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL19_745_334","label":"10EL19","x":745.0,"y":334.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL20_740_302","label":"10EL20","x":740.0,"y":302.4,"type":"elevator","desc":"Elevator \u2014 Floor 10"}]}};
+const FP={"1":{"name":"Floor 1","label":"1","pois":[{"id":"f1_01EL01_243_614","label":"01EL01","x":243.2,"y":614.8,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_ELEVATOR_191_520","label":"ELEVATOR","x":191.7,"y":520.5,"type":"elevator","desc":"Elevator \u2014 Floor 1"},{"id":"f1_01ST01_183_547","label":"01ST01","x":183.8,"y":547.7,"type":"stairs","desc":"Stairwell \u2014 Floor 1"},{"id":"f1_VESTIBULE_295_653","label":"VESTIBULE","x":295.6,"y":653.5,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_RECEPTION_213_614","label":"RECEPTION","x":213.4,"y":614.1,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_LOBBY_145_607","label":"LOBBY","x":145.8,"y":607.0,"type":"reception","desc":"Reception / Lobby \u2014 Floor 1"},{"id":"f1_ROOM_245_655","label":"ROOM","x":245.8,"y":655.4,"type":"room","desc":"Floor 1"},{"id":"f1_COAT_317_580","label":"COAT","x":317.6,"y":580.7,"type":"room","desc":"Floor 1"},{"id":"f1_CONTROL_316_617","label":"CONTROL","x":316.2,"y":617.6,"type":"room","desc":"Floor 1"}]},"2":{"name":"Floor 2","label":"2","pois":[{"id":"f2_02EL01_471_281","label":"02EL01","x":471.3,"y":281.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL02_472_309","label":"02EL02","x":472.7,"y":309.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL03_471_341","label":"02EL03","x":471.7,"y":341.4,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL04_526_283","label":"02EL04","x":526.3,"y":283.8,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL05_526_313","label":"02EL05","x":526.6,"y":313.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL06_527_340","label":"02EL06","x":527.7,"y":340.5,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL07_526_371","label":"02EL07","x":526.5,"y":371.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL15_707_330","label":"02EL15","x":707.1,"y":330.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL16_708_304","label":"02EL16","x":708.3,"y":304.6,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL17_705_278","label":"02EL17","x":705.4,"y":278.7,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_ELEVLOB_497_339","label":"ELEVLOB","x":497.5,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_02EL_G_206_645","label":"02EL-G","x":206.3,"y":645.2,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_FRELEVLB_671_350","label":"FRELEVLB","x":671.5,"y":350.9,"type":"elevator","desc":"Elevator \u2014 Floor 2"},{"id":"f2_STAIR_D_225_347","label":"STAIR D","x":225.8,"y":347.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_A_555_382","label":"STAIR A","x":555.1,"y":382.1,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_C_830_355","label":"STAIR C","x":830.2,"y":355.4,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_STAIR_G_162_590","label":"STAIR G","x":162.2,"y":590.2,"type":"stairs","desc":"Stairwell \u2014 Floor 2"},{"id":"f2_ESC_G_164_572","label":"ESC-G","x":164.4,"y":572.7,"type":"stairs","desc":"Stairwell \u2014 Floor 2"}]},"8":{"name":"Floor 8","label":"8","pois":[{"id":"f8_ELEVATOR_496_298","label":"ELEVATOR","x":496.6,"y":298.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_LOBBY_D_673_302","label":"LOBBY D","x":673.4,"y":302.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL01_471_277","label":"08EL01","x":471.4,"y":277.9,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL02_471_306","label":"08EL02","x":471.6,"y":306.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL03_471_338","label":"08EL03","x":471.6,"y":338.2,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL04_526_278","label":"08EL04","x":526.0,"y":278.6,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL05_525_309","label":"08EL05","x":525.5,"y":309.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL06_526_338","label":"08EL06","x":526.0,"y":338.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL07_526_366","label":"08EL07","x":526.9,"y":366.8,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL08_588_338","label":"08EL08","x":588.3,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL09_588_310","label":"08EL09","x":588.5,"y":310.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL10_588_279","label":"08EL10","x":588.2,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL11_643_278","label":"08EL11","x":643.9,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL12_642_309","label":"08EL12","x":642.5,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL13_642_338","label":"08EL13","x":642.1,"y":338.1,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL14_642_368","label":"08EL14","x":642.8,"y":368.3,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_08EL15_706_327","label":"08EL15","x":706.4,"y":327.4,"type":"elevator","desc":"Elevator \u2014 Floor 8"},{"id":"f8_STAIR_C_832_327","label":"STAIR C","x":832.3,"y":327.6,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_A_556_335","label":"STAIR A","x":556.0,"y":335.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_D_236_341","label":"STAIR D","x":236.8,"y":341.0,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_E_614_220","label":"STAIR E","x":614.2,"y":220.5,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_STAIR_B_1070_376","label":"STAIR B","x":1070.8,"y":376.2,"type":"stairs","desc":"Stairwell \u2014 Floor 8"},{"id":"f8_TOILET__MEN__861_277","label":"TOILET (MEN)","x":861.6,"y":277.4,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_TOILET__WOMEN__763_287","label":"TOILET (WOMEN)","x":763.4,"y":287.4,"type":"restroom","desc":"Restroom \u2014 Floor 8"},{"id":"f8_TOILET_396_311","label":"TOILET","x":396.2,"y":311.2,"type":"restroom","desc":"Restroom \u2014 Floor 8"}]},"9":{"name":"Floor 9","label":"9","pois":[{"id":"f9_09EL17_707_275","label":"09EL17","x":707.0,"y":275.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL16_708_302","label":"09EL16","x":708.0,"y":302.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL15_708_328","label":"09EL15","x":708.1,"y":328.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL14_642_367","label":"09EL14","x":642.0,"y":367.2,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL13_641_336","label":"09EL13","x":641.8,"y":336.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL12_641_308","label":"09EL12","x":641.9,"y":308.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL11_643_279","label":"09EL11","x":643.7,"y":279.3,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL10_588_279","label":"09EL10","x":588.0,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL09_588_309","label":"09EL09","x":588.7,"y":309.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL08_587_339","label":"09EL08","x":587.8,"y":339.8,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL07_526_368","label":"09EL07","x":526.4,"y":368.1,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL06_526_339","label":"09EL06","x":526.4,"y":339.0,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL05_525_308","label":"09EL05","x":525.9,"y":308.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL04_525_279","label":"09EL04","x":525.3,"y":279.6,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL03_473_338","label":"09EL03","x":473.9,"y":338.7,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL02_473_306","label":"09EL02","x":473.9,"y":306.9,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_09EL01_473_278","label":"09EL01","x":473.7,"y":278.4,"type":"elevator","desc":"Elevator \u2014 Floor 9"},{"id":"f9_STAIR_B_1070_379","label":"STAIR B","x":1070.9,"y":379.6,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_C_830_356","label":"STAIR C","x":830.2,"y":356.2,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_E_597_207","label":"STAIR E","x":597.2,"y":207.0,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_STAIR_A_555_382","label":"STAIR A","x":555.0,"y":382.9,"type":"stairs","desc":"Stairwell \u2014 Floor 9"},{"id":"f9_9C_LK1_256_379","label":"9C-LK1","x":256.6,"y":379.2,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9A_LK2_601_569","label":"9A-LK2","x":601.6,"y":569.7,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9A_LK1_651_569","label":"9A-LK1","x":651.6,"y":569.5,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"},{"id":"f9_9C_LK5_606_234","label":"9C-LK5","x":606.6,"y":234.3,"type":"focus","desc":"Focus / quiet area \u2014 Floor 9"}]},"10":{"name":"Floor 10","label":"10","pois":[{"id":"f10_10EL01_472_331","label":"10EL01","x":472.3,"y":331.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL02_472_300","label":"10EL02","x":472.3,"y":300.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL03_472_268","label":"10EL03","x":472.3,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL04_526_268","label":"10EL04","x":526.5,"y":268.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL05_526_301","label":"10EL05","x":526.5,"y":301.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL06_526_330","label":"10EL06","x":526.5,"y":330.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL07_526_360","label":"10EL07","x":526.5,"y":360.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL08_586_332","label":"10EL08","x":586.7,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL09_588_301","label":"10EL09","x":588.5,"y":301.8,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL10_585_271","label":"10EL10","x":585.7,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL11_644_271","label":"10EL11","x":644.1,"y":271.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL12_644_302","label":"10EL12","x":644.1,"y":302.5,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL13_644_332","label":"10EL13","x":644.1,"y":332.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL14_644_361","label":"10EL14","x":644.1,"y":361.6,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL15_709_318","label":"10EL15","x":709.5,"y":318.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL16_706_294","label":"10EL16","x":706.2,"y":294.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL17_708_266","label":"10EL17","x":708.7,"y":266.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL18_744_361","label":"10EL18","x":744.1,"y":361.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL19_745_334","label":"10EL19","x":745.0,"y":334.1,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL20_740_302","label":"10EL20","x":740.0,"y":302.4,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL21_743_270","label":"10EL21","x":743.8,"y":270.3,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL22_800_271","label":"10EL22","x":800.3,"y":271.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL23_800_301","label":"10EL23","x":800.8,"y":301.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL25_799_361","label":"10EL25","x":799.2,"y":361.9,"type":"elevator","desc":"Elevator \u2014 Floor 10"},{"id":"f10_10EL24_798_333","label":"10EL24","x":798.2,"y":333.7,"type":"elevator","desc":"Elevator \u2014 Floor 10"}]}};
 
-// ── FLOORS ──────────────────────────────────────────
+// ── CONFIG ───────────────────────────────────────────
 const FL=[
   {n:'1', name:'Floor 1',  c:'#42be65'},
   {n:'2', name:'Floor 2',  c:'#0f62fe'},
@@ -244,74 +256,56 @@ const FL=[
   {n:'10',name:'Floor 10', c:'#08bdba'},
 ];
 
-// Simplified floor outlines (traced from architectural drawings, SVG space 0-1224 x 0-792)
+// Floor outlines in SVG space (1224×792)
 const SHAPES={
   '1': {
     walls:[[70,160],[700,160],[700,225],[900,225],[900,690],[700,690],[700,730],[250,730],[250,690],[70,690]],
     zones:[
-      {l:'Lobby',       x:80, y:500,w:180,h:160,f:'#ddefff'},
-      {l:'Reception',   x:160,y:540,w:120,h:90, f:'#c8e0ff'},
-      {l:'Vestibule',   x:240,y:630,w:110,h:60, f:'#ddefff'},
-      {l:'Elevator',    x:165,y:470,w:65, h:55, f:'#d0f5f5'},
-      {l:'Stairwell',   x:157,y:510,w:55, h:45, f:'#d0f5e0'},
+      {l:'Lobby',x:80,y:500,w:180,h:160,f:'#ddeeff'},{l:'Reception',x:160,y:545,w:120,h:90,f:'#c8dfff'},
+      {l:'Vestibule',x:242,y:630,w:110,h:58,f:'#ddeeff'},{l:'Elevator',x:166,y:472,w:62,h:52,f:'#ccf5f5'},
+      {l:'Stair',x:158,y:512,w:52,h:44,f:'#ccf5e0'},
     ]
   },
   '2': {
     walls:[[60,155],[880,155],[880,690],[700,690],[700,730],[220,730],[220,690],[60,690]],
     zones:[
-      {l:'Elevator Lobby', x:445,y:255,w:130,h:130,f:'#d0f5f5'},
-      {l:'Elev Lobby D',   x:645,y:255,w:100,h:100,f:'#d0f5f5'},
-      {l:'Stair A',        x:530,y:358,w:52, h:52, f:'#d0f5e0'},
-      {l:'Stair C',        x:806,y:338,w:52, h:52, f:'#d0f5e0'},
-      {l:'Stair D',        x:204,y:328,w:52, h:52, f:'#d0f5e0'},
-      {l:'Open Plan A',    x:80, y:400,w:350,h:260,f:'#f8f8ff'},
-      {l:'Open Plan B',    x:470,y:400,w:380,h:260,f:'#f8f8ff'},
+      {l:'Elev Lobby',x:445,y:252,w:132,h:128,f:'#ccf5f5'},{l:'Elev Lobby D',x:644,y:252,w:102,h:102,f:'#ccf5f5'},
+      {l:'Stair A',x:529,y:356,w:50,h:50,f:'#ccf5e0'},{l:'Stair C',x:805,y:336,w:50,h:50,f:'#ccf5e0'},
+      {l:'Stair D',x:203,y:326,w:50,h:50,f:'#ccf5e0'},
+      {l:'Open Plan A',x:78,y:398,w:352,h:262,f:'#f6f6ff'},{l:'Open Plan B',x:468,y:398,w:382,h:262,f:'#f6f6ff'},
     ]
   },
   '8': {
     walls:[[60,100],[1185,100],[1185,710],[1010,710],[1010,765],[60,765]],
     zones:[
-      {l:'Elev Lobby A',  x:448,y:250,w:120,h:130,f:'#d0f5f5'},
-      {l:'Elev Lobby D',  x:635,y:250,w:115,h:115,f:'#d0f5f5'},
-      {l:'Stair A',       x:534,y:314,w:50, h:50, f:'#d0f5e0'},
-      {l:'Stair B',       x:1050,y:354,w:50,h:50,f:'#d0f5e0'},
-      {l:'Stair C',       x:810,y:306,w:50, h:50, f:'#d0f5e0'},
-      {l:'Stair D',       x:216,y:320,w:50, h:50, f:'#d0f5e0'},
-      {l:'Stair E',       x:592,y:198,w:50, h:44, f:'#d0f5e0'},
-      {l:'WC Men',        x:838,y:256,w:72, h:52, f:'#ede0ff'},
-      {l:'WC Women',      x:741,y:266,w:72, h:52, f:'#ede0ff'},
-      {l:'WC',            x:374,y:290,w:105,h:52, f:'#ede0ff'},
-      {l:'Focus',         x:162,y:420,w:100,h:80, f:'#fff8d0'},
-      {l:'Collab',        x:465,y:624,w:105,h:64, f:'#fff4ee'},
-      {l:'Copy/Print',    x:647,y:416,w:84, h:52, f:'#f0f0f8'},
-      {l:'Prayer',        x:989,y:330,w:84, h:52, f:'#f0fff4'},
-      {l:'Open Work',     x:80, y:380,w:350,h:210,f:'#f8f8ff'},
-      {l:'Team Area',     x:700,y:420,w:320,h:200,f:'#f8f8ff'},
+      {l:'Elev Lobby A',x:446,y:248,w:122,h:132,f:'#ccf5f5'},{l:'Elev Lobby D',x:633,y:248,w:117,h:117,f:'#ccf5f5'},
+      {l:'Stair A',x:533,y:312,w:50,h:50,f:'#ccf5e0'},{l:'Stair B',x:1049,y:352,w:50,h:50,f:'#ccf5e0'},
+      {l:'Stair C',x:809,y:304,w:50,h:50,f:'#ccf5e0'},{l:'Stair D',x:215,y:318,w:50,h:50,f:'#ccf5e0'},
+      {l:'Stair E',x:591,y:196,w:50,h:44,f:'#ccf5e0'},
+      {l:'WC Men',x:837,y:254,w:74,h:50,f:'#ede0ff'},{l:'WC Women',x:740,y:264,w:74,h:50,f:'#ede0ff'},
+      {l:'WC',x:373,y:288,w:107,h:50,f:'#ede0ff'},
+      {l:'Focus',x:160,y:418,w:102,h:82,f:'#fff8cc'},{l:'Collab',x:464,y:622,w:107,h:66,f:'#fff4ee'},
+      {l:'Copy/Print',x:645,y:414,w:86,h:50,f:'#f0f0f8'},{l:'Prayer',x:988,y:328,w:86,h:50,f:'#f0fff4'},
+      {l:'Open Work',x:78,y:378,w:352,h:212,f:'#f6f6ff'},{l:'Team Area',x:698,y:418,w:322,h:202,f:'#f6f6ff'},
     ]
   },
   '9': {
     walls:[[60,100],[1185,100],[1185,710],[1010,710],[1010,765],[60,765]],
     zones:[
-      {l:'Elev Bank A',   x:450,y:250,w:120,h:130,f:'#d0f5f5'},
-      {l:'Elev Bank B',   x:585,y:250,w:65, h:65, f:'#d0f5f5'},
-      {l:'Elev Bank C',   x:620,y:250,w:65, h:65, f:'#d0f5f5'},
-      {l:'Open Work A',   x:80, y:380,w:380,h:270,f:'#f8f8ff'},
-      {l:'Open Work B',   x:600,y:380,w:380,h:270,f:'#f8f8ff'},
+      {l:'Elev Bank',x:448,y:248,w:122,h:132,f:'#ccf5f5'},
+      {l:'Open Work A',x:78,y:378,w:382,h:272,f:'#f6f6ff'},{l:'Open Work B',x:598,y:378,w:382,h:272,f:'#f6f6ff'},
     ]
   },
   '10': {
     walls:[[60,100],[1185,100],[1185,710],[1010,710],[1010,765],[60,765]],
     zones:[
-      {l:'Elev Bank',     x:450,y:240,w:120,h:140,f:'#d0f5f5'},
-      {l:'Stair',         x:535,y:348,w:52, h:52, f:'#d0f5e0'},
-      {l:'WC Men',        x:370,y:274,w:84, h:52, f:'#ede0ff'},
-      {l:'WC Women',      x:456,y:274,w:84, h:52, f:'#ede0ff'},
-      {l:'Open Work',     x:80, y:380,w:760,h:290,f:'#f8f8ff'},
+      {l:'Elev Bank',x:448,y:238,w:122,h:142,f:'#ccf5f5'},{l:'Stair',x:533,y:346,w:52,h:52,f:'#ccf5e0'},
+      {l:'WC Men',x:368,y:272,w:86,h:50,f:'#ede0ff'},{l:'WC Women',x:454,y:272,w:86,h:50,f:'#ede0ff'},
+      {l:'Open Work',x:78,y:378,w:762,h:292,f:'#f6f6ff'},
     ]
   }
 };
 
-// POI icons (SVG path strings)
 const IC={
   elevator: {c:'#08bdba',p:'<path d="M8 2l2.5 3h-5zm0 12l-2.5-3h5zM6 6h4v4H6z"/>'},
   stairs:   {c:'#42be65',p:'<path d="M2 14h3v-3h3v-3h3V5h3V2h-3v3h-3v3H5v3H2z"/>'},
@@ -324,30 +318,69 @@ const IC={
   room:     {c:'#a0a0a0',p:'<path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/>'},
 };
 
-// ── STATE ────────────────────────────────────────────
-let fi=2; // default floor 8
+// ── STATE ─────────────────────────────────────────────
+let fi=2, view='iso';
 let sc=1,ox=0,oy=0,rmode=false,rstep=null,org=null,dst=null,saved=[];
 
-// ── CANVAS ───────────────────────────────────────────
+// ── CANVAS ────────────────────────────────────────────
 const mw=document.getElementById('mw');
 const mcEl=document.getElementById('mc');
 const cv=document.getElementById('cv');
 const ctx=cv.getContext('2d');
 const rv=document.getElementById('rv');
 const pl=document.getElementById('pl');
-const W=700,H=480; // canvas size in CSS px — small enough for any phone
-const S=W/1224;    // scale from SVG coords to canvas coords
 
-cv.width=W; cv.height=H;
-cv.style.width=W+'px'; cv.style.height=H+'px';
-rv.style.width=W+'px'; rv.style.height=H+'px';
-rv.setAttribute('width',W); rv.setAttribute('height',H);
-pl.style.width=W+'px'; pl.style.height=H+'px';
+// SVG coord space
+const SVG_W=1224, SVG_H=792;
+// Draw scale: fit 1224 wide into ~700px
+const DS=0.57;
+const CW=Math.round(SVG_W*DS); // ~698
+const CH=Math.round(SVG_H*DS); // ~452
 
-function px(x){return x*S;}
-function py(y){return y*S;}
+// ISO constants
+const ISO_SX=0.50;  // horizontal skew per Y unit
+const ISO_SY=0.25;  // vertical compression
+const GAP=90;       // px between stacked floors
 
-// Draw a rounded rectangle without roundRect API (iOS 15 compat)
+// Total canvas size: wide enough for iso projection
+const ISO_EXTRA_W=Math.round(SVG_H*DS*ISO_SX*0.5);
+const ISO_EXTRA_H=Math.round(FL.length*GAP + SVG_W*DS*ISO_SY);
+const TOTAL_W = view==='iso' ? CW+ISO_EXTRA_W+60 : CW;
+const TOTAL_H_ISO = CH + FL.length*GAP + 80;
+
+function setCanvasSize(){
+  if(view==='iso'){
+    cv.width=CW+120; cv.height=TOTAL_H_ISO;
+    cv.style.width=(CW+120)+'px'; cv.style.height=TOTAL_H_ISO+'px';
+    rv.setAttribute('width',CW+120); rv.setAttribute('height',TOTAL_H_ISO);
+    pl.style.width=(CW+120)+'px'; pl.style.height=TOTAL_H_ISO+'px';
+  } else {
+    cv.width=CW; cv.height=CH;
+    cv.style.width=CW+'px'; cv.style.height=CH+'px';
+    rv.setAttribute('width',CW); rv.setAttribute('height',CH);
+    pl.style.width=CW+'px'; pl.style.height=CH+'px';
+  }
+}
+
+// Convert SVG coords to screen coords for a given floor index
+function isoXY(svgX, svgY, floorIdx){
+  // Each floor is lifted by GAP * (FL.length-1-floorIdx) so floor 0 is at bottom
+  const lift = (FL.length-1-floorIdx)*GAP;
+  // Apply shear: x goes right, y adds rightward shift
+  const sx = svgX*DS - svgY*DS*ISO_SX*0.5 + 40;
+  const sy = svgX*DS*ISO_SY*0.5 + svgY*DS*ISO_SY + lift + 30;
+  return {x:sx, y:sy};
+}
+
+function flatXY(svgX, svgY){
+  return {x: svgX*DS, y: svgY*DS};
+}
+
+function proj(svgX, svgY, floorIdx){
+  return view==='iso' ? isoXY(svgX,svgY,floorIdx) : flatXY(svgX,svgY);
+}
+
+// ── ROUNDED RECT (iOS 15 compat) ──────────────────────
 function rrect(x,y,w,h,r){
   ctx.beginPath();
   ctx.moveTo(x+r,y);
@@ -358,60 +391,157 @@ function rrect(x,y,w,h,r){
   ctx.closePath();
 }
 
-function drawFloor(){
-  const f=FL[fi], sh=SHAPES[f.n];
-  ctx.clearRect(0,0,W,H);
+// ── DRAW ISO FLOOR ────────────────────────────────────
+function drawIsoFloor(sh, floorIdx, floorColor, isActive){
+  // Draw the floor as a skewed parallelogram
+  const walls = sh.walls;
+  // Project each wall point
+  const pts = walls.map(([x,y])=>isoXY(x,y,floorIdx));
 
-  // Background
-  ctx.fillStyle='#e8eef4';
-  ctx.fillRect(0,0,W,H);
-
-  if(!sh) return;
-
-  // Floor fill
+  // Floor slab (bottom face — just a fill with the wall outline skewed)
   ctx.beginPath();
-  sh.walls.forEach(([x,y],i)=>i===0?ctx.moveTo(px(x),py(y)):ctx.lineTo(px(x),py(y)));
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
   ctx.closePath();
-  ctx.fillStyle='#ffffff';
+  ctx.fillStyle = isActive ? '#ffffff' : 'rgba(240,242,248,0.7)';
   ctx.fill();
-  ctx.strokeStyle=f.c;
-  ctx.lineWidth=2.5;
+
+  // Edge lines (give depth: draw left and front edges slightly darker)
+  // Left edge shadow
+  const p0=pts[0], pLast=pts[pts.length-1];
+  ctx.beginPath();
+  ctx.moveTo(p0.x, p0.y);
+  ctx.lineTo(p0.x, p0.y+8);
+  ctx.strokeStyle='rgba(0,0,0,.1)';ctx.lineWidth=6;ctx.stroke();
+
+  // Outline
+  ctx.beginPath();
+  pts.forEach((p,i)=>i===0?ctx.moveTo(p.x,p.y):ctx.lineTo(p.x,p.y));
+  ctx.closePath();
+  ctx.strokeStyle = isActive ? floorColor : 'rgba(180,185,200,0.5)';
+  ctx.lineWidth = isActive ? 2 : 1;
   ctx.stroke();
 
-  // Zones
-  sh.zones.forEach(z=>{
-    rrect(px(z.x),py(z.y),px(z.w),py(z.h),3);
-    ctx.fillStyle=z.f||'#f4f4f4';
-    ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,.07)';
-    ctx.lineWidth=1;
-    ctx.stroke();
-    // Label
-    const cw=px(z.w),ch=py(z.h);
-    if(cw>28&&ch>16){
-      const fs=Math.min(9,Math.max(6,cw/(z.l.length*0.7)));
-      ctx.fillStyle='#525252';
-      ctx.font=fs+'px -apple-system,sans-serif';
-      ctx.textAlign='center';
-      ctx.textBaseline='middle';
-      ctx.fillText(z.l,px(z.x)+cw/2,py(z.y)+ch/2,cw-4);
-    }
-  });
+  // Zones (projected as skewed rects)
+  if(sh.zones){
+    sh.zones.forEach(z=>{
+      const tl=isoXY(z.x,       z.y,       floorIdx);
+      const tr=isoXY(z.x+z.w,   z.y,       floorIdx);
+      const br=isoXY(z.x+z.w,   z.y+z.h,   floorIdx);
+      const bl=isoXY(z.x,       z.y+z.h,   floorIdx);
+      ctx.beginPath();
+      ctx.moveTo(tl.x,tl.y);ctx.lineTo(tr.x,tr.y);
+      ctx.lineTo(br.x,br.y);ctx.lineTo(bl.x,bl.y);
+      ctx.closePath();
+      const alpha = isActive ? 1 : 0.5;
+      // Parse hex fill and apply alpha
+      ctx.fillStyle = z.f || '#f4f4f4';
+      ctx.globalAlpha = isActive ? 1 : 0.55;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle='rgba(0,0,0,.05)';ctx.lineWidth=.5;ctx.stroke();
+    });
+  }
 
-  // Floor label
-  ctx.font='bold 11px -apple-system,monospace';
-  ctx.fillStyle=f.c;
-  ctx.textAlign='left';
-  ctx.textBaseline='top';
-  ctx.fillText(f.name,8,6);
+  // Elevator shaft vertical lines (only if not bottom floor)
+  if(isActive && floorIdx < FL.length-1){
+    const shaftPts=[{x:497,y:330},{x:670,y:315}];
+    shaftPts.forEach(sp=>{
+      const top=isoXY(sp.x,sp.y,floorIdx);
+      const bot=isoXY(sp.x,sp.y,floorIdx+1);
+      // Gradient shaft
+      const grad=ctx.createLinearGradient(top.x,top.y,bot.x,bot.y);
+      grad.addColorStop(0,'rgba(8,189,186,.7)');
+      grad.addColorStop(1,'rgba(8,189,186,.15)');
+      ctx.beginPath();
+      ctx.moveTo(top.x-3,top.y);ctx.lineTo(top.x+3,top.y);
+      ctx.lineTo(bot.x+3,bot.y);ctx.lineTo(bot.x-3,bot.y);
+      ctx.closePath();
+      ctx.fillStyle=grad;ctx.fill();
+      ctx.strokeStyle='rgba(8,189,186,.5)';ctx.lineWidth=1;ctx.stroke();
+    });
+  }
+}
+
+// ── DRAW FLAT FLOOR ───────────────────────────────────
+function drawFlatFloor(sh, floorColor){
+  const walls=sh.walls;
+  ctx.beginPath();
+  walls.forEach(([x,y],i)=>i===0?ctx.moveTo(x*DS,y*DS):ctx.lineTo(x*DS,y*DS));
+  ctx.closePath();
+  ctx.fillStyle='#ffffff';ctx.fill();
+  ctx.strokeStyle=floorColor;ctx.lineWidth=2.5;ctx.stroke();
+
+  if(sh.zones){
+    sh.zones.forEach(z=>{
+      rrect(z.x*DS,z.y*DS,z.w*DS,z.h*DS,3);
+      ctx.fillStyle=z.f||'#f4f4f4';ctx.fill();
+      ctx.strokeStyle='rgba(0,0,0,.06)';ctx.lineWidth=1;ctx.stroke();
+      const cw=z.w*DS,ch=z.h*DS;
+      if(cw>28&&ch>16){
+        const fs=Math.min(9,Math.max(6,cw/(z.l.length*0.72)));
+        ctx.fillStyle='#525252';ctx.font=fs+'px -apple-system,sans-serif';
+        ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText(z.l,z.x*DS+cw/2,z.y*DS+ch/2,cw-4);
+      }
+    });
+  }
 
   // Scale bar
-  ctx.strokeStyle='rgba(0,0,0,.3)';
-  ctx.lineWidth=2;
-  ctx.beginPath();ctx.moveTo(W-64,H-12);ctx.lineTo(W-16,H-12);ctx.stroke();
-  ctx.fillStyle='rgba(0,0,0,.4)';
-  ctx.font='8px sans-serif';ctx.textAlign='center';ctx.textBaseline='bottom';
-  ctx.fillText('~20m',W-40,H-2);
+  ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(CW-60,CH-12);ctx.lineTo(CW-14,CH-12);ctx.stroke();
+  ctx.fillStyle='rgba(0,0,0,.35)';ctx.font='8px sans-serif';
+  ctx.textAlign='center';ctx.textBaseline='bottom';
+  ctx.fillText('~20m',CW-37,CH-2);
+}
+
+// ── MAIN RENDER ───────────────────────────────────────
+function render(){
+  setCanvasSize();
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // Remove old labels
+  document.querySelectorAll('.iso-lbl').forEach(e=>e.remove());
+
+  if(view==='iso'){
+    // Dark background gradient
+    const bg=ctx.createLinearGradient(0,0,0,cv.height);
+    bg.addColorStop(0,'#1a2035');bg.addColorStop(1,'#0d1020');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,cv.width,cv.height);
+
+    // Draw floors bottom to top (index 0 = Floor 1 = bottom of stack)
+    FL.forEach((f,i)=>{
+      const sh=SHAPES[f.n];
+      if(!sh)return;
+      const isActive=(i===fi);
+      drawIsoFloor(sh,i,f.c,isActive);
+    });
+
+    // Floor labels on left spine
+    FL.forEach((f,i)=>{
+      const p=isoXY(0, SVG_H/2, i);
+      const lbl=document.createElement('div');
+      lbl.className='iso-lbl';
+      lbl.style.left=(p.x-42)+'px';
+      lbl.style.top=(p.y-8)+'px';
+      lbl.style.color= i===fi ? f.c : 'rgba(180,190,210,0.5)';
+      lbl.style.borderLeft=`3px solid ${i===fi?f.c:'rgba(180,190,210,0.3)'}`;
+      lbl.style.paddingLeft='6px';
+      lbl.textContent=f.name;
+      mcEl.appendChild(lbl);
+    });
+
+  } else {
+    // Flat: light bg
+    ctx.fillStyle='#e8eef4';ctx.fillRect(0,0,CW,CH);
+    const f=FL[fi],sh=SHAPES[f.n];
+    if(sh) drawFlatFloor(sh,f.c);
+    // Floor label
+    ctx.fillStyle=f.c;ctx.font='bold 11px monospace';
+    ctx.textAlign='left';ctx.textBaseline='top';
+    ctx.fillText(f.name,8,6);
+  }
+
+  renderPins();
+  drawRoute();
 }
 
 // ── PINS ─────────────────────────────────────────────
@@ -422,73 +552,75 @@ function renderPins(){
 
   pois.forEach(p=>{
     const ic=IC[p.type]||IC.room;
-    const x=px(p.x),y=py(p.y);
+    const pt=proj(p.x,p.y,fi);
     const d=document.createElement('div');
-    d.style.cssText=`position:absolute;left:${x}px;top:${y}px;transform:translate(-50%,-100%);cursor:pointer;z-index:5`;
+    d.style.cssText=`position:absolute;left:${pt.x}px;top:${pt.y}px;transform:translate(-50%,-100%);cursor:pointer;z-index:5;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))`;
     d.dataset.id=p.id;
-    d.innerHTML=`<svg width="20" height="26" viewBox="0 0 28 36" xmlns="http://www.w3.org/2000/svg"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.94 14 22 14 22S28 23.94 28 14C28 6.27 21.73 0 14 0z" fill="${ic.c}"/><circle cx="14" cy="14" r="7" fill="white" opacity=".9"/><svg x="7" y="7" width="14" height="14" viewBox="0 0 16 16" fill="${ic.c}">${ic.p}</svg></svg>`;
+    d.innerHTML=`<svg width="20" height="26" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.94 14 22 14 22S28 23.94 28 14C28 6.27 21.73 0 14 0z" fill="${ic.c}"/><circle cx="14" cy="14" r="7" fill="white" opacity=".9"/><svg x="7" y="7" width="14" height="14" viewBox="0 0 16 16" fill="${ic.c}">${ic.p}</svg></svg>`;
     d.addEventListener('click',e=>{e.stopPropagation();if(rmode&&rstep)assignRoute(p);else showPOI(p);},{passive:true});
     pl.appendChild(d);
   });
 
-  // Nav pins
-  if(org&&org.fn===f.n) addNavPin(org.x,org.y,'#42be65');
-  if(dst&&dst.fn===f.n) addNavPin(dst.x,dst.y,'#fa4d56');
+  if(org) addNavPin(org.svgX,org.svgY,'#42be65');
+  if(dst) addNavPin(dst.svgX,dst.svgY,'#fa4d56');
 
-  // You-are-here dot
+  // You-are-here
+  const yahPt=proj(498,310,fi);
   const yah=document.createElement('div');
-  yah.style.cssText=`position:absolute;left:${px(498)}px;top:${py(310)}px;transform:translate(-50%,-50%);pointer-events:none;z-index:4`;
-  yah.innerHTML=`<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#0f62fe" opacity=".18"/><circle cx="9" cy="9" r="5" fill="#0f62fe" opacity=".35"/><circle cx="9" cy="9" r="3" fill="#0f62fe"/><circle cx="9" cy="9" r="1.5" fill="white"/></svg>`;
+  yah.style.cssText=`position:absolute;left:${yahPt.x}px;top:${yahPt.y}px;transform:translate(-50%,-50%);pointer-events:none;z-index:4`;
+  yah.innerHTML=`<svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="8" fill="#0f62fe" opacity=".2"/><circle cx="9" cy="9" r="5" fill="#0f62fe" opacity=".4"/><circle cx="9" cy="9" r="3" fill="#0f62fe"/><circle cx="9" cy="9" r="1.5" fill="white"/></svg>`;
   pl.appendChild(yah);
 }
 
 function addNavPin(svgX,svgY,color){
+  const pt=proj(svgX,svgY,fi);
   const d=document.createElement('div');
-  d.style.cssText=`position:absolute;left:${px(svgX)}px;top:${py(svgY)}px;transform:translate(-50%,-100%);pointer-events:none;z-index:10`;
+  d.style.cssText=`position:absolute;left:${pt.x}px;top:${pt.y}px;transform:translate(-50%,-100%);pointer-events:none;z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))`;
   d.innerHTML=`<svg width="24" height="32" viewBox="0 0 28 36"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.94 14 22 14 22S28 23.94 28 14C28 6.27 21.73 0 14 0z" fill="${color}"/><circle cx="14" cy="14" r="5" fill="white"/></svg>`;
   pl.appendChild(d);
 }
 
-// ── ROUTE SVG ────────────────────────────────────────
+// ── ROUTE ─────────────────────────────────────────────
 function drawRoute(){
   rv.querySelectorAll('.rp').forEach(e=>e.remove());
-  if(!org||!dst||org.fn!==FL[fi].n||dst.fn!==FL[fi].n) return;
-  const ox2=px(org.x),oy2=py(org.y),dx=px(dst.x),dy2=py(dst.y);
-  const d=`M${ox2},${oy2}L${dx},${oy2}L${dx},${dy2}`;
-  const mk=(s,w,c,dash,marker)=>{
+  if(!org||!dst) return;
+  const o=proj(org.svgX,org.svgY,fi);
+  const d2=proj(dst.svgX,dst.svgY,fi);
+  const m=proj(dst.svgX,org.svgY,fi);
+  const pathD=`M${o.x},${o.y}L${m.x},${m.y}L${d2.x},${d2.y}`;
+  const mk=(w,c,dash,marker)=>{
     const p=document.createElementNS('http://www.w3.org/2000/svg','path');
-    p.setAttribute('d',d);p.setAttribute('class','rp');p.setAttribute('fill','none');
-    p.setAttribute('stroke',c);p.setAttribute('stroke-width',w);
-    p.setAttribute('stroke-linecap','round');
+    p.setAttribute('d',pathD);p.setAttribute('class','rp');p.setAttribute('fill','none');
+    p.setAttribute('stroke',c);p.setAttribute('stroke-width',w);p.setAttribute('stroke-linecap','round');
     if(dash)p.setAttribute('stroke-dasharray',dash);
     if(marker)p.setAttribute('marker-end',marker);
     rv.appendChild(p);
   };
-  mk(null,'8','rgba(0,0,0,.15)');
-  mk(null,'4','#0f62fe','10 4','url(#ar)');
+  mk('8','rgba(0,0,0,.2)');
+  mk('4','#0f62fe','10 4','url(#ar)');
 }
 
-// ── PAN/ZOOM ─────────────────────────────────────────
+// ── PAN / ZOOM ────────────────────────────────────────
 function applyT(a){
-  if(a){mcEl.style.transition='transform .25s cubic-bezier(.4,0,.2,1)';setTimeout(()=>mcEl.style.transition='',260);}
+  if(a){mcEl.style.transition='transform .28s cubic-bezier(.4,0,.2,1)';setTimeout(()=>mcEl.style.transition='',300);}
   mcEl.style.transform=`translate(${ox}px,${oy}px) scale(${sc})`;
 }
 function center(a=true){
   const vw=mw.clientWidth,vh=mw.clientHeight;
-  const fit=Math.min(vw/W,vh/H)*0.88;
-  sc=Math.max(.2,Math.min(4,fit));
-  ox=(vw-W*sc)/2; oy=(vh-H*sc)/2;
+  const cw=cv.width,ch=cv.height;
+  const fit=Math.min(vw/cw,vh/ch)*0.85;
+  sc=Math.max(.15,Math.min(4,fit));
+  ox=(vw-cw*sc)/2; oy=(vh-ch*sc)/2;
   applyT(a);
 }
 function zAt(cx,cy,f){
-  const ns=Math.max(.2,Math.min(4,sc*f)),r=ns/sc;
-  ox=cx-(cx-ox)*r; oy=cy-(cy-oy)*r; sc=ns; applyT(false);
+  const ns=Math.max(.15,Math.min(4,sc*f)),r=ns/sc;
+  ox=cx-(cx-ox)*r;oy=cy-(cy-oy)*r;sc=ns;applyT(false);
 }
 
-// Touch
-let tx=0,ty=0,td=false,pd=0,px2=0,py2=0,mv=0;
+let tx=0,ty=0,td=false,pd=0,px2=0,py2=0,mm=0;
 mw.addEventListener('touchstart',e=>{
-  if(e.touches.length===1){tx=e.touches[0].clientX;ty=e.touches[0].clientY;td=true;mv=0;}
+  if(e.touches.length===1){tx=e.touches[0].clientX;ty=e.touches[0].clientY;td=true;mm=0;}
   else if(e.touches.length===2){
     pd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
     const r=mw.getBoundingClientRect();
@@ -501,103 +633,95 @@ mw.addEventListener('touchmove',e=>{
   e.preventDefault();
   if(e.touches.length===1&&td){
     const dx=e.touches[0].clientX-tx,dy=e.touches[0].clientY-ty;
-    mv+=Math.abs(dx)+Math.abs(dy);
-    ox+=dx;oy+=dy;tx=e.touches[0].clientX;ty=e.touches[0].clientY;applyT(false);
+    mm+=Math.abs(dx)+Math.abs(dy);ox+=dx;oy+=dy;
+    tx=e.touches[0].clientX;ty=e.touches[0].clientY;applyT(false);
   }else if(e.touches.length===2){
     const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
     zAt(px2,py2,d/pd);pd=d;
   }
 },{passive:false});
 mw.addEventListener('touchend',()=>{td=false;},{passive:true});
-
-// Mouse
-let md=false,mm=0;
-mw.addEventListener('mousedown',e=>{if(e.button!==0)return;md=true;mm=0;mw.classList.add('gr');});
-mw.addEventListener('mousemove',e=>{if(!md)return;mm+=Math.abs(e.movementX)+Math.abs(e.movementY);ox+=e.movementX;oy+=e.movementY;applyT(false);});
+let md=false,mvm=0;
+mw.addEventListener('mousedown',e=>{if(e.button!==0)return;md=true;mvm=0;mw.classList.add('gr');});
+mw.addEventListener('mousemove',e=>{if(!md)return;mvm+=Math.abs(e.movementX)+Math.abs(e.movementY);ox+=e.movementX;oy+=e.movementY;applyT(false);});
 mw.addEventListener('mouseup',()=>{md=false;mw.classList.remove('gr');});
 mw.addEventListener('mouseleave',()=>{md=false;mw.classList.remove('gr');});
 mw.addEventListener('wheel',e=>{e.preventDefault();const r=mw.getBoundingClientRect();zAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.12:1/1.12);},{passive:false});
-mw.addEventListener('click',e=>{if(mm>6)return;if(!rmode)hideBs();});
+mw.addEventListener('click',e=>{if(mvm>6)return;if(!rmode)hideBs();});
 document.getElementById('zi').onclick=()=>zAt(mw.clientWidth/2,mw.clientHeight/2,1.35);
 document.getElementById('zo').onclick=()=>zAt(mw.clientWidth/2,mw.clientHeight/2,1/1.35);
 document.getElementById('zr').onclick=()=>center();
 
-// ── FLOOR PILL ───────────────────────────────────────
+// ── VIEW TOGGLE ───────────────────────────────────────
+document.getElementById('v-iso').onclick=()=>{
+  view='iso';
+  document.getElementById('v-iso').classList.add('a');
+  document.getElementById('v-flat').classList.remove('a');
+  render();center(true);
+};
+document.getElementById('v-flat').onclick=()=>{
+  view='flat';
+  document.getElementById('v-flat').classList.add('a');
+  document.getElementById('v-iso').classList.remove('a');
+  render();center(true);
+};
+
+// ── FLOOR PILL ────────────────────────────────────────
 function buildPill(){
-  const fp=document.getElementById('fp');
-  fp.innerHTML='';
+  const fp=document.getElementById('fp');fp.innerHTML='';
   [...FL].reverse().forEach(f=>{
     const i=FL.findIndex(x=>x.n===f.n);
     const b=document.createElement('button');
     b.className='fb'+(i===fi?' a':'');
-    b.textContent=f.n;
-    b.title=f.name;
+    b.textContent=f.n;b.title=f.name;
     b.onclick=()=>switchFloor(i);
     fp.appendChild(b);
   });
 }
 function switchFloor(i){
-  fi=i;buildPill();drawFloor();renderPins();drawRoute();showToast(FL[i].name);hideBs();
-  org=null;dst=null;
+  fi=i;buildPill();render();showToast(FL[i].name);hideBs();org=null;dst=null;
 }
 
-// ── SEARCH ───────────────────────────────────────────
+// ── SEARCH ────────────────────────────────────────────
 function allP(){return FL.flatMap((f,i)=>(FP[f.n]||{pois:[]}).pois.map(p=>({...p,fi:i,fn:f.name,fc:f.c,fl:f.n})));}
 const sinp=document.getElementById('si'),sxb=document.getElementById('sx'),srEl=document.getElementById('sr');
 sinp.oninput=()=>{
   const q=sinp.value.trim().toLowerCase();
   sxb.classList.toggle('v',q.length>0);
   if(!q){srEl.classList.remove('v');return;}
-  const hits=allP().filter(p=>p.label.toLowerCase().includes(q)||(p.desc||'').toLowerCase().includes(q));
-  renderSR(hits,q);
+  renderSR(allP().filter(p=>p.label.toLowerCase().includes(q)||(p.desc||'').toLowerCase().includes(q)),q);
 };
 sinp.onfocus=()=>{if(sinp.value.trim())srEl.classList.add('v');};
 document.addEventListener('click',e=>{if(!document.getElementById('sb').contains(e.target))srEl.classList.remove('v');});
 sxb.onclick=()=>{sinp.value='';sxb.classList.remove('v');srEl.classList.remove('v');sinp.focus();};
-
 function renderSR(items,q){
-  if(!items.length){srEl.innerHTML=`<div class="si"><span class="sn" style="color:#6f6f6f">No results for "${q}"</span></div>`;srEl.classList.add('v');return;}
+  if(!items.length){srEl.innerHTML=`<div class="sri"><span class="sn" style="color:#6f6f6f">No results</span></div>`;srEl.classList.add('v');return;}
   srEl.innerHTML=items.slice(0,8).map(p=>{
-    const ic=IC[p.type]||IC.room;
-    const lbl=(p.label||'').replace(/&amp;/g,'&');
-    return `<div class="si" data-id="${p.id}" data-fi="${p.fi}">
-      <div class="sic" style="background:${ic.c}18;color:${ic.c}"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">${ic.p}</svg></div>
-      <div style="flex:1"><div class="sn">${hl(lbl,q)}</div><div class="sd">${p.fn}</div></div>
-      <span class="sf" style="background:${p.fc}18;color:${p.fc}">${p.fl}</span>
-    </div>`;
+    const ic=IC[p.type]||IC.room,lbl=(p.label||'').replace(/&amp;/g,'&');
+    return `<div class="sri" data-id="${p.id}" data-fi="${p.fi}"><div class="sic" style="background:${ic.c}18;color:${ic.c}"><svg width="13" height="13" viewBox="0 0 16 16" fill="currentColor">${ic.p}</svg></div><div style="flex:1"><div class="sn">${hl(lbl,q)}</div><div class="sd">${p.fn}</div></div><span class="sf" style="background:${p.fc}18;color:${p.fc}">${p.fl}</span></div>`;
   }).join('');
   srEl.classList.add('v');
-  srEl.querySelectorAll('.si[data-id]').forEach(el=>{
-    el.onclick=()=>{
-      const i=parseInt(el.dataset.fi);
-      const poi=(FP[FL[i].n]||{pois:[]}).pois.find(p=>p.id===el.dataset.id);
-      if(!poi)return;
-      srEl.classList.remove('v');sinp.value=(poi.label||'').replace(/&amp;/g,'&');
-      if(i!==fi)switchFloor(i);
-      flyTo(poi.x,poi.y);showPOI(poi);
-    };
-  });
+  srEl.querySelectorAll('[data-id]').forEach(el=>{el.onclick=()=>{
+    const i=parseInt(el.dataset.fi);const poi=(FP[FL[i].n]||{pois:[]}).pois.find(p=>p.id===el.dataset.id);
+    if(!poi)return;srEl.classList.remove('v');sinp.value=(poi.label||'').replace(/&amp;/g,'&');
+    if(i!==fi)switchFloor(i);flyTo(poi.x,poi.y);showPOI(poi);
+  };});
 }
 function hl(t,q){const i=t.toLowerCase().indexOf(q);if(i<0)return t;return t.slice(0,i)+`<b style="color:#0f62fe">${t.slice(i,i+q.length)}</b>`+t.slice(i+q.length);}
-
-// ── FLY TO ───────────────────────────────────────────
-function flyTo(svgX,svgY,ts=2.2){
+function flyTo(svgX,svgY){
+  const pt=proj(svgX,svgY,fi);
   const vw=mw.clientWidth,vh=mw.clientHeight;
-  sc=Math.min(4,Math.max(.2,ts));
-  ox=vw/2-px(svgX)*sc;oy=vh/2-py(svgY)*sc;applyT(true);
+  sc=Math.min(4,Math.max(.15,2.2));
+  ox=vw/2-pt.x*sc;oy=vh/2-pt.y*sc;applyT(true);
 }
 
-// ── POI SHEET ────────────────────────────────────────
+// ── POI SHEET ─────────────────────────────────────────
 function showPOI(poi){
-  const f=FL[fi],ic=IC[poi.type]||IC.room;
-  const lbl=(poi.label||'').replace(/&amp;/g,'&');
+  const f=FL[fi],ic=IC[poi.type]||IC.room,lbl=(poi.label||'').replace(/&amp;/g,'&');
   const sv=saved.some(s=>s.id===poi.id);
   document.getElementById('bb').innerHTML=`
     <div class="bt">${lbl}</div>
-    <div class="bs2">
-      <span class="bg" style="background:${f.c}18;color:${f.c}">${f.name}</span>
-      <span class="bg" style="background:${ic.c}18;color:${ic.c}">${poi.type}</span>
-    </div>
+    <div class="bs2"><span class="bg" style="background:${f.c}18;color:${f.c}">${f.name}</span><span class="bg" style="background:${ic.c}18;color:${ic.c}">${poi.type}</span></div>
     <div class="ba">
       <button class="bb2 p" id="bdir"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3,11 22,2 13,21 11,13"/></svg>Directions</button>
       <button class="bb2 s" id="bsav"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>${sv?'Saved ✓':'Save'}</button>
@@ -605,98 +729,62 @@ function showPOI(poi){
     <div class="br"><svg width="14" height="14" viewBox="0 0 16 16" fill="${ic.c}">${ic.p}</svg><span>${poi.desc||f.name}</span></div>
     <div class="br"><svg width="14" height="14" viewBox="0 0 16 16" fill="#6f6f6f"><path d="M8 1C5.24 1 3 3.24 3 6c0 3.75 5 9 5 9s5-5.25 5-9c0-2.76-2.24-5-5-5zm0 7.5A2.5 2.5 0 1 1 8 4a2.5 2.5 0 0 1 0 5z"/></svg><span>IBM One Madison, ${f.name}</span></div>`;
   document.getElementById('bdir').onclick=()=>{hideBs();enterRoute(poi);};
-  document.getElementById('bsav').onclick=()=>{toggleSave(poi);showPOI(poi);};
+  document.getElementById('bsav').onclick=()=>{const i=saved.findIndex(s=>s.id===poi.id);if(i>=0){saved.splice(i,1);toast('Removed');}else{saved.push(poi);toast('Saved!');}showPOI(poi);};
   showBs('on');
 }
-function toggleSave(poi){const i=saved.findIndex(s=>s.id===poi.id);if(i>=0){saved.splice(i,1);toast('Removed');}else{saved.push(poi);toast('Saved!');}}
 
-// ── ROUTING ──────────────────────────────────────────
+// ── ROUTING ───────────────────────────────────────────
 function enterRoute(destPoi){
-  rmode=true;
-  document.getElementById('sb').style.display='none';
-  document.getElementById('rh').classList.add('v');
-  if(destPoi){
-    const lbl=(destPoi.label||'').replace(/&amp;/g,'&');
-    dst={x:destPoi.x,y:destPoi.y,fn:FL[fi].n,label:lbl};
-    document.getElementById('rfb').textContent=lbl;
-    rstep='org';toast('Tap your starting point');
-  }
+  rmode=true;document.getElementById('sb').style.display='none';document.getElementById('rh').classList.add('v');
+  if(destPoi){const lbl=(destPoi.label||'').replace(/&amp;/g,'&');dst={svgX:destPoi.x,svgY:destPoi.y,fn:FL[fi].n,label:lbl};document.getElementById('rfb').textContent=lbl;rstep='org';toast('Tap your start point');}
   renderPins();navOn(2);
 }
 function exitRoute(){
   rmode=false;rstep=null;org=null;dst=null;
-  rv.querySelectorAll('.rp').forEach(e=>e.remove());
-  renderPins();
-  document.getElementById('rh').classList.remove('v');
-  document.getElementById('sb').style.display='';
-  document.getElementById('rfa').textContent='Your location';
-  document.getElementById('rfb').textContent='Destination';
+  rv.querySelectorAll('.rp').forEach(e=>e.remove());renderPins();
+  document.getElementById('rh').classList.remove('v');document.getElementById('sb').style.display='';
+  document.getElementById('rfa').textContent='Your location';document.getElementById('rfb').textContent='Destination';
   navOn(0);hideBs();
 }
 function assignRoute(poi){
-  const lbl=(poi.label||'').replace(/&amp;/g,'&');
-  const fn=FL[fi].n;
-  if(rstep==='org'){org={x:poi.x,y:poi.y,fn,label:lbl};document.getElementById('rfa').textContent=lbl;rstep=dst?null:'dst';if(!dst)toast('Now tap destination');}
-  else{dst={x:poi.x,y:poi.y,fn,label:lbl};document.getElementById('rfb').textContent=lbl;rstep=null;}
-  renderPins();drawRoute();
-  if(org&&dst)showRouteSheet();
+  const lbl=(poi.label||'').replace(/&amp;/g,'&'),fn=FL[fi].n;
+  if(rstep==='org'){org={svgX:poi.x,svgY:poi.y,fn,label:lbl};document.getElementById('rfa').textContent=lbl;rstep=dst?null:'dst';if(!dst)toast('Now tap destination');}
+  else{dst={svgX:poi.x,svgY:poi.y,fn,label:lbl};document.getElementById('rfb').textContent=lbl;rstep=null;}
+  renderPins();drawRoute();if(org&&dst)showRouteSheet();
 }
 function showRouteSheet(){
   const sf=org.fn===dst.fn;
-  const d=Math.round((Math.hypot(dst.x-org.x,dst.y-org.y)+(sf?0:120))*0.14);
-  const m=Math.max(1,Math.round(d/85));
+  const dist=Math.round((Math.hypot(dst.svgX-org.svgX,dst.svgY-org.svgY)+(sf?0:120))*0.14);
+  const mins=Math.max(1,Math.round(dist/85));
   const steps=sf?[`Walk toward ${dst.label}`,`Arrive at <b>${dst.label}</b>`]:
     [`Head to elevator on Floor ${org.fn}`,`Take elevator to Floor ${dst.fn}`,`Walk to <b>${dst.label}</b>`];
-  document.getElementById('bb').innerHTML=`
-    <div class="bt">Route</div>
+  document.getElementById('bb').innerHTML=`<div class="bt">Route</div>
     <div class="bs2"><span>${org.label}</span><span style="margin:0 5px">&#8594;</span><span>${dst.label}</span></div>
-    <div class="rbox"><div><div class="rt">${m} min</div><div class="rd">${d} m walk</div></div>
+    <div class="rbox"><div><div class="rt">${mins} min</div><div class="rd">${dist} m walk</div></div>
       <button class="bb2 p" id="gon" style="flex:0;padding:0 16px">Start</button></div>
-    ${steps.map((s,i)=>`<div class="stp">
-      <div class="stpi" style="${i===steps.length-1?'background:#fa4d5620;color:#fa4d56':'color:#0f62fe'}">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          ${i===steps.length-1?'<circle cx="12" cy="12" r="8"/>':'<polygon points="3,11 22,2 13,21 11,13"/>'}
-        </svg></div><span>${s}</span></div>`).join('')}`;
+    ${steps.map((s,i)=>`<div class="stp"><div class="stpi" style="${i===steps.length-1?'color:#fa4d56':'color:#0f62fe'}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">${i===steps.length-1?'<circle cx="12" cy="12" r="8"/>':'<polygon points="3,11 22,2 13,21 11,13"/>'}</svg></div><span>${s}</span></div>`).join('')}`;
   document.getElementById('gon').onclick=()=>toast('Follow the blue path');
   showBs('pk');
 }
 document.getElementById('rx').onclick=exitRoute;
 
-// ── EXPLORE ──────────────────────────────────────────
+// ── EXPLORE / SAVED ───────────────────────────────────
 function openExplore(){
-  const groups={};
-  allP().filter(p=>p.type!=='room').forEach(p=>{if(!groups[p.type])groups[p.type]=[];groups[p.type].push(p);});
-  let h=`<div class="bt">Explore</div><div class="bs2">Tap any location to navigate</div>`;
-  Object.keys(groups).sort().forEach(t=>{
-    const ic=IC[t]||IC.room;
-    h+=`<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${ic.c};margin:10px 0 5px">${t}</div>
-    ${groups[t].slice(0,5).map(p=>{
-      const lbl=(p.label||'').replace(/&amp;/g,'&');
-      return `<div class="si" data-eid="${p.id}" data-fi="${p.fi}" style="padding:9px 0;border-bottom:1px solid #e0e0e0">
-        <div class="sic" style="background:${ic.c}18;color:${ic.c}"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">${ic.p}</svg></div>
-        <div style="flex:1"><div class="sn">${lbl}</div><div class="sd">${p.fn}</div></div>
-        <span class="sf" style="background:${p.fc}18;color:${p.fc}">${p.fl}</span>
-      </div>`;}).join('')}</div>`;
-  });
+  const groups={};allP().filter(p=>p.type!=='room').forEach(p=>{if(!groups[p.type])groups[p.type]=[];groups[p.type].push(p);});
+  let h=`<div class="bt">Explore</div><div class="bs2">Tap to navigate</div>`;
+  Object.keys(groups).sort().forEach(t=>{const ic=IC[t]||IC.room;h+=`<div style="margin-bottom:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;color:${ic.c};margin:10px 0 5px;letter-spacing:.07em">${t}</div>${groups[t].slice(0,5).map(p=>{const lbl=(p.label||'').replace(/&amp;/g,'&');return`<div class="sri" data-eid="${p.id}" data-fi="${p.fi}" style="padding:9px 0;border-bottom:1px solid #e0e0e0"><div class="sic" style="background:${ic.c}18;color:${ic.c}"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">${ic.p}</svg></div><div style="flex:1"><div class="sn">${lbl}</div><div class="sd">${p.fn}</div></div><span class="sf" style="background:${p.fc}18;color:${p.fc}">${p.fl}</span></div>`;}).join('')}</div>`;});
   document.getElementById('bb').innerHTML=h;
-  document.getElementById('bb').querySelectorAll('[data-eid]').forEach(el=>{
-    el.onclick=()=>{const i=parseInt(el.dataset.fi);const poi=(FP[FL[i].n]||{pois:[]}).pois.find(p=>p.id===el.dataset.eid);if(!poi)return;if(i!==fi)switchFloor(i);flyTo(poi.x,poi.y);showPOI(poi);};
-  });
+  document.getElementById('bb').querySelectorAll('[data-eid]').forEach(el=>{el.onclick=()=>{const i=parseInt(el.dataset.fi);const poi=(FP[FL[i].n]||{pois:[]}).pois.find(p=>p.id===el.dataset.eid);if(!poi)return;if(i!==fi)switchFloor(i);flyTo(poi.x,poi.y);showPOI(poi);};});
   showBs('on');
 }
-
-// ── SAVED ────────────────────────────────────────────
 function openSaved(){
-  document.getElementById('bb').innerHTML=!saved.length
-    ?`<div class="bt">Saved Places</div><p style="padding:20px 0;text-align:center;color:#6f6f6f;font-size:13px">Tap bookmark on any location to save it.</p>`
-    :`<div class="bt">Saved (${saved.length})</div>${saved.map((p,i)=>{const ic=IC[p.type]||IC.room;const lbl=(p.label||'').replace(/&amp;/g,'&');return`<div class="si" data-si="${i}" style="padding:10px 0;border-bottom:1px solid #e0e0e0"><div class="sic" style="background:${ic.c}18;color:${ic.c}"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">${ic.p}</svg></div><div style="flex:1"><div class="sn">${lbl}</div><div class="sd">${p.desc||''}</div></div></div>`;}).join('')}`;
-  document.getElementById('bb').querySelectorAll('[data-si]').forEach(el=>{
-    el.onclick=()=>showPOI(saved[parseInt(el.dataset.si)]);
-  });
+  document.getElementById('bb').innerHTML=!saved.length?`<div class="bt">Saved Places</div><p style="padding:20px 0;text-align:center;color:#6f6f6f;font-size:13px">Tap bookmark on any location to save it.</p>`:
+  `<div class="bt">Saved (${saved.length})</div>${saved.map((p,i)=>{const ic=IC[p.type]||IC.room,lbl=(p.label||'').replace(/&amp;/g,'&');return`<div class="sri" data-si="${i}" style="padding:10px 0;border-bottom:1px solid #e0e0e0"><div class="sic" style="background:${ic.c}18;color:${ic.c}"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor">${ic.p}</svg></div><div style="flex:1"><div class="sn">${lbl}</div><div class="sd">${p.desc||''}</div></div></div>`;}).join('')}`;
+  document.getElementById('bb').querySelectorAll('[data-si]').forEach(el=>{el.onclick=()=>showPOI(saved[parseInt(el.dataset.si)]);});
   showBs('on');
 }
 
-// ── UI HELPERS ───────────────────────────────────────
+// ── HELPERS ────────────────────────────────────────────
 function navOn(i){document.querySelectorAll('.ni').forEach((b,j)=>b.classList.toggle('a',j===i));}
 function showBs(c){const b=document.getElementById('bs');b.classList.remove('on','pk');b.classList.add(c);}
 function hideBs(){document.getElementById('bs').classList.remove('on','pk');}
@@ -705,16 +793,12 @@ document.getElementById('n0').onclick=()=>{navOn(0);hideBs();};
 document.getElementById('n1').onclick=()=>{navOn(1);openExplore();};
 document.getElementById('n2').onclick=()=>{navOn(2);enterRoute(null);};
 document.getElementById('n3').onclick=()=>{navOn(3);openSaved();};
+document.getElementById('stbtn').onclick=()=>toast('Settings — coming soon');
+let tt;function toast(m){const el=document.getElementById('t');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2400);}
 
-let tt;
-function toast(m){const el=document.getElementById('t');el.textContent=m;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2400);}
-
-document.getElementById('stbtn').onclick=()=>toast('Settings coming soon');
-
-// ── BOOT ─────────────────────────────────────────────
+// ── BOOT ──────────────────────────────────────────────
 buildPill();
-drawFloor();
-renderPins();
+render();
 center(false);
 </script>
 </body>
