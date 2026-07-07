@@ -28,6 +28,7 @@ export default function AppShell({
   locatingMode,
   userLocation,
   locationState,
+  liveTracking,
   startAnchor,
   routeGraphs,
   activeRoute,
@@ -234,6 +235,7 @@ export default function AppShell({
               locatingMode={locatingMode}
               userLocation={userLocation}
               locationState={locationState}
+              liveTracking={liveTracking}
               startAnchor={startAnchor}
               routeGraph={routeGraphs?.[activeFloorId]}
               activeRoute={activeRoute}

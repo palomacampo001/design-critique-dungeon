@@ -4,7 +4,7 @@ import { parseSvg } from './utils/parseSvg.js';
 import { generateIndoorMapData } from './utils/detectFeatures.js';
 import { loadMapState, saveMapState } from './utils/storage.js';
 import { planIndoorRoute } from './utils/navigation.js';
-import { BUILDING_GEOFENCE, formatDistanceFeet, getDefaultStartAnchor, haversineDistanceMeters, isInsideBuildingGeofence } from './utils/locationConfig.js';
+import { BUILDING_GEOFENCE, formatDistanceFeet, getDefaultStartAnchor, gpsToMapPoint, haversineDistanceMeters, isInsideBuildingGeofence } from './utils/locationConfig.js';
 import { generateHallwayGraph, loadRouteGraphs, saveRouteGraphs } from './utils/routeGraphs.js';
 import sampleMap from './data/sampleConvertedMap.json';
 import {
@@ -158,8 +158,7 @@ export default function App() {
   useEffect(() => {
     if (adminMode || !mapData.floors.length) return undefined;
 
-    // Immediately anchor to entrance on load — GPS is unreliable indoors so
-    // we place the user at the entrance right away and let GPS refine later.
+    // Anchor to entrance immediately so routing works before GPS resolves.
     const anchor = getDefaultStartAnchor(mapData.floors);
     if (anchor) {
       setUserLocation({ floorId: anchor.floorId, point: anchor.mapPoint, approximate: true });
@@ -167,26 +166,32 @@ export default function App() {
         mode: 'indoorAnchored',
         floorId: anchor.floorId,
         mapPoint: anchor.mapPoint,
-        message: "You're tracked from the main entrance. Tap the map to set your exact position.",
+        message: "Locating you via GPS…",
       });
     }
 
     if (!navigator.geolocation) {
-      setLocationState({ mode: 'denied', message: 'Location is off. Your start is set to the main entrance.' });
+      setLocationState({ mode: 'denied', message: "Location services are off. Tap the map to set your position." });
       return undefined;
     }
+
+    const floorId = anchor?.floorId || mapData.floors[0]?.id;
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
         const meters = haversineDistanceMeters(latLng, BUILDING_GEOFENCE.center);
-        if (isInsideBuildingGeofence(latLng, BUILDING_GEOFENCE)) {
-          // GPS confirms user is at the building — keep the anchor already set.
+        const inside = isInsideBuildingGeofence(latLng, BUILDING_GEOFENCE);
+
+        // Convert real GPS → SVG map point and move the blue dot live.
+        const mapPoint = gpsToMapPoint(latLng);
+        if (mapPoint && inside) {
+          setUserLocation({ floorId, point: mapPoint, gps: latLng, approximate: false });
           setLocationState({
-            mode: 'nearBuilding',
+            mode: 'tracking',
             gps: latLng,
             accuracy: position.coords.accuracy,
-            message: "You're in the building. Tap the map to refine your position.",
+            message: null,
           });
         } else {
           setLocationState({
@@ -194,14 +199,15 @@ export default function App() {
             gps: latLng,
             accuracy: position.coords.accuracy,
             distanceMeters: meters,
-            message: `GPS says you're ${formatDistanceFeet(meters)} from the building. Your start is still set to the main entrance.`,
+            message: `GPS signal is outside the building (${formatDistanceFeet(meters)} away). Position held at last known location.`,
           });
         }
       },
       () => {
-        // GPS failed — anchor already set above, so user can still route.
+        // GPS unavailable — entrance anchor still set so routing works.
+        setLocationState({ mode: 'denied', message: "Can't get GPS signal indoors. Tap the map to place yourself." });
       },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 20000 },
     );
     return () => navigator.geolocation.clearWatch(watchId);
   }, [adminMode, mapData.floors]);
@@ -696,6 +702,7 @@ export default function App() {
       locatingMode={locatingMode}
       userLocation={userLocation}
       locationState={locationState}
+      liveTracking={locationState?.mode === 'tracking'}
       startAnchor={getDefaultStartAnchor(mapData.floors)}
       routeGraphs={routeGraphs}
       activeRoute={activeRoute}

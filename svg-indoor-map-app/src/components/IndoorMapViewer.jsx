@@ -282,6 +282,7 @@ export default function IndoorMapViewer({
   locatingMode,
   userLocation,
   locationState,
+  liveTracking,
   startAnchor,
   routeGraph,
   activeRoute,
@@ -309,6 +310,8 @@ export default function IndoorMapViewer({
   const areaDrawingModeRef = useRef(areaDrawingMode);
   const locatingModeRef = useRef(locatingMode);
   const [trackingMode, setTrackingMode] = useState(false);
+  // Auto-enable map-follows-user when GPS live tracking is active
+  useEffect(() => { if (liveTracking) setTrackingMode(true); }, [liveTracking]);
   const [zoomLevel, setZoomLevel] = useState(0);
   const [baseZoom, setBaseZoom] = useState(0);
   const [floorTransitioning, setFloorTransitioning] = useState(false);

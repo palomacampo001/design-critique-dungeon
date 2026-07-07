@@ -3,9 +3,37 @@ export const BUILDING_GEOFENCE = {
   name: 'US OMA',
   // IBM One Madison Ave, New York, NY 10010
   center: { lat: 40.7425, lng: -73.9878 },
-  // 200 m covers the full building footprint with indoor GPS drift margin.
-  radiusMeters: 200,
+  // 250 m covers the full building footprint with indoor GPS drift margin.
+  radiusMeters: 250,
 };
+
+// Affine GPS↔SVG transform for the One Madison Ave floor plan.
+// Two surveyed reference points: a real-world GPS coordinate paired with
+// the corresponding SVG pixel position on the 1224×792 viewBox.
+// Adjust these if the SVG ever gets re-exported at a different scale/origin.
+export const BUILDING_GPS_TRANSFORM = {
+  // NW corner of the building footprint (SVG top-left area)
+  ref0: { gps: { lat: 40.74335, lng: -73.98895 }, svg: { x: 30,   y: 60  } },
+  // SE corner of the building footprint (SVG bottom-right area)
+  ref1: { gps: { lat: 40.74155, lng: -73.98655 }, svg: { x: 1194, y: 752 } },
+};
+
+/**
+ * Convert a real-world GPS coordinate to an SVG map point.
+ * Uses bilinear interpolation between the two reference corners.
+ * Returns null when the position is too far outside the building.
+ */
+export function gpsToMapPoint(latLng, transform = BUILDING_GPS_TRANSFORM) {
+  const { ref0, ref1 } = transform;
+  const tLat = (latLng.lat - ref0.gps.lat) / (ref1.gps.lat - ref0.gps.lat);
+  const tLng = (latLng.lng - ref0.gps.lng) / (ref1.gps.lng - ref0.gps.lng);
+  // Allow up to 40 % outside the footprint (GPS can drift indoors)
+  if (tLat < -0.4 || tLat > 1.4 || tLng < -0.4 || tLng > 1.4) return null;
+  return {
+    x: ref0.svg.x + tLng * (ref1.svg.x - ref0.svg.x),
+    y: ref0.svg.y + tLat * (ref1.svg.y - ref0.svg.y),
+  };
+}
 
 export const BUILDING_START_ANCHORS = [
   {
