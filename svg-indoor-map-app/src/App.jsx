@@ -75,6 +75,10 @@ export default function App() {
   const isAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
   const [mapData, setMapData] = useState(() => savedState || initialMap);
   const [activeFloorId, setActiveFloorId] = useState(() => savedState?.floors?.[0]?.id || '');
+  // Ref so the GPS watchPosition callback always reads the current floor
+  // without needing to re-register the watcher on every floor switch.
+  const activeFloorIdRef = useRef(activeFloorId);
+  useEffect(() => { activeFloorIdRef.current = activeFloorId; }, [activeFloorId]);
   const [selectedId, setSelectedId] = useState('');
   const [hoveredId, setHoveredId] = useState('');
   const [highlightId, setHighlightId] = useState('');
@@ -158,24 +162,14 @@ export default function App() {
   useEffect(() => {
     if (adminMode || !mapData.floors.length) return undefined;
 
-    // Anchor to entrance immediately so routing works before GPS resolves.
-    const anchor = getDefaultStartAnchor(mapData.floors);
-    if (anchor) {
-      setUserLocation({ floorId: anchor.floorId, point: anchor.mapPoint, approximate: true });
-      setLocationState({
-        mode: 'indoorAnchored',
-        floorId: anchor.floorId,
-        mapPoint: anchor.mapPoint,
-        message: "Locating you via GPS…",
-      });
-    }
-
+    // Don't pre-anchor to Floor 1 — start with no assumed position and let
+    // GPS or the user's manual floor selection determine the starting floor.
     if (!navigator.geolocation) {
-      setLocationState({ mode: 'denied', message: "Location services are off. Tap the map to set your position." });
+      setLocationState({ mode: 'denied', message: "Location services are off. Select your floor and tap the map to set your position." });
       return undefined;
     }
 
-    const floorId = anchor?.floorId || mapData.floors[0]?.id;
+    setLocationState({ mode: 'locating', message: "Locating you via GPS…" });
 
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
@@ -183,10 +177,14 @@ export default function App() {
         const meters = haversineDistanceMeters(latLng, BUILDING_GEOFENCE.center);
         const inside = isInsideBuildingGeofence(latLng, BUILDING_GEOFENCE);
 
+        // Use the floor the user currently has selected — phones can't detect
+        // vertical position via GPS, so the selected floor IS their floor.
+        const currentFloorId = activeFloorIdRef.current;
+
         // Convert real GPS → SVG map point and move the blue dot live.
         const mapPoint = gpsToMapPoint(latLng);
         if (mapPoint && inside) {
-          setUserLocation({ floorId, point: mapPoint, gps: latLng, approximate: false });
+          setUserLocation({ floorId: currentFloorId, point: mapPoint, gps: latLng, approximate: false });
           setLocationState({
             mode: 'tracking',
             gps: latLng,
@@ -199,18 +197,26 @@ export default function App() {
             gps: latLng,
             accuracy: position.coords.accuracy,
             distanceMeters: meters,
-            message: `GPS signal is outside the building (${formatDistanceFeet(meters)} away). Position held at last known location.`,
+            message: `GPS is outside the building (${formatDistanceFeet(meters)} away). Select your floor and tap the map to place yourself.`,
           });
         }
       },
       () => {
-        // GPS unavailable — entrance anchor still set so routing works.
-        setLocationState({ mode: 'denied', message: "Can't get GPS signal indoors. Tap the map to place yourself." });
+        setLocationState({ mode: 'denied', message: "Can't get GPS. Select your floor and tap the map to place yourself." });
       },
       { enableHighAccuracy: true, maximumAge: 3000, timeout: 20000 },
     );
     return () => navigator.geolocation.clearWatch(watchId);
   }, [adminMode, mapData.floors]);
+
+  // When the user switches floors, move their tracked position to that floor
+  // so the route origin always matches where they actually are.
+  useEffect(() => {
+    setUserLocation((current) => {
+      if (!current || current.approximate) return current;
+      return { ...current, floorId: activeFloorId };
+    });
+  }, [activeFloorId]);
 
   useEffect(() => {
     if (!isAdminUrl || buildingId) return;
@@ -593,19 +599,20 @@ export default function App() {
     setSelectedId(feature.id);
     setHighlightId(feature.id);
     setRouteDestinationId(feature.id);
-    if (!userLocation && floorId) {
-      const entrance = getDefaultStartAnchor(mapData.floors);
-      if (entrance) {
-        setActiveFloorId(entrance.floorId);
-        setUserLocation({ floorId: entrance.floorId, point: entrance.mapPoint, approximate: true });
+    if (!userLocation) {
+      // No GPS fix yet — place the user at the center of whichever floor
+      // they currently have selected, not always the ground floor entrance.
+      const currentFloor = mapData.floors.find((f) => f.id === activeFloorIdRef.current) || mapData.floors[0];
+      if (currentFloor) {
+        const [x, y, w, h] = currentFloor.viewBox || [0, 0, 1224, 792];
+        const fallbackPoint = { x: x + w * 0.5, y: y + h * 0.5 };
+        setUserLocation({ floorId: currentFloor.id, point: fallbackPoint, approximate: true });
         setLocationState({
           mode: 'indoorAnchored',
-          floorId: entrance.floorId,
-          mapPoint: entrance.mapPoint,
-          message: 'Starting from the highlighted entrance. Confirm your indoor position for best accuracy.',
+          floorId: currentFloor.id,
+          mapPoint: fallbackPoint,
+          message: 'Position estimated from your selected floor. Tap the map to set your exact location.',
         });
-      } else {
-        setActiveFloorId(floorId);
       }
     }
   }
