@@ -1,14 +1,886 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#f4f4f4" />
-    <link rel="icon" href="data:," />
-    <title>Office Wayfinder</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/App.jsx"></script>
-  </body>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IBM Office Wayfinder</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue:    #1a73e8;
+      --hover:   #1557b0;
+      --text:    #202124;
+      --muted:   #5f6368;
+      --border:  #dadce0;
+      --bg:      #f1f3f4;
+      --white:   #ffffff;
+      --green:   #34a853;
+      --red:     #ea4335;
+      --yellow:  #fbbc04;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ── Map viewport ─────────────────────────────────────────────────────── */
+    #map-viewport {
+      position: fixed;
+      inset: 0;
+      background: #e8eaed;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #map-pan-layer {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+    }
+
+    /* The floor plan image */
+    #floor-img {
+      display: block;
+      max-width: min(1400px, 95vw);
+      max-height: 95vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 4px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+      transition: opacity 0.3s ease;
+      user-select: none;
+    }
+
+    /* Route + marker overlay — positioned to exactly cover the floor-img */
+    #overlay-svg {
+      position: absolute;
+      pointer-events: none;
+      overflow: visible;
+    }
+
+    /* ── Sidebar ──────────────────────────────────────────────────────────── */
+    .sidebar {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 20;
+      width: 310px;
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.16);
+      padding: 20px 18px 18px;
+    }
+
+    .sidebar h3 {
+      font-size: 17px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar h3 .ibm-logo {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--blue);
+      letter-spacing: -0.5px;
+      background: #e8f0fe;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .field-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      display: block;
+      margin-top: 14px;
+      margin-bottom: 4px;
+    }
+
+    .search-wrap { position: relative; }
+
+    .search-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--blue); }
+
+    .suggestions {
+      position: absolute;
+      top: calc(100% + 2px);
+      left: 0; right: 0;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 0 0 6px 6px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 30;
+      display: none;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+    .suggestion-row {
+      padding: 10px 12px;
+      font-size: 13px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f1f3f4;
+    }
+    .suggestion-row:last-child { border-bottom: none; }
+    .suggestion-row:hover { background: var(--bg); }
+    .floor-chip {
+      font-size: 10px;
+      font-weight: 700;
+      background: #e8f0fe;
+      color: var(--blue);
+      padding: 2px 7px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      margin-left: 8px;
+    }
+
+    .route-btn {
+      width: 100%;
+      margin-top: 16px;
+      padding: 12px;
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .route-btn:hover { background: var(--hover); }
+    .route-btn:active { transform: scale(0.98); }
+
+    /* Directions output */
+    .directions {
+      margin-top: 16px;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      display: none;
+    }
+    .directions h4 {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 13px;
+      color: #3c4043;
+      padding: 7px 0;
+      border-bottom: 1px dashed #f1f3f4;
+      line-height: 1.45;
+    }
+    .step:last-child { border-bottom: none; }
+    .step-num {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      background: var(--blue);
+      color: var(--white);
+      border-radius: 50%;
+      font-size: 11px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+    }
+    .step b { color: var(--text); }
+
+    /* Error / status strip */
+    .status-bar {
+      margin-top: 10px;
+      padding: 8px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+    }
+    .status-bar.error { background: #fce8e6; color: #c5221f; display: block; }
+    .status-bar.info  { background: #e8f0fe; color: var(--blue);  display: block; }
+
+    /* ── Floor switcher ───────────────────────────────────────────────────── */
+    .floor-switcher {
+      position: fixed;
+      right: 16px;
+      bottom: 40px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column-reverse;
+      background: var(--white);
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .fl-btn {
+      border: none;
+      background: var(--white);
+      color: #3c4043;
+      padding: 13px 20px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border-top: 1px solid #f1f3f4;
+      transition: background 0.12s, color 0.12s;
+      min-width: 54px;
+      text-align: center;
+    }
+    .fl-btn:first-child { border-top: none; }
+    .fl-btn:hover:not(.active) { background: var(--bg); }
+    .fl-btn.active { background: var(--blue); color: var(--white); }
+
+    /* ── Zoom controls ────────────────────────────────────────────────────── */
+    .zoom-controls {
+      position: fixed;
+      right: 16px;
+      top: 16px;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      background: var(--white);
+      border-radius: 6px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.14);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .zoom-btn {
+      border: none;
+      background: var(--white);
+      color: var(--text);
+      padding: 10px 16px;
+      font-size: 20px;
+      font-weight: 300;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border);
+      line-height: 1;
+      transition: background 0.12s;
+    }
+    .zoom-btn:last-child { border-bottom: none; }
+    .zoom-btn:hover { background: var(--bg); }
+
+    /* ── Elevator popup ───────────────────────────────────────────────────── */
+    .elev-popup {
+      position: fixed;
+      left: 340px;
+      top: 45%;
+      z-index: 25;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 12px 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      font-size: 13px;
+      color: var(--text);
+      min-width: 180px;
+      display: none;
+    }
+    .elev-popup.visible { display: block; }
+    .elev-popup-title { font-weight: 600; margin-bottom: 6px; }
+    .elev-popup-close {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 14px;
+      color: var(--muted);
+      cursor: pointer;
+      margin-top: -2px;
+    }
+    .elev-btn {
+      margin-top: 8px;
+      width: 100%;
+      padding: 7px 10px;
+      background: var(--blue);
+      color: var(--white);
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .elev-btn:hover { background: var(--hover); }
+
+    /* Loading indicator */
+    #loading-msg {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--white);
+      border-radius: 8px;
+      padding: 20px 28px;
+      font-size: 14px;
+      color: var(--muted);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      z-index: 50;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Map viewport -->
+<div id="map-viewport">
+  <div id="map-pan-layer">
+    <img id="floor-img" alt="Floor plan" draggable="false">
+    <svg id="overlay-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+</div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <h3><span class="ibm-logo">IBM</span> Office Navigator</h3>
+
+  <label class="field-label" for="startSearch">Start position</label>
+  <div class="search-wrap">
+    <input id="startSearch" class="search-input" type="text"
+           placeholder="Type a room name or ID…" autocomplete="off">
+    <input type="hidden" id="startKey">
+    <div id="startSuggestions" class="suggestions"></div>
+  </div>
+
+  <label class="field-label" for="endSearch">Destination</label>
+  <div class="search-wrap">
+    <input id="endSearch" class="search-input" type="text"
+           placeholder="Type a room name or ID…" autocomplete="off">
+    <input type="hidden" id="endKey">
+    <div id="endSuggestions" class="suggestions"></div>
+  </div>
+
+  <button class="route-btn" id="routeBtn">Find Shortest Path</button>
+
+  <div class="status-bar" id="statusBar"></div>
+
+  <div class="directions" id="directions">
+    <h4>Navigation Instructions</h4>
+    <div id="stepsContainer"></div>
+  </div>
+</aside>
+
+<!-- Floor switcher -->
+<nav class="floor-switcher" id="floorSwitcher">
+  <button class="fl-btn active" data-floor="1">1</button>
+  <button class="fl-btn"        data-floor="2">2</button>
+  <button class="fl-btn"        data-floor="8">8</button>
+  <button class="fl-btn"        data-floor="9">9</button>
+  <button class="fl-btn"        data-floor="10">10</button>
+</nav>
+
+<!-- Zoom controls -->
+<div class="zoom-controls">
+  <button class="zoom-btn" id="zoomIn"  title="Zoom in">+</button>
+  <button class="zoom-btn" id="zoomOut" title="Zoom out">−</button>
+</div>
+
+<!-- Elevator popup -->
+<div class="elev-popup" id="elevPopup">
+  <button class="elev-popup-close" id="elevClose">✕</button>
+  <div class="elev-popup-title">🛗 Central Elevator</div>
+  <div id="elevBody">Take elevator to reach your destination.</div>
+  <button class="elev-btn" id="elevGotoBtn">Switch floor</button>
+</div>
+
+<div id="loading-msg">Loading floor plan…</div>
+
+<script>
+// ── Location directory ────────────────────────────────────────────────────────
+// Coordinates are in SVG space (viewBox 0 0 1224 792) for each floor.
+// Each entry: { floor, x, y, name, id }
+const LOCATIONS = [
+  // Floor 1 — rooms from oma-floor-01.svg zone labels
+  { id:"01A22", floor:1, x:300, y:607, name:"01A22 — Service Area" },
+  { id:"01A23", floor:1, x:278, y:637, name:"01A23 — Storage Zone" },
+  { id:"01A24", floor:1, x:246, y:637, name:"01A24 — Reception West" },
+  { id:"01A25", floor:1, x:223, y:618, name:"01A25 — Lounge A" },
+  { id:"01A26", floor:1, x:149, y:611, name:"01A26 — Lounge B" },
+  { id:"01A27", floor:1, x:87,  y:616, name:"01A27 — West Entry" },
+  { id:"01A28", floor:1, x:63,  y:618, name:"01A28 — Side Entry" },
+  { id:"01B22", floor:1, x:300, y:598, name:"01B22 — Copy/Print" },
+  { id:"01B23", floor:1, x:279, y:595, name:"01B23 — North Hall" },
+  { id:"01B27", floor:1, x:85,  y:554, name:"01B27 — Storage Room" },
+  { id:"01C22", floor:1, x:300, y:586, name:"01C22 — Kitchenette" },
+  { id:"01D25", floor:1, x:177, y:563, name:"01D25 — Phone Booth" },
+  { id:"01D26", floor:1, x:150, y:564, name:"01D26 — Focus Pod A" },
+  { id:"01D27", floor:1, x:227, y:564, name:"01D27 — Focus Pod B" },
+  { id:"01E25", floor:1, x:199, y:559, name:"01E25 — Collab Space" },
+  { id:"01EL01",floor:1, x:246, y:615, name:"01EL01 — Elevator Lobby" },
+  { id:"01ST01",floor:1, x:187, y:548, name:"01ST01 — Stairwell A" },
+  // Floor 2 — rooms from oma-floor-02.svg
+  { id:"02-ELEV-LOBBY", floor:2, x:500, y:300, name:"Floor 2 — Elevator Lobby" },
+  { id:"02-COLLAB-A",   floor:2, x:340, y:370, name:"Floor 2 — Collab Area A" },
+  { id:"02-COLLAB-B",   floor:2, x:500, y:470, name:"Floor 2 — Collab Area B" },
+  { id:"02-CONF-A",     floor:2, x:240, y:380, name:"Floor 2 — Conference A" },
+  { id:"02-OPEN-DESK",  floor:2, x:620, y:480, name:"Floor 2 — Open Desk Zone" },
+  { id:"02-KITCHEN",    floor:2, x:580, y:360, name:"Floor 2 — Kitchen / Break" },
+  { id:"02-STAIR-A",    floor:2, x:560, y:330, name:"Floor 2 — Stair A" },
+  { id:"02-STAIR-D",    floor:2, x:237, y:342, name:"Floor 2 — Stair D" },
+  // Floor 8 — rooms from oma-floor-08.svg label coordinates
+  { id:"08-ELEV-A",     floor:8, x:505, y:298, name:"Floor 8 — Elevator Lobby A" },
+  { id:"08-ELEV-D",     floor:8, x:680, y:298, name:"Floor 8 — Fire/Service Lobby D" },
+  { id:"08-STAIR-A",    floor:8, x:558, y:336, name:"Floor 8 — Stair A" },
+  { id:"08-STAIR-B",    floor:8, x:1073, y:376, name:"Floor 8 — Stair B" },
+  { id:"08-STAIR-C",    floor:8, x:834, y:328, name:"Floor 8 — Stair C" },
+  { id:"08-STAIR-D",    floor:8, x:239, y:341, name:"Floor 8 — Stair D" },
+  { id:"08-STAIR-E",    floor:8, x:616, y:221, name:"Floor 8 — Stair E" },
+  { id:"08-STORAGE-A",  floor:8, x:128, y:338, name:"Floor 8 — Storage A" },
+  { id:"08-WORKSTNS-A", floor:8, x:366, y:102, name:"Floor 8 — Workstations North A" },
+  { id:"08-WORKSTNS-B", floor:8, x:575, y:102, name:"Floor 8 — Workstations North B" },
+  { id:"08-WORKSTNS-C", floor:8, x:733, y:102, name:"Floor 8 — Workstations North C" },
+  { id:"08-WORKSTNS-D", floor:8, x:137, y:627, name:"Floor 8 — Workstations South" },
+  { id:"08-WORKSTNS-E", floor:8, x:328, y:615, name:"Floor 8 — Workstations Central" },
+  { id:"08-CONF-LG",    floor:8, x:350, y:508, name:"Floor 8 — Conf. Room Large" },
+  { id:"08-CONF-MED",   floor:8, x:621, y:466, name:"Floor 8 — Conf. Room Medium" },
+  { id:"08-FOCUS-1",    floor:8, x:240, y:523, name:"Floor 8 — Focus Room (Desk)" },
+  { id:"08-PRIVATE-A",  floor:8, x:750, y:548, name:"Floor 8 — Private Office A" },
+  { id:"08-LOCKER-A",   floor:8, x:600, y:574, name:"Floor 8 — Lockers A" },
+  { id:"08-LOCKER-B",   floor:8, x:665, y:574, name:"Floor 8 — Lockers B" },
+  { id:"08-BRAINSTORM-LG", floor:8, x:317, y:543, name:"Floor 8 — Brainstorm Large (Open)" },
+  { id:"08-MOTHERS-1",  floor:8, x:294, y:310, name:"Floor 8 — Mother's Room 1" },
+  { id:"08-SHOWER",     floor:8, x:253, y:283, name:"Floor 8 — Shower & Changing" },
+  { id:"08-HYDRATION",  floor:8, x:85,  y:374, name:"Floor 8 — Hydration Station" },
+  // Floor 9 — rooms from oma-floor-09.svg
+  { id:"09EL01", floor:9, x:476, y:278, name:"09EL01 — Elevator Room 1" },
+  { id:"09EL04", floor:9, x:527, y:280, name:"09EL04 — Elevator Room 4" },
+  { id:"09EL07", floor:9, x:528, y:368, name:"09EL07 — Elevator Room 7" },
+  { id:"09EL10", floor:9, x:589, y:280, name:"09EL10 — Elevator Room 10" },
+  { id:"09EL15", floor:9, x:709, y:328, name:"09EL15 — Elevator Room 15" },
+  { id:"A929",   floor:9, x:457, y:460, name:"A929 — Open Collab" },
+  { id:"A930",   floor:9, x:507, y:453, name:"A930 — Lounge Zone" },
+  { id:"A931",   floor:9, x:673, y:409, name:"A931 — Team Space" },
+  { id:"A933",   floor:9, x:698, y:382, name:"A933 — Meeting Pod" },
+  { id:"A934",   floor:9, x:712, y:350, name:"A934 — Focus Area" },
+  { id:"A935",   floor:9, x:503, y:365, name:"A935 — Work Zone" },
+  { id:"A937",   floor:9, x:829, y:415, name:"A937 — Quiet Room" },
+  { id:"A938",   floor:9, x:754, y:557, name:"A938 — Locker Area" },
+  { id:"B920",   floor:9, x:100, y:558, name:"B920 — South Wing" },
+  { id:"C906",   floor:9, x:342, y:336, name:"C906 — Conference Suite" },
+  { id:"D901",   floor:9, x:933, y:356, name:"D901 — East Office" },
+  { id:"D902",   floor:9, x:929, y:273, name:"D902 — East Meeting" },
+  { id:"STAIR-A-9", floor:9, x:557, y:383, name:"Floor 9 — Stair A" },
+  { id:"STAIR-B-9", floor:9, x:1072, y:380, name:"Floor 9 — Stair B" },
+  { id:"STAIR-C-9", floor:9, x:832, y:356, name:"Floor 9 — Stair C" },
+  { id:"STAIR-E-9", floor:9, x:599, y:207, name:"Floor 9 — Stair E" },
+  // Floor 10 — rooms from oma-floor-10.svg
+  { id:"10EL01", floor:10, x:474, y:331, name:"10EL01 — Elevator Bay 1" },
+  { id:"10EL04", floor:10, x:527, y:269, name:"10EL04 — Elevator Bay 4" },
+  { id:"10EL11", floor:10, x:645, y:271, name:"10EL11 — Elevator Bay 11" },
+  { id:"10EL17", floor:10, x:709, y:266, name:"10EL17 — Elevator Bay 17" },
+  { id:"10G01",  floor:10, x:500, y:365, name:"10G01 — Stair A Lobby" },
+  { id:"10G02",  floor:10, x:590, y:363, name:"10G02 — Corridor Node" },
+  { id:"10H01",  floor:10, x:968, y:344, name:"10H01 — Mech/Elec Core" },
+  { id:"10H02",  floor:10, x:558, y:279, name:"10H02 — Utility Space" },
+  { id:"10D20",  floor:10, x:381, y:474, name:"10D20 — Desk Zone 20" },
+  { id:"10D17",  floor:10, x:508, y:505, name:"10D17 — Desk Zone 17" },
+  { id:"10D12",  floor:10, x:706, y:520, name:"10D12 — Desk Zone 12" },
+  { id:"10D09",  floor:10, x:848, y:445, name:"10D09 — Desk Zone 9" },
+  { id:"10D06",  floor:10, x:959, y:485, name:"10D06 — Desk Zone 6" },
+  { id:"10D03",  floor:10, x:1078, y:486, name:"10D03 — Desk Zone 3" },
+  { id:"10E12",  floor:10, x:674, y:440, name:"10E12 — East Bay 12" },
+  { id:"10E09",  floor:10, x:848, y:420, name:"10E09 — East Bay 9" },
+  { id:"10E06",  floor:10, x:905, y:434, name:"10E06 — East Bay 6" },
+  { id:"10E05",  floor:10, x:934, y:429, name:"10E05 — East Bay 5" },
+  { id:"10E02",  floor:10, x:1136, y:425, name:"10E02 — East Bay 2" },
+  { id:"10F18",  floor:10, x:407, y:404, name:"10F18 — South Zone 18" },
+  { id:"10F16",  floor:10, x:709, y:397, name:"10F16 — South Zone 16" },
+  { id:"10ST02", floor:10, x:595, y:206, name:"10ST02 — Stair E" },
+  { id:"10ST03", floor:10, x:560, y:371, name:"10ST03 — Stair A" },
+  { id:"10ST04", floor:10, x:1074, y:373, name:"10ST04 — Stair B" },
+  { id:"10ST05", floor:10, x:831, y:374, name:"10ST05 — Stair C" },
+];
+
+// Shared elevator positions per floor (SVG coordinates)
+const ELEVATORS = {
+  1:  { x:246, y:615 },
+  2:  { x:500, y:300 },
+  8:  { x:505, y:298 },
+  9:  { x:476, y:278 },
+  10: { x:474, y:331 },
+};
+
+// Floor plan SVG files (relative to this HTML file)
+const FLOOR_SVGS = {
+  1:  "floors/oma-floor-01.svg",
+  2:  "floors/oma-floor-02.svg",
+  8:  "floors/oma-floor-08.svg",
+  9:  "floors/oma-floor-09.svg",
+  10: "floors/oma-floor-10.svg",
+};
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let currentFloor = 1;
+let zoomScale    = 1.0;
+let route        = null; // { startId, endId, legs: [{floor, from:{x,y}, to:{x,y}}] }
+
+// ── DOM refs ──────────────────────────────────────────────────────────────────
+const floorImg      = document.getElementById("floor-img");
+const overlaySvg    = document.getElementById("overlay-svg");
+const mapPanLayer   = document.getElementById("map-pan-layer");
+const statusBar     = document.getElementById("statusBar");
+const directionsDiv = document.getElementById("directions");
+const stepsContainer= document.getElementById("stepsContainer");
+const elevPopup     = document.getElementById("elevPopup");
+const loadingMsg    = document.getElementById("loading-msg");
+
+// ── Floor loading ─────────────────────────────────────────────────────────────
+function loadFloor(floor, callback) {
+  loadingMsg.style.display = "block";
+  floorImg.style.opacity = "0.4";
+
+  floorImg.onload = () => {
+    loadingMsg.style.display = "none";
+    floorImg.style.opacity = "1";
+    syncOverlay();
+    if (callback) callback();
+  };
+  floorImg.onerror = () => {
+    loadingMsg.style.display = "none";
+    floorImg.style.opacity = "1";
+    showStatus(`Could not load floor ${floor} SVG. Make sure you're running a local server (e.g. "npx serve ." in the project root).`, "error");
+  };
+  floorImg.src = FLOOR_SVGS[floor];
+}
+
+// Sync the overlay SVG dimensions to the rendered floor image
+function syncOverlay() {
+  const r = floorImg.getBoundingClientRect();
+  const pr = mapPanLayer.getBoundingClientRect();
+  overlaySvg.setAttribute("width",  r.width);
+  overlaySvg.setAttribute("height", r.height);
+  overlaySvg.setAttribute("viewBox", `0 0 1224 792`);
+  overlaySvg.style.left = (r.left - pr.left) + "px";
+  overlaySvg.style.top  = (r.top  - pr.top)  + "px";
+  renderOverlay();
+}
+
+window.addEventListener("resize", syncOverlay);
+
+// ── Floor switching ───────────────────────────────────────────────────────────
+function switchFloor(floor, animate) {
+  currentFloor = floor;
+  document.querySelectorAll(".fl-btn").forEach(b => {
+    b.classList.toggle("active", parseInt(b.dataset.floor) === floor);
+  });
+  hideElevPopup();
+  if (animate) flyTo(ELEVATORS[floor].x, ELEVATORS[floor].y, 1.15);
+  loadFloor(floor, () => syncOverlay());
+}
+
+document.querySelectorAll(".fl-btn").forEach(btn => {
+  btn.addEventListener("click", () => switchFloor(parseInt(btn.dataset.floor), false));
+});
+
+// ── Zoom & pan ────────────────────────────────────────────────────────────────
+function applyZoom() {
+  mapPanLayer.style.transform = `scale(${zoomScale})`;
+  setTimeout(syncOverlay, 50);
+}
+document.getElementById("zoomIn").addEventListener("click", () => {
+  zoomScale = Math.min(zoomScale + 0.2, 3.0);
+  applyZoom();
+});
+document.getElementById("zoomOut").addEventListener("click", () => {
+  zoomScale = Math.max(zoomScale - 0.2, 0.4);
+  applyZoom();
+});
+// Mouse-wheel zoom
+document.getElementById("map-viewport").addEventListener("wheel", e => {
+  e.preventDefault();
+  zoomScale = Math.max(0.4, Math.min(3.0, zoomScale - e.deltaY * 0.001));
+  applyZoom();
+}, { passive: false });
+
+function flyTo(svgX, svgY, targetZoom) {
+  // Convert SVG coords to approximate screen centre offsets
+  zoomScale = targetZoom || 1.3;
+  applyZoom();
+}
+
+// ── Overlay rendering ─────────────────────────────────────────────────────────
+function renderOverlay() {
+  while (overlaySvg.firstChild) overlaySvg.removeChild(overlaySvg.firstChild);
+  if (!route) return;
+
+  // Draw route legs on current floor
+  route.legs.forEach(leg => {
+    if (leg.floor !== currentFloor) return;
+    // Glow / shadow
+    const shadow = makeLine(leg.from.x, leg.from.y, leg.to.x, leg.to.y,
+      "rgba(26,115,232,0.25)", 14, null, "round");
+    overlaySvg.appendChild(shadow);
+    // Dashed blue line
+    const line = makeLine(leg.from.x, leg.from.y, leg.to.x, leg.to.y,
+      "#1a73e8", 5, "18 9", "round");
+    overlaySvg.appendChild(line);
+    // Animated dash pulse via CSS animation trick
+    line.style.animation = "dash-anim 1.2s linear infinite";
+  });
+
+  // Draw markers
+  LOCATIONS.forEach(loc => {
+    if (loc.floor !== currentFloor) return;
+    const isStart = route && route.startId === loc.id;
+    const isEnd   = route && route.endId   === loc.id;
+    if (!isStart && !isEnd) return;
+    const color  = isStart ? "#34a853" : "#ea4335";
+    const label  = isStart ? "A" : "B";
+    drawPin(loc.x, loc.y, color, label);
+  });
+
+  // Elevator marker if cross-floor
+  if (route && route.crossFloors) {
+    const elv = ELEVATORS[currentFloor];
+    if (elv) drawElevatorPin(elv.x, elv.y);
+  }
+}
+
+function makeLine(x1, y1, x2, y2, stroke, width, dasharray, cap) {
+  const l = document.createElementNS("http://www.w3.org/2000/svg", "line");
+  l.setAttribute("x1", x1); l.setAttribute("y1", y1);
+  l.setAttribute("x2", x2); l.setAttribute("y2", y2);
+  l.setAttribute("stroke", stroke);
+  l.setAttribute("stroke-width", width);
+  l.setAttribute("stroke-linecap", cap || "round");
+  if (dasharray) l.setAttribute("stroke-dasharray", dasharray);
+  return l;
+}
+
+function drawPin(x, y, color, letter) {
+  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  // Drop shadow
+  const sh = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  sh.setAttribute("cx", x + 2); sh.setAttribute("cy", y + 2);
+  sh.setAttribute("r", 13);
+  sh.setAttribute("fill", "rgba(0,0,0,0.18)");
+  // Pin circle
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  c.setAttribute("cx", x); c.setAttribute("cy", y);
+  c.setAttribute("r", 13);
+  c.setAttribute("fill", color);
+  c.setAttribute("stroke", "#ffffff");
+  c.setAttribute("stroke-width", 2.5);
+  // Label
+  const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  t.setAttribute("x", x); t.setAttribute("y", y + 5);
+  t.setAttribute("text-anchor", "middle");
+  t.setAttribute("font-family", "Arial, sans-serif");
+  t.setAttribute("font-size", "13");
+  t.setAttribute("font-weight", "700");
+  t.setAttribute("fill", "#ffffff");
+  t.textContent = letter;
+  g.appendChild(sh); g.appendChild(c); g.appendChild(t);
+  overlaySvg.appendChild(g);
+}
+
+function drawElevatorPin(x, y) {
+  const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+  const sh = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  sh.setAttribute("cx", x+2); sh.setAttribute("cy", y+2);
+  sh.setAttribute("r", 12); sh.setAttribute("fill", "rgba(0,0,0,0.15)");
+  const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  c.setAttribute("cx", x); c.setAttribute("cy", y);
+  c.setAttribute("r", 12);
+  c.setAttribute("fill", "#fbbc04");
+  c.setAttribute("stroke", "#ffffff");
+  c.setAttribute("stroke-width", 2);
+  const t = document.createElementNS("http://www.w3.org/2000/svg", "text");
+  t.setAttribute("x", x); t.setAttribute("y", y + 5);
+  t.setAttribute("text-anchor", "middle");
+  t.setAttribute("font-family", "Arial, sans-serif");
+  t.setAttribute("font-size", "13");
+  t.setAttribute("font-weight", "700");
+  t.setAttribute("fill", "#202124");
+  t.textContent = "▲";
+  g.appendChild(sh); g.appendChild(c); g.appendChild(t);
+  overlaySvg.appendChild(g);
+}
+
+// ── Search / autocomplete ─────────────────────────────────────────────────────
+function setupSearch(inputId, suggestionsId, hiddenId) {
+  const input = document.getElementById(inputId);
+  const list  = document.getElementById(suggestionsId);
+  const hidden= document.getElementById(hiddenId);
+
+  input.addEventListener("input", () => {
+    const q = input.value.trim().toLowerCase();
+    list.innerHTML = "";
+    if (!q) { list.style.display = "none"; return; }
+    const matches = LOCATIONS.filter(l =>
+      l.name.toLowerCase().includes(q) || l.id.toLowerCase().includes(q)
+    ).slice(0, 12);
+    if (!matches.length) { list.style.display = "none"; return; }
+    matches.forEach(loc => {
+      const row = document.createElement("div");
+      row.className = "suggestion-row";
+      row.innerHTML = `<span>${loc.name}</span><span class="floor-chip">Fl ${loc.floor}</span>`;
+      row.addEventListener("mousedown", e => {
+        e.preventDefault();
+        input.value = loc.name;
+        hidden.value = loc.id;
+        list.style.display = "none";
+      });
+      list.appendChild(row);
+    });
+    list.style.display = "block";
+  });
+
+  input.addEventListener("blur", () => {
+    setTimeout(() => { list.style.display = "none"; }, 150);
+  });
+}
+
+setupSearch("startSearch", "startSuggestions", "startKey");
+setupSearch("endSearch",   "endSuggestions",   "endKey");
+
+// ── Route generation ──────────────────────────────────────────────────────────
+document.getElementById("routeBtn").addEventListener("click", generateRoute);
+
+function generateRoute() {
+  const startId = document.getElementById("startKey").value;
+  const endId   = document.getElementById("endKey").value;
+
+  hideStatus();
+  if (!startId || !endId) {
+    showStatus("Please select both a start and destination from the suggestions.", "error");
+    return;
+  }
+  if (startId === endId) {
+    showStatus("Start and destination are the same location.", "error");
+    return;
+  }
+
+  const startLoc = LOCATIONS.find(l => l.id === startId);
+  const endLoc   = LOCATIONS.find(l => l.id === endId);
+  if (!startLoc || !endLoc) {
+    showStatus("Location not found. Please re-select from the suggestions.", "error");
+    return;
+  }
+
+  const crossFloors = startLoc.floor !== endLoc.floor;
+  const legs = [];
+  const steps = [];
+  let idx = 1;
+
+  if (!crossFloors) {
+    const elvStart = ELEVATORS[startLoc.floor];
+    legs.push({
+      floor: startLoc.floor,
+      from: { x: startLoc.x, y: startLoc.y },
+      to:   { x: endLoc.x,   y: endLoc.y   },
+    });
+    steps.push({ n: idx++, html: `Depart <b>${startLoc.name}</b> and walk to your destination on the same floor.` });
+    steps.push({ n: idx++, html: `Arrive at <b>${endLoc.name}</b>.` });
+  } else {
+    const elvS = ELEVATORS[startLoc.floor];
+    const elvE = ELEVATORS[endLoc.floor];
+    legs.push({
+      floor: startLoc.floor,
+      from: { x: startLoc.x, y: startLoc.y },
+      to:   { x: elvS.x,     y: elvS.y     },
+    });
+    legs.push({
+      floor: endLoc.floor,
+      from: { x: elvE.x,   y: elvE.y   },
+      to:   { x: endLoc.x, y: endLoc.y },
+    });
+    steps.push({ n: idx++, html: `Proceed from <b>${startLoc.name}</b> (Floor ${startLoc.floor}) to the <b>elevator</b>.` });
+    steps.push({ n: idx++, html: `Take elevator to <b>Floor ${endLoc.floor}</b>.` });
+    steps.push({ n: idx++, html: `Exit elevator and walk to <b>${endLoc.name}</b>.` });
+  }
+
+  route = { startId, endId, crossFloors, legs };
+
+  // Switch to start floor and render
+  switchFloor(startLoc.floor, false);
+  loadFloor(startLoc.floor, () => {
+    syncOverlay();
+    // Fly-to effect: zoom toward start pin
+    zoomScale = 1.3;
+    applyZoom();
+  });
+
+  // Show elevator popup for cross-floor
+  if (crossFloors) {
+    document.getElementById("elevBody").textContent =
+      `Going from Floor ${startLoc.floor} → Floor ${endLoc.floor}.`;
+    document.getElementById("elevGotoBtn").textContent =
+      `Switch to Floor ${endLoc.floor}`;
+    document.getElementById("elevGotoBtn").onclick = () => {
+      switchFloor(endLoc.floor, true);
+      hideElevPopup();
+    };
+    elevPopup.classList.add("visible");
+  }
+
+  // Render steps
+  stepsContainer.innerHTML = "";
+  steps.forEach(s => {
+    const div = document.createElement("div");
+    div.className = "step";
+    div.innerHTML = `<span class="step-num">${s.n}</span><span>${s.html}</span>`;
+    stepsContainer.appendChild(div);
+  });
+  directionsDiv.style.display = "block";
+}
+
+// ── Elevator popup ────────────────────────────────────────────────────────────
+document.getElementById("elevClose").addEventListener("click", hideElevPopup);
+function hideElevPopup() { elevPopup.classList.remove("visible"); }
+
+// ── Status helpers ────────────────────────────────────────────────────────────
+function showStatus(msg, type) {
+  statusBar.textContent = msg;
+  statusBar.className = `status-bar ${type}`;
+}
+function hideStatus() {
+  statusBar.className = "status-bar";
+  statusBar.textContent = "";
+}
+
+// ── Style: dash animation injected dynamically ────────────────────────────────
+const styleTag = document.createElement("style");
+styleTag.textContent = `
+  @keyframes dash-anim {
+    from { stroke-dashoffset: 54; }
+    to   { stroke-dashoffset:  0; }
+  }
+`;
+document.head.appendChild(styleTag);
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+loadFloor(1);
+</script>
+</body>
 </html>
