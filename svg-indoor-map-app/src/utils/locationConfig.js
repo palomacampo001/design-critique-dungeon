@@ -1,8 +1,8 @@
 export const BUILDING_GEOFENCE = {
   id: 'us-oma',
   name: 'US OMA',
-  // IBM Omaha (1 IBM Way, Omaha NE 68114) — surveyed entrance centroid.
-  center: { lat: 41.25643, lng: -95.93527 },
+  // IBM One Madison Ave, New York, NY 10010
+  center: { lat: 40.7425, lng: -73.9878 },
   // 200 m covers the full building footprint with indoor GPS drift margin.
   radiusMeters: 200,
 };

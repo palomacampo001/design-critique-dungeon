@@ -156,28 +156,37 @@ export default function App() {
   }, [isAdminUrl]);
 
   useEffect(() => {
-    if (adminMode || !mapData.floors.length || !navigator.geolocation) {
-      if (!navigator.geolocation) setLocationState({ mode: 'denied', message: 'Location is off. You can still search or set your location manually.' });
+    if (adminMode || !mapData.floors.length) return undefined;
+
+    // Immediately anchor to entrance on load — GPS is unreliable indoors so
+    // we place the user at the entrance right away and let GPS refine later.
+    const anchor = getDefaultStartAnchor(mapData.floors);
+    if (anchor) {
+      setUserLocation({ floorId: anchor.floorId, point: anchor.mapPoint, approximate: true });
+      setLocationState({
+        mode: 'indoorAnchored',
+        floorId: anchor.floorId,
+        mapPoint: anchor.mapPoint,
+        message: "You're tracked from the main entrance. Tap the map to set your exact position.",
+      });
+    }
+
+    if (!navigator.geolocation) {
+      setLocationState({ mode: 'denied', message: 'Location is off. Your start is set to the main entrance.' });
       return undefined;
     }
-    setLocationState({ mode: 'locating', message: 'Locating you…' });
+
     const watchId = navigator.geolocation.watchPosition(
       (position) => {
         const latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
         const meters = haversineDistanceMeters(latLng, BUILDING_GEOFENCE.center);
         if (isInsideBuildingGeofence(latLng, BUILDING_GEOFENCE)) {
-          // GPS confirms user is at the building — auto-anchor to entrance if not
-          // already manually placed so routing can start immediately.
-          setUserLocation((current) => {
-            if (current) return current;
-            const anchor = getDefaultStartAnchor(mapData.floors);
-            return anchor ? { floorId: anchor.floorId, point: anchor.mapPoint, approximate: true } : current;
-          });
+          // GPS confirms user is at the building — keep the anchor already set.
           setLocationState({
             mode: 'nearBuilding',
             gps: latLng,
             accuracy: position.coords.accuracy,
-            message: "You're in the building. Your position is set to the main entrance \u2014 tap the map to refine it.",
+            message: "You're in the building. Tap the map to refine your position.",
           });
         } else {
           setLocationState({
@@ -185,19 +194,14 @@ export default function App() {
             gps: latLng,
             accuracy: position.coords.accuracy,
             distanceMeters: meters,
-            message: `Looks like you're outside the building. Walk ${formatDistanceFeet(meters)} toward the highlighted entrance to start.`,
+            message: `GPS says you're ${formatDistanceFeet(meters)} from the building. Your start is still set to the main entrance.`,
           });
         }
       },
-      (error) => {
-        setLocationState({
-          mode: 'denied',
-          message: error.code === 1
-            ? 'Location permission is off. You can still search or set your location manually.'
-            : 'Location is unavailable. Search or tap Locate me to set your indoor position.',
-        });
+      () => {
+        // GPS failed — anchor already set above, so user can still route.
       },
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 },
     );
     return () => navigator.geolocation.clearWatch(watchId);
   }, [adminMode, mapData.floors]);
