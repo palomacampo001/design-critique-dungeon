@@ -810,6 +810,11 @@ export default function App() {
         if (floorId) selectFloor(floorId);
         setSelectedId(feature?.id || '');
         setHighlightId(feature?.id || '');
+        // In public mode, tapping any label/space immediately sets it as the
+        // route destination — no need to find it in the search dropdown first.
+        if (!adminMode && feature?.id) {
+          startRouteTo(feature, floorId || activeFloorId);
+        }
       }}
       onHoverFeature={setHoveredId}
       onUpdateFeature={updateFeature}
