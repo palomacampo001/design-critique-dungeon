@@ -73,12 +73,20 @@ function polygonGeometry(points) {
 export default function App() {
   const savedState = loadMapState();
   const isAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
+  // Read ?floor=<levelNumber> from the URL so QR codes on each floor can deep-link
+  // directly to the right floor (e.g. a QR on floor 10 points to /?floor=10).
+  const urlFloorLevel = Number(new URLSearchParams(window.location.search).get('floor')) || null;
   const [mapData, setMapData] = useState(() => savedState || initialMap);
-  const [activeFloorId, setActiveFloorId] = useState(() => savedState?.floors?.[0]?.id || '');
+  const [activeFloorId, setActiveFloorId] = useState(() => {
+    // Prefer last-used floor stored in localStorage so reloads remember your floor.
+    return localStorage.getItem('nwt-last-floor') || savedState?.floors?.[0]?.id || '';
+  });
   // Ref so the GPS watchPosition callback always reads the current floor
   // without needing to re-register the watcher on every floor switch.
   const activeFloorIdRef = useRef(activeFloorId);
   useEffect(() => { activeFloorIdRef.current = activeFloorId; }, [activeFloorId]);
+  // Persist the active floor whenever it changes.
+  useEffect(() => { if (activeFloorId) localStorage.setItem('nwt-last-floor', activeFloorId); }, [activeFloorId]);
   const [selectedId, setSelectedId] = useState('');
   const [hoveredId, setHoveredId] = useState('');
   const [highlightId, setHighlightId] = useState('');
@@ -143,7 +151,11 @@ export default function App() {
       .then((publishedMap) => {
         if (!publishedMap?.floors?.length) return;
         setMapData(publishedMap);
-        setActiveFloorId(publishedMap.floors[0]?.id || '');
+        // Resolve starting floor: ?floor= param beats localStorage beats floors[0].
+        const targetFloor = urlFloorLevel
+          ? publishedMap.floors.find((f) => f.levelNumber === urlFloorLevel) || publishedMap.floors[0]
+          : publishedMap.floors.find((f) => f.id === localStorage.getItem('nwt-last-floor')) || publishedMap.floors[0];
+        setActiveFloorId(targetFloor.id);
         setHighlightId(defaultStartAreaId(publishedMap.floors));
         setBuildingId(publishedMap.building?.id || '');
         setPublished(true);
@@ -152,7 +164,10 @@ export default function App() {
       .catch(() => {
         if (!savedState?.floors?.length && sampleMap?.floors?.length) {
           setMapData(sampleMap);
-          setActiveFloorId(sampleMap.floors[0]?.id || '');
+          const targetFloor = urlFloorLevel
+            ? sampleMap.floors.find((f) => f.levelNumber === urlFloorLevel) || sampleMap.floors[0]
+            : sampleMap.floors.find((f) => f.id === localStorage.getItem('nwt-last-floor')) || sampleMap.floors[0];
+          setActiveFloorId(targetFloor.id);
           setHighlightId(defaultStartAreaId(sampleMap.floors));
           setPublished(true);
         }
@@ -185,6 +200,8 @@ export default function App() {
         const mapPoint = gpsToMapPoint(latLng);
         if (mapPoint && inside) {
           setUserLocation({ floorId: currentFloorId, point: mapPoint, gps: latLng, approximate: false });
+          // Switch the visible map to the user's actual floor immediately.
+          setActiveFloorId(currentFloorId);
           setLocationState({
             mode: 'tracking',
             gps: latLng,
