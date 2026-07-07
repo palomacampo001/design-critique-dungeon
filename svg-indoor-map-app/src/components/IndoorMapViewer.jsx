@@ -42,12 +42,12 @@ const paneZ = {
   activeLabelPane: 950,
 };
 
-const floorAccents = {
+export const floorAccents = {
   'floor-us-oma-01': '#2563eb',
   'floor-us-oma-02': '#0f766e',
   'floor-03': '#7c3aed',
-  'floor-04': '#ea580c',
-  'floor-05': '#15803d',
+  'floor-04': '#b45309',
+  'floor-05': '#be123c',
 };
 
 function areaRatio(feature, viewBox) {

@@ -1,5 +1,30 @@
 import { useRef, useState } from 'react';
 import { ChevronDown, ChevronUp, LocateFixed, Navigation, Volume2, VolumeX, X } from 'lucide-react';
+import { floorAccents } from './IndoorMapViewer.jsx';
+
+// Derive an ordered list of unique floors the route passes through, with colors.
+function routeFloorJourney(route) {
+  if (!route?.legs) return [];
+  const seen = new Set();
+  const stops = [];
+  route.legs.forEach((leg) => {
+    if (leg.type === 'walk' && leg.floorId && !seen.has(leg.floorId)) {
+      seen.add(leg.floorId);
+      stops.push({ floorId: leg.floorId, floorName: leg.floorName, type: 'walk' });
+    }
+    if (leg.type === 'transfer') {
+      if (!seen.has(leg.toFloorId)) {
+        seen.add(leg.toFloorId);
+        stops.push({ floorId: leg.toFloorId, floorName: leg.toFloorName, type: 'transfer', via: leg.connectorType });
+      }
+    }
+  });
+  return stops;
+}
+
+function floorColor(floorId) {
+  return floorAccents[floorId] || '#6b7280';
+}
 
 export default function NavigationDrawer({
   route,
@@ -77,6 +102,73 @@ export default function NavigationDrawer({
             </span>
           </div>
         </div>
+        {/* ── Floor journey strip ── */}
+        {(() => {
+          const journey = routeFloorJourney(route);
+          if (journey.length < 2) return null;
+          return (
+            <div style={{ margin: '10px 0 4px', padding: '10px 14px', background: '#f7f8fa', borderRadius: 10, border: '1px solid #e5e7eb' }}>
+              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: '#57606a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+                Your journey · {journey.length} floor{journey.length !== 1 ? 's' : ''}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0, overflowX: 'auto' }}>
+                {journey.map((stop, i) => {
+                  const color = floorColor(stop.floorId);
+                  const isActive = stop.floorId === activeFloorId;
+                  const isLast = i === journey.length - 1;
+                  return (
+                    <div key={stop.floorId} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                      <button
+                        onClick={() => onSelectFloor(stop.floorId)}
+                        title={`Go to ${stop.floorName}`}
+                        style={{
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                          background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+                        }}
+                      >
+                        <div style={{
+                          width: isActive ? 34 : 28,
+                          height: isActive ? 34 : 28,
+                          borderRadius: '50%',
+                          background: color,
+                          border: isActive ? '3px solid #1f2328' : '2px solid rgba(0,0,0,0.12)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.2s',
+                          boxShadow: isActive ? `0 0 0 3px ${color}44` : 'none',
+                        }}>
+                          {i === 0 && (
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                              <circle cx="5" cy="5" r="3" fill="white" />
+                            </svg>
+                          )}
+                          {isLast && (
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+                              <path d="M5 2L7 7H3L5 2Z" fill="white" />
+                            </svg>
+                          )}
+                        </div>
+                        <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? '#1f2328' : '#57606a', whiteSpace: 'nowrap' }}>
+                          {stop.floorName}
+                        </span>
+                        {stop.via && (
+                          <span style={{ fontSize: 9, color: '#57606a', fontStyle: 'italic' }}>{stop.via}</span>
+                        )}
+                      </button>
+                      {!isLast && (
+                        <div style={{ display: 'flex', alignItems: 'center', margin: '0 2px', paddingBottom: 18 }}>
+                          <div style={{ width: 18, height: 2, background: `linear-gradient(to right, ${color}, ${floorColor(journey[i + 1].floorId)})`, borderRadius: 1 }} />
+                          <svg width="8" height="8" viewBox="0 0 8 8" style={{ marginLeft: -1, marginBottom: 0 }}>
+                            <path d="M2 1L6 4L2 7" stroke={floorColor(journey[i + 1].floorId)} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+                          </svg>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
         <ol className="direction-list">
           {route.instructions?.map((step, index) => (
             <li
