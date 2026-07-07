@@ -696,7 +696,12 @@ export default function IndoorMapViewer({
         }),
       }).addTo(map);
       userMarkerRef.current.setZIndexOffset(2500);
-      if (trackingMode) map.setView(pointLatLng(userLocation.point), Math.max(map.getZoom(), 0));
+      if (trackingMode) {
+        // Zoom in to a street-level equivalent so the user is clearly centred.
+        // Use 1.5 as the minimum — enough to see the surrounding rooms clearly.
+        const targetZoom = Math.max(map.getZoom(), 1.5);
+        map.setView(pointLatLng(userLocation.point), targetZoom, { animate: true, duration: 0.4 });
+      }
     }
     if (anchorMarkerRef.current) {
       anchorMarkerRef.current.remove();

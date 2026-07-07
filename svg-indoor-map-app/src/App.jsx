@@ -96,6 +96,8 @@ export default function App() {
   const [locatingMode, setLocatingMode] = useState(false);
   const [userLocation, setUserLocation] = useState(null);
   const [locationState, setLocationState] = useState({ mode: 'idle', message: 'Locating you…' });
+  // Show floor picker on first open when no floor has been saved yet.
+  const [showFloorPicker, setShowFloorPicker] = useState(() => !localStorage.getItem('nwt-last-floor') && !urlFloorLevel);
   const [routeDestinationId, setRouteDestinationId] = useState('');
   const [adminMode, setAdminMode] = useState(isAdminUrl);
   const [published, setPublished] = useState(() => Boolean(savedState?.floors?.length));
@@ -708,7 +710,53 @@ export default function App() {
     }
   }
 
+  function pickFloor(floorId) {
+    setActiveFloorId(floorId);
+    setShowFloorPicker(false);
+  }
+
   return (
+    <>
+      {showFloorPicker && mapData.floors.length > 0 && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(15,23,28,0.72)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '24px',
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '16px', padding: '32px 28px',
+            width: '100%', maxWidth: '360px', boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '6px', textAlign: 'center' }}>📍</div>
+            <h2 style={{ margin: '0 0 6px', fontSize: '20px', fontWeight: 700, textAlign: 'center', color: '#1e252b' }}>
+              What floor are you on?
+            </h2>
+            <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#526069', textAlign: 'center' }}>
+              GPS can't detect your floor. Tap yours and the map will start there.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {mapData.floors.map((floor) => (
+                <button
+                  key={floor.id}
+                  onClick={() => pickFloor(floor.id)}
+                  style={{
+                    padding: '14px 20px', borderRadius: '10px', border: '1.5px solid #c8d1d8',
+                    background: '#f7f9fa', fontSize: '16px', fontWeight: 600,
+                    color: '#1e252b', cursor: 'pointer', textAlign: 'left',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}
+                >
+                  {floor.name}
+                  <span style={{ fontSize: '12px', fontWeight: 400, color: '#526069' }}>
+                    {floor.features?.length} spaces
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     <AppShell
       mapData={mapData}
       activeFloor={activeFloor}
@@ -788,5 +836,6 @@ export default function App() {
       onLoadSample={resetDemo}
       onClearAll={clearAll}
     />
+    </>
   );
 }
