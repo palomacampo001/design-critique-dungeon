@@ -166,11 +166,18 @@ export default function App() {
         const latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
         const meters = haversineDistanceMeters(latLng, BUILDING_GEOFENCE.center);
         if (isInsideBuildingGeofence(latLng, BUILDING_GEOFENCE)) {
+          // GPS confirms user is at the building — auto-anchor to entrance if not
+          // already manually placed so routing can start immediately.
+          setUserLocation((current) => {
+            if (current) return current;
+            const anchor = getDefaultStartAnchor(mapData.floors);
+            return anchor ? { floorId: anchor.floorId, point: anchor.mapPoint, approximate: true } : current;
+          });
           setLocationState({
             mode: 'nearBuilding',
             gps: latLng,
             accuracy: position.coords.accuracy,
-            message: 'You’re near the building. For accurate indoor guidance, scan a QR code or set your starting point.',
+            message: 'You're in the building. Your position is set to the main entrance — tap the map to refine it.',
           });
         } else {
           setLocationState({
@@ -178,7 +185,7 @@ export default function App() {
             gps: latLng,
             accuracy: position.coords.accuracy,
             distanceMeters: meters,
-            message: `Looks like you’re outside the building. Walk ${formatDistanceFeet(meters)} toward the highlighted entrance to start.`,
+            message: `Looks like you're outside the building. Walk ${formatDistanceFeet(meters)} toward the highlighted entrance to start.`,
           });
         }
       },

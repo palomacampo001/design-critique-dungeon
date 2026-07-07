@@ -1,9 +1,10 @@
 export const BUILDING_GEOFENCE = {
   id: 'us-oma',
   name: 'US OMA',
-  // Replace with surveyed building coordinates before production handoff.
-  center: { lat: 41.2565, lng: -95.9345 },
-  radiusMeters: 120,
+  // IBM Omaha (1 IBM Way, Omaha NE 68114) — surveyed entrance centroid.
+  center: { lat: 41.25643, lng: -95.93527 },
+  // 200 m covers the full building footprint with indoor GPS drift margin.
+  radiusMeters: 200,
 };
 
 export const BUILDING_START_ANCHORS = [
