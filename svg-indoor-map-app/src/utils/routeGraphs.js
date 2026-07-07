@@ -142,9 +142,40 @@ function isOpenOrCorridorLike(feature, mapArea) {
   const ratio = Math.max(width, height) / Math.max(1, Math.min(width, height));
   const text = featureText(feature);
   const category = String(feature.category || '').toLowerCase();
-  return /corridor|circulation|aisle|lobby|reception|vestibule|entrance|open|gallery|hall|walkway|turnstile/i.test(text)
-    || ['corridor', 'lobby', 'reception', 'entrance', 'wayfinding_zone', 'meeting_area', 'custom'].includes(category)
-    || (area / Math.max(1, mapArea) > 0.018 && ratio > 2.2);
+  const roomNumber = String(feature.roomNumber || '').toUpperCase();
+  // Named patterns: standard words + this floor plan's PAISLE/SECA zone codes
+  if (/corridor|circulation|aisle|lobby|reception|vestibule|entrance|open|gallery|hall|walkway|turnstile/i.test(text)) return true;
+  if (/^PAISLE|^SECA/i.test(roomNumber)) return true;
+  if (['corridor', 'lobby', 'reception', 'entrance', 'wayfinding_zone', 'meeting_area', 'custom'].includes(category)) return true;
+  // Geometry heuristic: long narrow shape (aspect ratio > 2.5) that covers enough map area
+  if (area / Math.max(1, mapArea) > 0.012 && ratio > 2.5) return true;
+  return false;
+}
+
+/**
+ * Generate evenly-spaced skeleton nodes along the centerline of a corridor polygon.
+ * For a horizontal corridor the spine runs along y=center; for vertical along x=center.
+ * Returns an array of {x, y} points spaced ~stepSize apart.
+ */
+function corridorSkeleton(bbox, stepSize = 90) {
+  const [x, y, width, height] = bbox;
+  const cx = x + width / 2;
+  const cy = y + height / 2;
+  const points = [];
+  if (width >= height) {
+    // Horizontal corridor — walk along x
+    const steps = Math.max(1, Math.floor(width / stepSize));
+    for (let i = 0; i <= steps; i++) {
+      points.push({ x: x + (width * i) / steps, y: cy });
+    }
+  } else {
+    // Vertical corridor — walk along y
+    const steps = Math.max(1, Math.floor(height / stepSize));
+    for (let i = 0; i <= steps; i++) {
+      points.push({ x: cx, y: y + (height * i) / steps });
+    }
+  }
+  return points;
 }
 
 function usefulDestination(feature) {
@@ -170,96 +201,89 @@ export function generateHallwayGraph(floor) {
   const features = floor?.features || [];
   const openFeatures = features.filter((feature) => isOpenOrCorridorLike(feature, mapArea));
 
-  openFeatures.forEach((feature, index) => {
-    const point = featurePoint(feature);
-    if (!point) return;
-    const node = addNode(nodes, {
-      id: `${floor.id}-generated-hall-${index + 1}`,
+  // ── Step 1: skeleton nodes along each corridor's centerline ───────────────
+  // Place nodes every ~80 units along the long axis so the route traces the
+  // actual corridor shape instead of cutting straight across walls.
+  openFeatures.forEach((feature, featureIndex) => {
+    if (!feature.bbox) return;
+    const isIntersectionLike = /intersection|lobby|reception|entrance|vestibule/i.test(featureText(feature));
+    const nodeType = isIntersectionLike ? 'intersection' : 'hallway';
+    const label = formatFeatureLabel(feature);
+    const [,, bw, bh] = feature.bbox;
+    const stepSize = Math.min(bw, bh) < 40 ? 60 : 80;
+    const skeletonPts = corridorSkeleton(feature.bbox, stepSize);
+    const skeletonNodes = skeletonPts.map((pt, ptIndex) => addNode(nodes, {
+      id: `${floor.id}-hall-${featureIndex + 1}-s${ptIndex}`,
       floorId: floor.id,
-      x: point.x,
-      y: point.y,
-      type: /intersection|lobby|reception|entrance|vestibule/i.test(featureText(feature)) ? 'intersection' : 'hallway',
-      name: formatFeatureLabel(feature),
+      x: pt.x,
+      y: pt.y,
+      type: ptIndex === 0 || ptIndex === skeletonPts.length - 1 ? 'turn' : nodeType,
+      name: ptIndex === 0 ? `${label} start` : ptIndex === skeletonPts.length - 1 ? `${label} end` : label,
       linkedFeatureId: feature.id,
       source: 'generated',
-    });
-    const [x, y, width, height] = feature.bbox || [];
-    if (!node || !width || !height) return;
-    if (Math.max(width, height) > 180) {
-      const horizontal = width >= height;
-      const a = addNode(nodes, {
-        id: `${floor.id}-generated-hall-${index + 1}-a`,
-        floorId: floor.id,
-        x: horizontal ? x + width * 0.22 : point.x,
-        y: horizontal ? point.y : y + height * 0.22,
-        type: 'turn',
-        name: `${formatFeatureLabel(feature)} approach`,
-        linkedFeatureId: feature.id,
-        source: 'generated',
-      });
-      const b = addNode(nodes, {
-        id: `${floor.id}-generated-hall-${index + 1}-b`,
-        floorId: floor.id,
-        x: horizontal ? x + width * 0.78 : point.x,
-        y: horizontal ? point.y : y + height * 0.78,
-        type: 'turn',
-        name: `${formatFeatureLabel(feature)} approach`,
-        linkedFeatureId: feature.id,
-        source: 'generated',
-      });
-      addEdge(edges, floor.id, a, node);
-      addEdge(edges, floor.id, node, b);
+    })).filter(Boolean);
+    // Chain skeleton nodes — this is the corridor's internal walkable path.
+    for (let i = 0; i < skeletonNodes.length - 1; i++) {
+      addEdge(edges, floor.id, skeletonNodes[i], skeletonNodes[i + 1]);
     }
   });
 
+  // Fallback when no corridor features detected
   if (!nodes.length) {
-    const center = { x: viewX + viewWidth / 2, y: viewY + viewHeight / 2 };
     addNode(nodes, {
       id: `${floor.id}-generated-hall-center`,
       floorId: floor.id,
-      x: center.x,
-      y: center.y,
+      x: viewX + viewWidth / 2,
+      y: viewY + viewHeight / 2,
       type: 'hallway',
       name: 'Suggested hallway center',
       source: 'generated',
     });
   }
 
-  const hallwayNodes = () => nodes.filter((node) => ['hallway', 'intersection', 'turn', 'doorway', 'entrance', 'reception'].includes(node.type));
-  hallwayNodes().forEach((node) => {
-    const nearby = hallwayNodes()
+  // ── Step 2: cross-connect corridor endpoints ──────────────────────────────
+  // Only connect endpoint/turn nodes to their nearest neighbours so adjacent
+  // corridor segments join up without long diagonal wall-crossing jumps.
+  const hallwayNodes = () => nodes.filter((n) => ['hallway', 'intersection', 'turn', 'doorway', 'entrance', 'reception'].includes(n.type));
+  const endpointNodes = nodes.filter((n) => n.type === 'turn' || n.type === 'intersection' || n.type === 'entrance' || n.type === 'reception');
+  endpointNodes.forEach((node) => {
+    const crossThreshold = Math.max(120, Math.min(viewWidth, viewHeight) * 0.18);
+    hallwayNodes()
       .filter((other) => other.id !== node.id)
       .map((other) => ({ node: other, distance: nodeDistance(node, other) }))
-      .filter((item) => item.distance < Math.max(180, Math.min(viewWidth, viewHeight) * 0.28))
+      .filter((item) => item.distance < crossThreshold)
       .sort((a, b) => a.distance - b.distance)
-      .slice(0, 3);
-    nearby.forEach((item) => addEdge(edges, floor.id, node, item.node));
+      .slice(0, 2)
+      .forEach((item) => addEdge(edges, floor.id, node, item.node));
   });
 
+  // ── Step 3: connectors (elevators, stairs, escalators) ────────────────────
   features.forEach((feature, index) => {
     if (feature.visible === false || feature.geometry?.type !== 'Point') return;
     const point = featurePoint(feature);
     if (!point) return;
     const type = connectorType(feature);
-    if (type) {
-      const connector = addNode(nodes, {
-        id: `${floor.id}-generated-connector-${index + 1}`,
-        floorId: floor.id,
-        x: point.x,
-        y: point.y,
-        type,
-        name: formatFeatureLabel(feature),
-        linkedPoiId: feature.id,
-        linkedFeatureId: feature.id,
-        connectorGroupId: connectorGroupId(feature, type),
-        source: 'generated',
-      });
-      const nearest = nearestNode(connector, hallwayNodes(), (node) => node.id !== connector.id);
-      if (nearest) addEdge(edges, floor.id, connector, nearest.node);
-    }
+    if (!type) return;
+    const connector = addNode(nodes, {
+      id: `${floor.id}-generated-connector-${index + 1}`,
+      floorId: floor.id,
+      x: point.x,
+      y: point.y,
+      type,
+      name: formatFeatureLabel(feature),
+      linkedPoiId: feature.id,
+      linkedFeatureId: feature.id,
+      connectorGroupId: connectorGroupId(feature, type),
+      source: 'generated',
+    });
+    const nearest = nearestNode(connector, hallwayNodes(), (n) => n.id !== connector.id);
+    if (nearest) addEdge(edges, floor.id, connector, nearest.node);
   });
 
-  const destinations = features.filter(usefulDestination).slice(0, 220);
+  // ── Step 4: destination approach stubs ────────────────────────────────────
+  // Each named POI gets a short stub node off the nearest hallway node so the
+  // route enters from the corridor rather than cutting through walls.
+  const destinations = features.filter(usefulDestination).slice(0, 300);
   destinations.forEach((feature, index) => {
     const point = featurePoint(feature);
     if (!point) return;
@@ -268,8 +292,8 @@ export function generateHallwayGraph(floor) {
     const approach = addNode(nodes, {
       id: `${floor.id}-generated-destination-${index + 1}`,
       floorId: floor.id,
-      x: nearest.node.x + (point.x - nearest.node.x) * 0.18,
-      y: nearest.node.y + (point.y - nearest.node.y) * 0.18,
+      x: nearest.node.x + (point.x - nearest.node.x) * 0.15,
+      y: nearest.node.y + (point.y - nearest.node.y) * 0.15,
       type: 'destination_approach',
       name: `${formatFeatureLabel(feature)} approach`,
       linkedPoiId: feature.id,
