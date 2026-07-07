@@ -177,7 +177,7 @@ export default function App() {
             mode: 'nearBuilding',
             gps: latLng,
             accuracy: position.coords.accuracy,
-            message: 'You're in the building. Your position is set to the main entrance — tap the map to refine it.',
+            message: "You're in the building. Your position is set to the main entrance \u2014 tap the map to refine it.",
           });
         } else {
           setLocationState({
