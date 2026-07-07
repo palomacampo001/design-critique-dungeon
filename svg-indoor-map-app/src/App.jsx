@@ -250,7 +250,22 @@ export default function App() {
 
   useEffect(() => {
     if (!mapData.floors.length) return;
-    setRouteGraphs(loadRouteGraphs(mapData.floors));
+    const loaded = loadRouteGraphs(mapData.floors);
+    // Auto-generate hallway graphs for any floor that has features but no edges yet.
+    // This means admins never have to manually hit "Auto-detect" per floor — it just works.
+    const next = { ...loaded };
+    let generated = false;
+    mapData.floors.forEach((floor) => {
+      const graph = next[floor.id];
+      const hasFeatures = floor.features?.length > 0;
+      const hasEdges = graph?.edges?.length > 0;
+      if (hasFeatures && !hasEdges) {
+        next[floor.id] = generateHallwayGraph(floor);
+        generated = true;
+      }
+    });
+    if (generated) saveRouteGraphs(next);
+    setRouteGraphs(next);
   }, [mapData.floors]);
 
   function updateRouteGraph(floorId, updater) {
