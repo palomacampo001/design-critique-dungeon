@@ -680,28 +680,35 @@ export default function IndoorMapViewer({
       origin?.setZIndexOffset(1000);
       target.setZIndexOffset(1000);
     }
-    if (userMarkerRef.current) {
+    if (userLocation?.floorId === floor?.id) {
+      // Prefer live GPS heading; fall back to the direction of travel along the
+      // active route leg so the arrow always points somewhere useful.
+      const gpsHeading = userLocation.heading;
+      const routeHeading = activeFloorLeg?.heading ?? activeRoute?.heading ?? null;
+      const userHeading = gpsHeading ?? routeHeading ?? 0;
+      const icon = L.divIcon({
+        className: '',
+        html: `<div class="leaflet-you-ring"></div><div class="leaflet-you-heading" style="transform:rotate(${userHeading}deg);transition:transform 0.4s ease"><div class="leaflet-you-arrow"></div></div>`,
+        iconSize: [44, 44],
+        iconAnchor: [22, 22],
+      });
+      const latlng = pointLatLng(userLocation.point);
+      if (userMarkerRef.current) {
+        // Move and re-icon the existing marker — smooth, no flicker.
+        userMarkerRef.current.setLatLng(latlng);
+        userMarkerRef.current.setIcon(icon);
+      } else {
+        userMarkerRef.current = L.marker(latlng, { pane: 'endpointPane', icon }).addTo(map);
+        userMarkerRef.current.setZIndexOffset(2500);
+      }
+      if (trackingMode) {
+        const targetZoom = Math.max(map.getZoom(), 1.5);
+        map.setView(latlng, targetZoom, { animate: true, duration: 0.4 });
+      }
+    } else if (userMarkerRef.current) {
+      // User switched to a different floor — hide the marker.
       userMarkerRef.current.remove();
       userMarkerRef.current = null;
-    }
-    if (userLocation?.floorId === floor?.id) {
-      const userHeading = activeFloorLeg?.heading ?? activeRoute?.heading ?? 0;
-      userMarkerRef.current = L.marker(pointLatLng(userLocation.point), {
-        pane: 'endpointPane',
-        icon: L.divIcon({
-          className: '',
-          html: `<div class="leaflet-you-ring"></div><div class="leaflet-you-heading" style="transform: rotate(${userHeading}deg)"><div class="leaflet-you-arrow"></div></div>`,
-          iconSize: [44, 44],
-          iconAnchor: [22, 22],
-        }),
-      }).addTo(map);
-      userMarkerRef.current.setZIndexOffset(2500);
-      if (trackingMode) {
-        // Zoom in to a street-level equivalent so the user is clearly centred.
-        // Use 1.5 as the minimum — enough to see the surrounding rooms clearly.
-        const targetZoom = Math.max(map.getZoom(), 1.5);
-        map.setView(pointLatLng(userLocation.point), targetZoom, { animate: true, duration: 0.4 });
-      }
     }
     if (anchorMarkerRef.current) {
       anchorMarkerRef.current.remove();

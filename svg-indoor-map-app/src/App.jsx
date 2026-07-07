@@ -201,7 +201,11 @@ export default function App() {
         // Convert real GPS → SVG map point and move the blue dot live.
         const mapPoint = gpsToMapPoint(latLng);
         if (mapPoint && inside) {
-          setUserLocation({ floorId: currentFloorId, point: mapPoint, gps: latLng, approximate: false });
+          // coords.heading is degrees clockwise from north (null when stationary).
+          const heading = position.coords.heading != null && Number.isFinite(position.coords.heading)
+            ? position.coords.heading
+            : null;
+          setUserLocation({ floorId: currentFloorId, point: mapPoint, gps: latLng, heading, approximate: false });
           // Switch the visible map to the user's actual floor immediately.
           setActiveFloorId(currentFloorId);
           setLocationState({
