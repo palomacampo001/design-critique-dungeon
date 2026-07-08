@@ -107,59 +107,71 @@ export default function NavigationDrawer({
           const journey = routeFloorJourney(route);
           if (journey.length < 2) return null;
           return (
-            <div style={{ margin: '10px 0 4px', padding: '10px 14px', background: '#f7f8fa', borderRadius: 10, border: '1px solid #e5e7eb' }}>
-              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: '#57606a', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                Your journey · {journey.length} floor{journey.length !== 1 ? 's' : ''}
+            <div style={{ margin: '12px 0 6px' }}>
+              <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 500, color: '#8b949e', letterSpacing: '0.03em' }}>
+                {journey.length} floors to cross
               </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 0, overflowX: 'auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, overflowX: 'auto', paddingBottom: 2 }}>
                 {journey.map((stop, i) => {
                   const color = floorColor(stop.floorId);
                   const isActive = stop.floorId === activeFloorId;
                   const isLast = i === journey.length - 1;
                   return (
-                    <div key={stop.floorId} style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                    <div key={stop.floorId} style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                      {/* Floor pill */}
                       <button
                         onClick={() => onSelectFloor(stop.floorId)}
                         title={`Go to ${stop.floorName}`}
                         style={{
-                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                          background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5,
+                          background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                         }}
                       >
                         <div style={{
-                          width: isActive ? 34 : 28,
-                          height: isActive ? 34 : 28,
+                          width: 40, height: 40,
                           borderRadius: '50%',
-                          background: color,
-                          border: isActive ? '3px solid #1f2328' : '2px solid rgba(0,0,0,0.12)',
+                          background: isActive ? color : `${color}22`,
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          transition: 'all 0.2s',
-                          boxShadow: isActive ? `0 0 0 3px ${color}44` : 'none',
+                          transition: 'all 0.25s ease',
+                          outline: isActive ? `2.5px solid ${color}` : 'none',
+                          outlineOffset: 2,
                         }}>
-                          {i === 0 && (
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                              <circle cx="5" cy="5" r="3" fill="white" />
-                            </svg>
+                          {/* Origin dot */}
+                          {i === 0 && <div style={{ width: 8, height: 8, borderRadius: '50%', background: isActive ? 'white' : color }} />}
+                          {/* Middle floors — floor number */}
+                          {i > 0 && !isLast && (
+                            <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? 'white' : color, lineHeight: 1 }}>
+                              {stop.floorName?.replace(/floor\s*/i, '') || i + 1}
+                            </span>
                           )}
+                          {/* Destination pin */}
                           {isLast && (
-                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
-                              <path d="M5 2L7 7H3L5 2Z" fill="white" />
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                              <path d="M7 1C4.79 1 3 2.79 3 5c0 3 4 8 4 8s4-5 4-8c0-2.21-1.79-4-4-4Z" fill={isActive ? 'white' : color} />
+                              <circle cx="7" cy="5" r="1.5" fill={isActive ? color : 'white'} />
                             </svg>
                           )}
                         </div>
-                        <span style={{ fontSize: 10, fontWeight: isActive ? 700 : 500, color: isActive ? '#1f2328' : '#57606a', whiteSpace: 'nowrap' }}>
+                        <span style={{
+                          fontSize: 10, fontWeight: isActive ? 600 : 400,
+                          color: isActive ? '#1f2328' : '#8b949e',
+                          whiteSpace: 'nowrap', lineHeight: 1,
+                        }}>
                           {stop.floorName}
                         </span>
-                        {stop.via && (
-                          <span style={{ fontSize: 9, color: '#57606a', fontStyle: 'italic' }}>{stop.via}</span>
-                        )}
                       </button>
+                      {/* Connector between floors */}
                       {!isLast && (
-                        <div style={{ display: 'flex', alignItems: 'center', margin: '0 2px', paddingBottom: 18 }}>
-                          <div style={{ width: 18, height: 2, background: `linear-gradient(to right, ${color}, ${floorColor(journey[i + 1].floorId)})`, borderRadius: 1 }} />
-                          <svg width="8" height="8" viewBox="0 0 8 8" style={{ marginLeft: -1, marginBottom: 0 }}>
-                            <path d="M2 1L6 4L2 7" stroke={floorColor(journey[i + 1].floorId)} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-                          </svg>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, paddingBottom: 16 }}>
+                          <div style={{
+                            width: 22, height: 2, borderRadius: 99,
+                            background: `linear-gradient(to right, ${color}88, ${floorColor(journey[i + 1].floorId)}88)`,
+                          }} />
+                          {journey[i + 1].via && (
+                            <span style={{ fontSize: 8, color: '#8b949e', whiteSpace: 'nowrap' }}>
+                              {journey[i + 1].via}
+                            </span>
+                          )}
                         </div>
                       )}
                     </div>
