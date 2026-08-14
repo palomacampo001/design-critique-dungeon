@@ -1,0 +1,865 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import AppShell from './components/AppShell.jsx';
+import { parseSvg } from './utils/parseSvg.js';
+import { generateIndoorMapData } from './utils/detectFeatures.js';
+import { loadMapState, saveMapState } from './utils/storage.js';
+import { planIndoorRoute } from './utils/navigation.js';
+import { BUILDING_GEOFENCE, formatDistanceFeet, getDefaultStartAnchor, gpsToMapPoint, haversineDistanceMeters, isInsideBuildingGeofence } from './utils/locationConfig.js';
+import { generateHallwayGraph, loadRouteGraphs, saveRouteGraphs } from './utils/routeGraphs.js';
+import sampleMap from './data/sampleConvertedMap.json';
+import {
+  createBuilding,
+  createFloor,
+  cleanupFloorNoise,
+  getIndoorMapJson,
+  getPublishedMap,
+  listBuildings,
+  publishBuilding,
+  createFeature as createFeatureApi,
+  deleteFeature as deleteFeatureApi,
+  updateFeature as updateFeatureApi,
+  uploadSvgToFloor,
+} from './api/indoorMapApi.js';
+
+const initialMap = {
+  building: 'Imported SVG Map',
+  source: { type: 'svg', filename: '', viewBox: [0, 0, 1200, 820] },
+  floors: [],
+};
+
+function floorName(index) {
+  return `Floor ${index + 1}`;
+}
+
+function defaultStartAreaId(floors = []) {
+  const floor = floors.find((item) => item.id === 'floor-us-oma-01') || floors[0];
+  const feature = floor?.features?.find((item) => item.visible !== false && item.isDefaultStartArea)
+    || floor?.features?.find((item) => item.visible !== false && item.id === 'space-main-ibm-entrance-lobby')
+    || floor?.features?.find((item) => item.visible !== false && item.isDefaultStart);
+  return feature?.id || '';
+}
+
+function closeRing(points) {
+  if (!points.length) return points;
+  const first = points[0];
+  const last = points[points.length - 1];
+  return first.x === last.x && first.y === last.y ? points : [...points, first];
+}
+
+function bboxFromMapPoints(points) {
+  if (!points.length) return [0, 0, 0, 0];
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  return [minX, minY, Math.max(...xs) - minX, Math.max(...ys) - minY];
+}
+
+function polygonArea(points) {
+  if (points.length < 3) return 0;
+  return Math.abs(points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return sum + point.x * next.y - next.x * point.y;
+  }, 0) / 2);
+}
+
+function polygonGeometry(points) {
+  return {
+    type: 'Polygon',
+    coordinates: [closeRing(points).map((point) => [point.x, point.y])],
+  };
+}
+
+export default function App() {
+  const savedState = loadMapState();
+  const isAdminUrl = new URLSearchParams(window.location.search).get('admin') === '1';
+  // Read ?floor=<levelNumber> from the URL so QR codes on each floor can deep-link
+  // directly to the right floor (e.g. a QR on floor 10 points to /?floor=10).
+  const urlFloorLevel = Number(new URLSearchParams(window.location.search).get('floor')) || null;
+  const [mapData, setMapData] = useState(() => savedState || initialMap);
+  const [activeFloorId, setActiveFloorId] = useState(() => {
+    // Prefer last-used floor stored in localStorage so reloads remember your floor.
+    return localStorage.getItem('nwt-last-floor') || savedState?.floors?.[0]?.id || '';
+  });
+  // Ref so the GPS watchPosition callback always reads the current floor
+  // without needing to re-register the watcher on every floor switch.
+  const activeFloorIdRef = useRef(activeFloorId);
+  useEffect(() => { activeFloorIdRef.current = activeFloorId; }, [activeFloorId]);
+  // Persist the active floor whenever it changes.
+  useEffect(() => { if (activeFloorId) localStorage.setItem('nwt-last-floor', activeFloorId); }, [activeFloorId]);
+  const [selectedId, setSelectedId] = useState('');
+  const [hoveredId, setHoveredId] = useState('');
+  const [highlightId, setHighlightId] = useState('');
+  const [query, setQuery] = useState('');
+  const [status, setStatus] = useState({ type: 'idle', message: '' });
+  const [addPoiMode, setAddPoiMode] = useState(false);
+  const [locatingMode, setLocatingMode] = useState(false);
+  const [userLocation, setUserLocation] = useState(null);
+  const [locationState, setLocationState] = useState({ mode: 'idle', message: 'Locating you…' });
+  // Show floor picker on first open when no floor has been saved yet.
+  const [showFloorPicker, setShowFloorPicker] = useState(() => !localStorage.getItem('nwt-last-floor') && !urlFloorLevel);
+  const [routeDestinationId, setRouteDestinationId] = useState('');
+  const [adminMode, setAdminMode] = useState(isAdminUrl);
+  const [published, setPublished] = useState(() => Boolean(savedState?.floors?.length));
+  const [buildingId, setBuildingId] = useState(savedState?.building?.id || '');
+  const [routeGraphs, setRouteGraphs] = useState({});
+  const [connectorPreference, setConnectorPreference] = useState('any');
+  const [highContrast, setHighContrast] = useState(() => localStorage.getItem('nwt-high-contrast') === 'true');
+  const [voiceGuidance, setVoiceGuidance] = useState(() => localStorage.getItem('nwt-voice-guidance') === 'true');
+  const [areaDrawingMode, setAreaDrawingMode] = useState(false);
+  const [areaDraftPoints, setAreaDraftPoints] = useState([]);
+  const [selectedVertexIndex, setSelectedVertexIndex] = useState(null);
+  const spokenRouteRef = useRef('');
+
+  function speakInstruction(text) {
+    if (!voiceGuidance || !text || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 1;
+    utterance.volume = 1;
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function currentRouteInstruction(route = activeRoute) {
+    if (!route) return '';
+    if (route.routeAvailable === false) return route.instructions?.[0]?.text || route.unavailableReason || '';
+    return route.instructions?.[0]?.text || route.notice || `Walking to ${route.destinationName}`;
+  }
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('high-contrast', highContrast);
+    localStorage.setItem('nwt-high-contrast', String(highContrast));
+  }, [highContrast]);
+
+  useEffect(() => {
+    localStorage.setItem('nwt-voice-guidance', String(voiceGuidance));
+    if (!voiceGuidance && window.speechSynthesis) window.speechSynthesis.cancel();
+  }, [voiceGuidance]);
+
+  useEffect(() => {
+    const load = isAdminUrl
+      ? async () => {
+        const buildings = await listBuildings();
+        for (const building of buildings) {
+          const backendMap = await getIndoorMapJson(building.id).catch(() => null);
+          if (backendMap?.floors?.length) return backendMap;
+        }
+        return null;
+      }
+      : () => getPublishedMap();
+
+    load()
+      .then((publishedMap) => {
+        if (!publishedMap?.floors?.length) return;
+        setMapData(publishedMap);
+        // Resolve starting floor: ?floor= param beats localStorage beats floors[0].
+        const targetFloor = urlFloorLevel
+          ? publishedMap.floors.find((f) => f.levelNumber === urlFloorLevel) || publishedMap.floors[0]
+          : publishedMap.floors.find((f) => f.id === localStorage.getItem('nwt-last-floor')) || publishedMap.floors[0];
+        setActiveFloorId(targetFloor.id);
+        setHighlightId(defaultStartAreaId(publishedMap.floors));
+        setBuildingId(publishedMap.building?.id || '');
+        setPublished(true);
+        setAdminMode(isAdminUrl);
+      })
+      .catch(() => {
+        if (!savedState?.floors?.length && sampleMap?.floors?.length) {
+          setMapData(sampleMap);
+          const targetFloor = urlFloorLevel
+            ? sampleMap.floors.find((f) => f.levelNumber === urlFloorLevel) || sampleMap.floors[0]
+            : sampleMap.floors.find((f) => f.id === localStorage.getItem('nwt-last-floor')) || sampleMap.floors[0];
+          setActiveFloorId(targetFloor.id);
+          setHighlightId(defaultStartAreaId(sampleMap.floors));
+          setPublished(true);
+        }
+      });
+  }, [isAdminUrl]);
+
+  useEffect(() => {
+    if (adminMode || !mapData.floors.length) return undefined;
+
+    // Don't pre-anchor to Floor 1 — start with no assumed position and let
+    // GPS or the user's manual floor selection determine the starting floor.
+    if (!navigator.geolocation) {
+      setLocationState({ mode: 'denied', message: "Location services are off. Select your floor and tap the map to set your position." });
+      return undefined;
+    }
+
+    setLocationState({ mode: 'locating', message: "Locating you via GPS…" });
+
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const latLng = { lat: position.coords.latitude, lng: position.coords.longitude };
+        const meters = haversineDistanceMeters(latLng, BUILDING_GEOFENCE.center);
+        const inside = isInsideBuildingGeofence(latLng, BUILDING_GEOFENCE);
+
+        // Use the floor the user currently has selected — phones can't detect
+        // vertical position via GPS, so the selected floor IS their floor.
+        const currentFloorId = activeFloorIdRef.current;
+
+        // Convert real GPS → SVG map point and move the blue dot live.
+        const mapPoint = gpsToMapPoint(latLng);
+        if (mapPoint && inside) {
+          // coords.heading is degrees clockwise from north (null when stationary).
+          const heading = position.coords.heading != null && Number.isFinite(position.coords.heading)
+            ? position.coords.heading
+            : null;
+          setUserLocation({ floorId: currentFloorId, point: mapPoint, gps: latLng, heading, approximate: false });
+          // Switch the visible map to the user's actual floor immediately.
+          setActiveFloorId(currentFloorId);
+          setLocationState({
+            mode: 'tracking',
+            gps: latLng,
+            accuracy: position.coords.accuracy,
+            message: null,
+          });
+        } else {
+          setLocationState({
+            mode: 'outside',
+            gps: latLng,
+            accuracy: position.coords.accuracy,
+            distanceMeters: meters,
+            message: `GPS is outside the building (${formatDistanceFeet(meters)} away). Select your floor and tap the map to place yourself.`,
+          });
+        }
+      },
+      () => {
+        setLocationState({ mode: 'denied', message: "Can't get GPS. Select your floor and tap the map to place yourself." });
+      },
+      { enableHighAccuracy: true, maximumAge: 3000, timeout: 20000 },
+    );
+    return () => navigator.geolocation.clearWatch(watchId);
+  }, [adminMode, mapData.floors]);
+
+  // When the user switches floors, move their tracked position to that floor
+  // so the route origin always matches where they actually are.
+  useEffect(() => {
+    setUserLocation((current) => {
+      if (!current || current.approximate) return current;
+      return { ...current, floorId: activeFloorId };
+    });
+  }, [activeFloorId]);
+
+  useEffect(() => {
+    if (!isAdminUrl || buildingId) return;
+    createBuilding({ name: 'Imported SVG Map', description: 'Created from admin uploader' })
+      .then((building) => setBuildingId(building.id))
+      .catch(() => {});
+  }, [isAdminUrl, buildingId]);
+
+  useEffect(() => {
+    saveMapState(mapData);
+  }, [mapData]);
+
+  useEffect(() => {
+    if (!mapData.floors.length) return;
+    const loaded = loadRouteGraphs(mapData.floors);
+    // Auto-generate hallway graphs for any floor that has features but no edges yet.
+    // This means admins never have to manually hit "Auto-detect" per floor — it just works.
+    const next = { ...loaded };
+    let generated = false;
+    mapData.floors.forEach((floor) => {
+      const graph = next[floor.id];
+      const hasFeatures = floor.features?.length > 0;
+      const hasEdges = graph?.edges?.length > 0;
+      if (hasFeatures && !hasEdges) {
+        next[floor.id] = generateHallwayGraph(floor);
+        generated = true;
+      }
+    });
+    if (generated) saveRouteGraphs(next);
+    setRouteGraphs(next);
+  }, [mapData.floors]);
+
+  function updateRouteGraph(floorId, updater) {
+    setRouteGraphs((current) => {
+      const next = { ...current, [floorId]: updater(current[floorId] || { floorId, status: 'admin_reviewed', nodes: [], edges: [] }) };
+      saveRouteGraphs(next);
+      return next;
+    });
+  }
+
+  function generateActiveFloorRouteGraph() {
+    if (!activeFloor) return;
+    const graph = generateHallwayGraph(activeFloor);
+    setRouteGraphs((current) => {
+      const next = { ...current, [activeFloor.id]: graph };
+      saveRouteGraphs(next);
+      return next;
+    });
+    setStatus({ type: 'success', message: `Generated ${graph.nodes.length} hallway nodes and ${graph.edges.length} edges for review.` });
+  }
+
+  function selectFloor(floorId) {
+    const nextFloor = mapData.floors.find((floor) => floor.id === floorId);
+    setActiveFloorId(floorId);
+    if (!nextFloor?.features.some((feature) => feature.id === selectedId)) setSelectedId('');
+    if (!nextFloor?.features.some((feature) => feature.id === highlightId)) setHighlightId('');
+    setSelectedVertexIndex(null);
+    setAreaDrawingMode(false);
+    setAreaDraftPoints([]);
+    setAddPoiMode(false);
+    setLocatingMode(false);
+  }
+
+  useEffect(() => {
+    if (!activeFloorId && mapData.floors.length) {
+      setActiveFloorId(mapData.floors[0].id);
+    }
+  }, [activeFloorId, mapData.floors]);
+
+  const activeFloor = useMemo(
+    () => mapData.floors.find((floor) => floor.id === activeFloorId) || mapData.floors[0],
+    [mapData.floors, activeFloorId],
+  );
+
+  const selectedFeature = useMemo(() => {
+    if (!selectedId) return null;
+    return mapData.floors.flatMap((floor) => floor.features).find((feature) => feature.id === selectedId) || null;
+  }, [mapData.floors, selectedId]);
+
+  const routeDestination = useMemo(() => {
+    if (!routeDestinationId) return null;
+    return mapData.floors.flatMap((floor) => floor.features).find((feature) => feature.id === routeDestinationId) || null;
+  }, [mapData.floors, routeDestinationId]);
+
+  const routeDestinationFloor = useMemo(() => {
+    if (!routeDestinationId) return null;
+    return mapData.floors.find((floor) => floor.features.some((feature) => feature.id === routeDestinationId)) || null;
+  }, [mapData.floors, routeDestinationId]);
+
+  const activeRoute = useMemo(() => {
+    if (!userLocation || !routeDestination || !routeDestinationFloor) return null;
+    return planIndoorRoute({
+      floors: mapData.floors,
+      originFloorId: userLocation.floorId,
+      originPoint: userLocation.point,
+      destinationFloorId: routeDestinationFloor.id,
+      destinationFeature: routeDestination,
+      routeGraphs,
+      connectorPreference,
+    });
+  }, [mapData.floors, userLocation, routeDestination, routeDestinationFloor, routeGraphs, connectorPreference]);
+
+  useEffect(() => {
+    if (!voiceGuidance || !activeRoute) return;
+    const instruction = currentRouteInstruction(activeRoute);
+    const signature = `${activeRoute.id}:${activeFloorId}:${instruction}`;
+    if (spokenRouteRef.current === signature) return;
+    spokenRouteRef.current = signature;
+    speakInstruction(instruction);
+  }, [activeRoute?.id, activeRoute?.quality, activeRoute?.routeAvailable, activeFloorId, voiceGuidance]);
+
+  function updateFloor(floorId, updater) {
+    setMapData((current) => ({
+      ...current,
+      floors: current.floors.map((floor) => (floor.id === floorId ? updater(floor) : floor)),
+    }));
+  }
+
+  async function handleUpload(files) {
+    const svgFiles = Array.from(files).filter((file) => file.name.toLowerCase().endsWith('.svg'));
+    if (!svgFiles.length) {
+      setStatus({ type: 'error', message: 'Choose one or more .svg files.' });
+      return;
+    }
+
+    try {
+      setStatus({ type: 'loading', message: `Converting ${svgFiles.length} SVG file${svgFiles.length > 1 ? 's' : ''}...` });
+      const building = buildingId ? { id: buildingId } : await createBuilding({ name: 'Imported SVG Map', description: 'Created from admin uploader' });
+      setBuildingId(building.id);
+      for (let i = 0; i < svgFiles.length; i += 1) {
+        const file = svgFiles[i];
+        const floorIndex = mapData.floors.length + i;
+        const floor = await createFloor(building.id, { name: floorName(floorIndex), levelNumber: floorIndex + 1, sortOrder: floorIndex });
+        await uploadSvgToFloor(floor.id, file);
+      }
+      const nextMap = await getIndoorMapJson(building.id);
+      setMapData(nextMap);
+      setActiveFloorId(nextMap.floors[0]?.id || activeFloorId);
+      setSelectedId('');
+      setRouteDestinationId('');
+      setUserLocation(null);
+      setStatus({ type: 'success', message: `Converted ${svgFiles.length} SVG floor${svgFiles.length > 1 ? 's' : ''} and saved to backend.` });
+      setAdminMode(true);
+    } catch (error) {
+      // Fallback to local conversion if the backend is not running.
+      try {
+        const newFloors = [];
+        for (let i = 0; i < svgFiles.length; i += 1) {
+          const file = svgFiles[i];
+          const svgText = await file.text();
+          const parsed = parseSvg(svgText, file.name);
+          const floorIndex = mapData.floors.length + i;
+          newFloors.push(generateIndoorMapData(parsed, {
+            floorId: `floor-${String(floorIndex + 1).padStart(2, '0')}-${Date.now()}-${i}`,
+            floorName: floorName(floorIndex),
+          }).floor);
+        }
+        setMapData((current) => ({ ...current, floors: [...current.floors, ...newFloors] }));
+        setActiveFloorId(newFloors[0]?.id || activeFloorId);
+        setStatus({ type: 'error', message: `Backend unavailable, saved as local draft only: ${error.message}` });
+      } catch {
+        setStatus({ type: 'error', message: error.message || 'The SVG could not be parsed.' });
+      }
+    }
+  }
+
+  function updateFeature(featureId, patch) {
+    setMapData((current) => ({
+      ...current,
+      floors: current.floors.map((floor) => ({
+        ...floor,
+        features: floor.features.map((feature) => {
+          if (feature.id !== featureId) return feature;
+          const next = { ...feature, ...patch };
+          if (!patch.displayName) {
+            next.displayName = [next.name, next.roomNumber].filter(Boolean).join(' ') || next.category;
+          }
+          return next;
+        }),
+      })),
+    }));
+    const allowed = ['type', 'category', 'name', 'displayName', 'roomNumber', 'confidence', 'visible', 'isDeleted'];
+    const apiPatch = Object.fromEntries(Object.entries(patch).filter(([key]) => allowed.includes(key)));
+    if (patch.geometry) apiPatch.geometryJson = JSON.stringify(patch.geometry);
+    if (patch.bbox) apiPatch.bboxJson = JSON.stringify(patch.bbox);
+    updateFeatureApi(featureId, apiPatch).catch(() => {});
+  }
+
+  function addFeatureToFloor(floorId, feature) {
+    setMapData((current) => ({
+      ...current,
+      floors: current.floors.map((floor) => (
+        floor.id === floorId
+          ? { ...floor, features: [...floor.features.filter((item) => item.id !== feature.id), feature] }
+          : floor
+      )),
+    }));
+  }
+
+  function removeFeatureFromFloor(featureId) {
+    setMapData((current) => ({
+      ...current,
+      floors: current.floors.map((floor) => ({
+        ...floor,
+        features: floor.features.filter((feature) => feature.id !== featureId),
+      })),
+    }));
+  }
+
+  function addPoi(point) {
+    if (!activeFloor) return;
+    const id = `poi-${Date.now()}`;
+    const size = Math.max(activeFloor.viewBox[2], activeFloor.viewBox[3]) * 0.012;
+    const feature = {
+      id,
+      type: 'poi',
+      category: 'landmark',
+      name: 'New POI',
+      roomNumber: '',
+      displayName: 'New POI',
+      confidence: 1,
+      visible: true,
+      geometry: {
+        type: 'Point',
+        coordinates: [point.x, point.y],
+      },
+      bbox: [point.x - size, point.y - size, size * 2, size * 2],
+      sourceSvg: { id: '', class: '', fill: '', stroke: '' },
+      manual: true,
+    };
+    updateFloor(activeFloor.id, (floor) => ({ ...floor, features: [...floor.features, feature] }));
+    setSelectedId(id);
+    setHighlightId(id);
+    setAddPoiMode(false);
+    setStatus({ type: 'success', message: 'Saved New POI. Rename it in the inspector.' });
+    createFeatureApi({
+      id: feature.id,
+      buildingId,
+      floorId: activeFloor.id,
+      sourceSvgId: null,
+      type: feature.type,
+      category: feature.category,
+      name: feature.name,
+      displayName: feature.displayName,
+      roomNumber: feature.roomNumber,
+      geometryJson: JSON.stringify(feature.geometry),
+      bboxJson: JSON.stringify(feature.bbox),
+      confidence: feature.confidence,
+      visible: true,
+      isDeleted: false,
+      sourceMetadataJson: JSON.stringify({ source: 'admin-added-poi', editable: true, manualApproved: true }),
+    }).catch(() => {});
+  }
+
+  function startAreaDrawing() {
+    setAreaDrawingMode((value) => !value);
+    setAreaDraftPoints([]);
+    setSelectedVertexIndex(null);
+    setAddPoiMode(false);
+    setLocatingMode(false);
+  }
+
+  function addAreaPoint(point) {
+    if (!areaDrawingMode) return;
+    setAreaDraftPoints((points) => [...points, point]);
+  }
+
+  function undoAreaPoint() {
+    setAreaDraftPoints((points) => points.slice(0, -1));
+  }
+
+  function cancelAreaDrawing() {
+    setAreaDrawingMode(false);
+    setAreaDraftPoints([]);
+    setSelectedVertexIndex(null);
+  }
+
+  async function finishAreaDrawing() {
+    if (!activeFloor) return;
+    if (areaDraftPoints.length < 3 || polygonArea(areaDraftPoints) < 25) {
+      setStatus({ type: 'error', message: 'Draw at least 3 points and make the area a little larger before saving.' });
+      return;
+    }
+    const name = window.prompt('Area name', 'New area');
+    if (!name?.trim()) {
+      setStatus({ type: 'error', message: 'Area needs a name before saving.' });
+      return;
+    }
+    const now = new Date().toISOString();
+    const geometry = polygonGeometry(areaDraftPoints);
+    const bbox = bboxFromMapPoints(areaDraftPoints);
+    const feature = {
+      id: `area-${Date.now()}`,
+      floorId: activeFloor.id,
+      type: 'custom_area',
+      category: 'custom',
+      name: name.trim(),
+      displayName: name.trim(),
+      visible: true,
+      editable: true,
+      source: 'admin-drawn',
+      confidence: 1,
+      geometry,
+      bbox,
+      createdAt: now,
+      updatedAt: now,
+      sourceSvg: { tag: 'polygon', source: 'admin-drawn', editable: true, manualApproved: true },
+    };
+    addFeatureToFloor(activeFloor.id, feature);
+    setSelectedId(feature.id);
+    setHighlightId(feature.id);
+    setAreaDrawingMode(false);
+    setAreaDraftPoints([]);
+    setSelectedVertexIndex(null);
+    setStatus({ type: 'success', message: `Saved ${feature.displayName}.` });
+    createFeatureApi({
+      id: feature.id,
+      buildingId,
+      floorId: activeFloor.id,
+      sourceSvgId: null,
+      type: feature.type,
+      category: feature.category,
+      name: feature.name,
+      displayName: feature.displayName,
+      roomNumber: '',
+      geometryJson: JSON.stringify(feature.geometry),
+      bboxJson: JSON.stringify(feature.bbox),
+      confidence: 1,
+      visible: true,
+      isDeleted: false,
+      sourceMetadataJson: JSON.stringify({ tag: 'polygon', source: 'admin-drawn', editable: true, manualApproved: true }),
+    }).catch(() => {});
+  }
+
+  function updateAreaGeometry(featureId, points) {
+    if (points.length < 3) return;
+    updateFeature(featureId, {
+      geometry: polygonGeometry(points),
+      bbox: bboxFromMapPoints(points),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  function updateAreaVertex(feature, index, point) {
+    const ring = feature.geometry.coordinates?.[0]?.slice(0, -1).map(([x, y]) => ({ x, y })) || [];
+    if (!ring[index]) return;
+    ring[index] = point;
+    updateAreaGeometry(feature.id, ring);
+  }
+
+  function insertAreaVertex(feature, index, point) {
+    const ring = feature.geometry.coordinates?.[0]?.slice(0, -1).map(([x, y]) => ({ x, y })) || [];
+    ring.splice(index + 1, 0, point);
+    updateAreaGeometry(feature.id, ring);
+    setSelectedVertexIndex(index + 1);
+  }
+
+  function deleteSelectedAreaVertex() {
+    const feature = selectedFeature;
+    if (!feature || feature.type !== 'custom_area' || selectedVertexIndex == null) return;
+    const ring = feature.geometry.coordinates?.[0]?.slice(0, -1).map(([x, y]) => ({ x, y })) || [];
+    if (ring.length <= 3) {
+      setStatus({ type: 'error', message: 'An area needs at least 3 points.' });
+      return;
+    }
+    ring.splice(selectedVertexIndex, 1);
+    setSelectedVertexIndex(null);
+    updateAreaGeometry(feature.id, ring);
+  }
+
+  function deleteSelectedFeature() {
+    const feature = selectedFeature;
+    if (!feature) return;
+    removeFeatureFromFloor(feature.id);
+    setSelectedId('');
+    setHighlightId('');
+    setSelectedVertexIndex(null);
+    deleteFeatureApi(feature.id).catch(() => {});
+  }
+
+  function setLocation(point) {
+    if (!activeFloor) return;
+    setUserLocation({ floorId: activeFloor.id, point });
+    setLocationState({
+      mode: 'indoorAnchored',
+      floorId: activeFloor.id,
+      mapPoint: point,
+      message: 'Indoor start set. Phone GPS may still be inaccurate indoors.',
+    });
+    setLocatingMode(false);
+  }
+
+  function startRouteTo(feature, floorId) {
+    if (!feature) return;
+    setSelectedId(feature.id);
+    setHighlightId(feature.id);
+    setRouteDestinationId(feature.id);
+    if (!userLocation) {
+      // No GPS fix yet — place the user at the center of whichever floor
+      // they currently have selected, not always the ground floor entrance.
+      const currentFloor = mapData.floors.find((f) => f.id === activeFloorIdRef.current) || mapData.floors[0];
+      if (currentFloor) {
+        const [x, y, w, h] = currentFloor.viewBox || [0, 0, 1224, 792];
+        const fallbackPoint = { x: x + w * 0.5, y: y + h * 0.5 };
+        setUserLocation({ floorId: currentFloor.id, point: fallbackPoint, approximate: true });
+        setLocationState({
+          mode: 'indoorAnchored',
+          floorId: currentFloor.id,
+          mapPoint: fallbackPoint,
+          message: 'Position estimated from your selected floor. Tap the map to set your exact location.',
+        });
+      }
+    }
+  }
+
+  function restoreHidden() {
+    if (!activeFloor) return;
+    updateFloor(activeFloor.id, (floor) => ({
+      ...floor,
+      features: floor.features.map((feature) => ({ ...feature, visible: true })),
+    }));
+  }
+
+  async function cleanupActiveFloor() {
+    if (!activeFloor || !buildingId) return;
+    try {
+      const result = await cleanupFloorNoise(activeFloor.id);
+      const nextMap = await getIndoorMapJson(buildingId);
+      setMapData(nextMap);
+      setStatus({ type: 'success', message: `Cleaned ${result.hidden} noisy detections from ${activeFloor.name}.` });
+    } catch (error) {
+      setStatus({ type: 'error', message: error.message || 'Cleanup failed.' });
+    }
+  }
+
+  async function cleanupAllFloors() {
+    if (!mapData.floors.length || !buildingId) return;
+    try {
+      let hidden = 0;
+      for (const floor of mapData.floors) {
+        const result = await cleanupFloorNoise(floor.id);
+        hidden += result.hidden || 0;
+      }
+      const nextMap = await getIndoorMapJson(buildingId);
+      setMapData(nextMap);
+      setStatus({ type: 'success', message: `Cleared ${hidden} corrupted or unsafe features across all floors.` });
+    } catch (error) {
+      setStatus({ type: 'error', message: error.message || 'Cleanup failed.' });
+    }
+  }
+
+  function resetDemo() {
+    setMapData(sampleMap);
+    setActiveFloorId(sampleMap.floors[0]?.id || '');
+    setSelectedId('');
+    setRouteDestinationId('');
+    setUserLocation(null);
+    setStatus({ type: 'success', message: 'Loaded sample converted indoor map.' });
+    setPublished(true);
+  }
+
+  function clearAll() {
+    setMapData(initialMap);
+    setActiveFloorId('');
+    setSelectedId('');
+    setRouteDestinationId('');
+    setUserLocation(null);
+    setQuery('');
+    setStatus({ type: 'idle', message: '' });
+    setPublished(false);
+    setAdminMode(false);
+  }
+
+  async function publishMap() {
+    try {
+      if (!buildingId) throw new Error('No backend building exists. Upload SVGs in admin mode first.');
+      await publishBuilding(buildingId);
+      const publishedMap = await getPublishedMap(buildingId);
+      setMapData(publishedMap);
+      setPublished(true);
+      setAdminMode(false);
+      setStatus({ type: 'success', message: 'Published map for public navigation.' });
+    } catch {
+      setPublished(true);
+      setAdminMode(false);
+      setStatus({ type: 'error', message: 'Published in this browser only. Restart dev server if the phone cannot load it.' });
+    }
+  }
+
+  function pickFloor(floorId) {
+    setActiveFloorId(floorId);
+    setShowFloorPicker(false);
+  }
+
+  return (
+    <>
+      {showFloorPicker && mapData.floors.length > 0 && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 9999,
+          background: 'rgba(15,23,28,0.72)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '24px',
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '16px', padding: '32px 28px',
+            width: '100%', maxWidth: '360px', boxShadow: '0 8px 40px rgba(0,0,0,0.22)',
+          }}>
+            <div style={{ fontSize: '28px', marginBottom: '6px', textAlign: 'center' }}>📍</div>
+            <h2 style={{ margin: '0 0 6px', fontSize: '20px', fontWeight: 700, textAlign: 'center', color: '#1e252b' }}>
+              What floor are you on?
+            </h2>
+            <p style={{ margin: '0 0 24px', fontSize: '14px', color: '#526069', textAlign: 'center' }}>
+              GPS can't detect your floor. Tap yours and the map will start there.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {mapData.floors.map((floor) => (
+                <button
+                  key={floor.id}
+                  onClick={() => pickFloor(floor.id)}
+                  style={{
+                    padding: '14px 20px', borderRadius: '10px', border: '1.5px solid #c8d1d8',
+                    background: '#f7f9fa', fontSize: '16px', fontWeight: 600,
+                    color: '#1e252b', cursor: 'pointer', textAlign: 'left',
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}
+                >
+                  {floor.name}
+                  <span style={{ fontSize: '12px', fontWeight: 400, color: '#526069' }}>
+                    {floor.features?.length} spaces
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    <AppShell
+      mapData={mapData}
+      activeFloor={activeFloor}
+      activeFloorId={activeFloorId}
+      selectedFeature={selectedFeature}
+      selectedId={selectedId}
+      hoveredId={hoveredId}
+      highlightId={highlightId}
+      query={query}
+      status={status}
+      addPoiMode={addPoiMode}
+      areaDrawingMode={areaDrawingMode}
+      areaDraftPoints={areaDraftPoints}
+      selectedVertexIndex={selectedVertexIndex}
+      locatingMode={locatingMode}
+      userLocation={userLocation}
+      locationState={locationState}
+      liveTracking={locationState?.mode === 'tracking'}
+      startAnchor={getDefaultStartAnchor(mapData.floors)}
+      routeGraphs={routeGraphs}
+      activeRoute={activeRoute}
+      connectorPreference={connectorPreference}
+      routeDestinationId={routeDestinationId}
+      highContrast={highContrast}
+      voiceGuidance={voiceGuidance}
+      buildingId={buildingId}
+      adminMode={adminMode}
+      published={published}
+      onUpload={handleUpload}
+      onSelectFloor={selectFloor}
+      onSelectFeature={(feature, floorId) => {
+        if (floorId) selectFloor(floorId);
+        setSelectedId(feature?.id || '');
+        setHighlightId(feature?.id || '');
+        // In public mode, tapping any label/space immediately sets it as the
+        // route destination — no need to find it in the search dropdown first.
+        if (!adminMode && feature?.id) {
+          startRouteTo(feature, floorId || activeFloorId);
+        }
+      }}
+      onHoverFeature={setHoveredId}
+      onUpdateFeature={updateFeature}
+      onAddAreaPoint={addAreaPoint}
+      onStartAreaDrawing={startAreaDrawing}
+      onFinishAreaDrawing={finishAreaDrawing}
+      onUndoAreaPoint={undoAreaPoint}
+      onCancelAreaDrawing={cancelAreaDrawing}
+      onUpdateAreaVertex={updateAreaVertex}
+      onInsertAreaVertex={insertAreaVertex}
+      onSelectAreaVertex={setSelectedVertexIndex}
+      onDeleteAreaVertex={deleteSelectedAreaVertex}
+      onDeleteFeature={deleteSelectedFeature}
+      onUpdateRouteGraph={updateRouteGraph}
+      onGenerateRouteGraph={generateActiveFloorRouteGraph}
+      onQueryChange={setQuery}
+      onHighlight={setHighlightId}
+      onAddPoi={addPoi}
+      onSetLocation={setLocation}
+      onToggleLocate={() => {
+        setAddPoiMode(false);
+        setAreaDrawingMode(false);
+        setAreaDraftPoints([]);
+        setLocatingMode((value) => !value);
+      }}
+      onRouteTo={startRouteTo}
+      onConnectorPreferenceChange={setConnectorPreference}
+      onToggleHighContrast={() => setHighContrast((value) => !value)}
+      onToggleVoiceGuidance={() => setVoiceGuidance((value) => !value)}
+      onRepeatInstruction={() => speakInstruction(currentRouteInstruction())}
+      onClearRoute={() => setRouteDestinationId('')}
+      onToggleAdmin={() => setAdminMode((value) => !value)}
+      onPublish={publishMap}
+      onToggleAddPoi={() => {
+        setLocatingMode(false);
+        setAreaDrawingMode(false);
+        setAreaDraftPoints([]);
+        setAddPoiMode((value) => !value);
+      }}
+      onRestoreHidden={restoreHidden}
+      onCleanupFloor={cleanupActiveFloor}
+      onCleanupAllFloors={cleanupAllFloors}
+      onLoadSample={resetDemo}
+      onClearAll={clearAll}
+    />
+    </>
+  );
+}
